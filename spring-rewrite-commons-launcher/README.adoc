@@ -1,0 +1,152 @@
+# sbm-support-rewrite
+
+The `sbm-support-rewrite` project provides Spring beans classes to parse a given project to an OpenRewrite abstract syntax tree (AST) which can then be used to run OpenRewrite recipes that were discovered on the classpath.
+
+## Components
+
+
+## Getting started
+
+
+## Configuration
+
+Some behaviour can be configured through application properties or by providing custom Spring beans.
+
+### Maven Artifact Cache
+OpenRewrite uses a `MavenArtifactCache` to store downloaded jar dependencies.
+The provided `MavenArtifactCache` bean tries to retrieve jars from local Maven cache `~/.m2/repository` first.
+If the dependency doesn't exist it is searched under `~/.rewrite/cache/artifacts` and if it doesn't exist it is downloaded to this dir.
+
+[source,java]
+.....
+@Bean
+MavenArtifactCache mavenArtifactCache() {
+    Path userHome = Path.of(System.getProperty("user.home"));
+    Path localMavenRepo = userHome.resolve(".m2/repository");
+    Path localRewriteRepo = userHome.resolve(".rewrite/cache/artifacts");
+    return new LocalMavenArtifactCache(localMavenRepo)
+                .orElse(localRewriteRepo));
+}
+.....
+
+#### Custom Maven Artifact Cache
+
+The provided cache configuration can be replaced with a custom bean.
+
+[source,java]
+.....
+@Bean
+MavenArtifactCache mavenArtifactCache() {
+    return new CustomMavenArtifactCache();
+}
+
+.....
+
+
+
+
+### Maven Pom Cache
+OpenRewrite downloads Maven Pom files to resolve dependencies.
+The pom files get cached and the cache depends on the system.
+
+- 32-Bit systems use the `InMemoryPomCache`.
+- 64-Bit systems use the `RocksdbMavenPomCache`.
+
+
+#### Pom Cache Properties
+
+|===
+|Name |Description |Default Value
+
+|`parser.isPomCacheEnabled`
+|If the flag is set to false, only the default, in-memory cache is used.
+|`false`
+
+|`parser.pomCacheDirectory`
+|Defines the cache dir for RocksdbMavenPomCache when `parser.isPomCacheEnabled` is `true`
+|`~/.rewrite-cache`
+|===
+
+#### Custom Pom Cache
+A custom `MavenPomCache` implementation can be provided through a custom Spring bean declaration.
+
+[source,java]
+.....
+@Bean
+public MavenPomCache mavenPomCache() {
+    return new CustomMavenPomCache();
+}
+.....
+
+
+## Example
+
+Example code showing how to apply OpenRewrite's UpgradeSpringBoot_3_1 recipe
+
+[source,java]
+.....
+package com.example;
+
+import org.openrewrite.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.rewrite.parsers.ProjectScanner;
+import org.springframework.rewrite.parsers.RewriteProjectParser;
+import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
+import org.springframework.rewrite.project.resource.ProjectResourceSet;
+import org.springframework.rewrite.project.resource.ProjectResourceSetFactory;
+import org.springframework.rewrite.project.resource.ProjectResourceSetSerializer;
+import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+
+import java.nio.file.Path;
+import java.util.List;
+
+@SpringBootApplication
+public class BootUpgrade implements CommandLineRunner {
+    public static void main(String[] args) {
+        SpringApplication.run(BootUpgrade.class, args);
+    }
+
+    @Autowired
+    ProjectScanner scanner;
+    @Autowired
+    RewriteProjectParser parser;
+    @Autowired
+    RewriteRecipeDiscovery discovery;
+    @Autowired
+    ProjectResourceSetSerializer serializer;
+    @Autowired
+    ProjectResourceSetFactory factory;
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        String path  = "demo-spring-song-app";
+        Path baseDir = Path.of(path ).toAbsolutePath().normalize();
+        System.out.println(baseDir);
+        if(!baseDir.toFile().exists() || !baseDir.toFile().isDirectory()) {
+            throw new IllegalArgumentException("Given path '%s' does not exist or is not a directory.".formatted(path));
+        }
+
+        // parse
+        RewriteProjectParsingResult parsingResult = parser.parse(baseDir);
+        List<SourceFile> sourceFiles = parsingResult.sourceFiles();
+
+        // create ProjectResourceSet
+        ProjectResourceSet projectResourceSet = factory.create(baseDir, sourceFiles);
+
+        // find recipe
+        String recipeName = "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1";
+        List<Recipe> recipes = discovery.discoverRecipes();
+        Recipe recipe = findRecipe(recipes, recipeName);
+
+        // apply recipe
+        projectResourceSet.apply(recipe);
+
+        // write changes to fs
+        serializer.writeChanges(projectResourceSet);
+    }
+}
+.....

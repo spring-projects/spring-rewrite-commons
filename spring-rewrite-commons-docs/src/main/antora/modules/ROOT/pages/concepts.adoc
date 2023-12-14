@@ -1,0 +1,61 @@
+[[concepts]]
+= Spring Rewrite Commons Concepts
+
+This sections describes the important concepts of Spring Rewrite Commons and how they relate to concepts from OpenRewrite.
+Running OpenRewrite recipes requires a given project to be parsed to create the LST for it.
+
+== Parsing a Project
+Spring Rewrite Commons aims to yield the same parsing result (LST) as OpenRewrite's `rewrite-maven-plugin`.
+This allows access to the LST from outside the execution of `rewrite-maven-plugin`.
+
+=== RewriteProjectParser
+The `RewriteProjectParser` component is a Spring bean and offers the API to parse projects to OpenRewrite LST.
+
+==== Parse a Path
+When the application exists on the local filesystem, the path to the project is enough to parse the project to its LST.
+
+[source, java]
+....
+Path baseDir = ...
+RewriteProjectParsingResult result = parser.parse(baseDir);
+List<SourceFile> lst = result.sourceFiles();
+....
+
+==== Parse a List of Resources
+It is also possible to provide a list of ``https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/io/Resource.html[Resource]``s and their baseDir.
+This allows to provide synthetic resources that only exist in-memory which is helpful to test migration recipes without disk IO.
+
+[source, java]
+....
+Path baseDir = ...
+List<Resource> resources = ...
+List<SourceFile> lst = parser.parse(baseDir, List<Resource> resources);
+List<SourceFile> lst = result.sourceFiles();
+....
+
+
+== Provided Scoped Beans
+OpenRewrite initializes some while during parsing a project.
+These objects provide information required to execute recipes.
+Spring Rewrite Commons provides access to these objects through scoped beans.
+The lifetime of these beans starts with the successful parse of a project, and ends with the next parse or when the application is closed.
+
+=== ExecutionContext
+OpenRewrite has the concept of an `ExecutionContext`.
+The `ExecutionContext` holds information required during recipe execution.
+This means the exact same instance needs to be provided to recipe runs.
+Spring Rewrite Commons provides the right instance as scoped Spring bean `RewriteExecutionContext`.
+This bean can be injected to other Spring Beans in an application and provides access to the `ExecutionContext`.
+
+[source, java]
+....
+@Component
+public class MyComponent {
+    @Autowired
+    private ExecutionContext executionContext;
+
+    public void runRecipe() {
+        Recipe recipe = new SomeOpenRewriteRecipe();
+    }
+}
+....

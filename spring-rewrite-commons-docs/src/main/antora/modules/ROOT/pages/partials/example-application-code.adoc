@@ -1,0 +1,55 @@
+[source,java]
+....
+package com.acme.example;
+
+import org.openrewrite.Recipe;
+import org.openrewrite.SourceFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.rewrite.parsers.RewriteProjectParser;
+import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
+import org.springframework.rewrite.project.resource.ProjectResourceSet;
+import org.springframework.rewrite.project.resource.ProjectResourceSetFactory;
+import org.springframework.rewrite.project.resource.ProjectResourceSetSerializer;
+import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.stereotype.Component;
+
+import java.nio.file.Path;
+import java.util.List;
+
+@Component
+public class MyMigrationApplication {
+
+    @Autowired <1>
+    private RewriteProjectParser parser;
+
+    @Autowired
+    private RewriteRecipeDiscovery discovery; <2>
+
+    @Autowired
+    private ProjectResourceSetFactory resourceSetFactory;
+
+    @Autowired
+    private ProjectResourceSetSerializer serializer;
+
+
+    public void migrateToBoot3_1() {
+        Path baseDir = Path.of("."); <2>
+        String recipeName = "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1";
+        Recipe boot3Upgrade = discovery.getByName(recipeName); <3>
+
+        RewriteProjectParsingResult result = parser.parse(baseDir); <4>
+        List<SourceFile> lst = result.sourceFiles(); <5>
+        ProjectResourceSet resourceSet = resourceSetFactory.create(baseDir, lst); <6>
+        resourceSet.apply(boot3Upgrade); <7>
+        serializer.writeChanges(resourceSet); <8>
+    }
+}
+....
+<1> All components are Spring beans and can be injected as such.
+<2> The path of the project that should be migrated.
+<3> `RewriteRecipeDiscovery` is used to discover an OpenRewrite recipe by name.
+<4> `RewriteProjectParser` parses a given project to OpenRewrite LST.
+<5> The result contains the list of ``SourceFile``s (the LST).
+<6> `ProjectResourceSetFactory` can be used to create a `ProjectResourceSet`.
+<7> The recipe is applied to the `ProjectResourceSet` which wraps the LST.
+<8> `ProjectResourceSetSerializer` is used to serialize the changes to disk.

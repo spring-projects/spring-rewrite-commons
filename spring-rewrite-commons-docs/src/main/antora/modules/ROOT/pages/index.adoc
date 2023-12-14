@@ -1,0 +1,58 @@
+[[introduction]]
+
+= Spring Rewrite Commons
+Fabian Krüger
+:revnumber: {projectVersion}
+:revdate: {localdate}
+:toc: left
+:iconfont-fontawesome:
+
+== Overview
+Spring Rewrite Commons provides abstractions and parsers for https://github.com/openrewrite/[OpenRewrite].
+The project can parse Java projects using Maven and apply OpenRewrite recipes without the need of a build tool plugin.
+It aims to become the foundation for Spring Boot applications using OpenRewrite.
+
+https://github.com/openrewrite/[OpenRewrite] is a code refactoring, remediation, and modernization automation tool providing a rich https://docs.openrewrite.org/recipes[catalog of recipes] for tasks like automated code transformations.
+
+These are the main components offered by Spring Rewrite Commons:
+
+* `xref:concepts.adoc#_rewriteprojectparser[RewriteProjectParser]` - Parse a project to an OpenRewrite https://docs.openrewrite.org/concepts-explanations/lossless-semantic-trees[Lossless Semantic Tree] (LST).
+* `xref:concepts.adoc#_recipediscovery[RewriteRecipeDiscovery]` - Discover recipes on the classpath.
+* `xref:concepts.adoc#_projectresourceset[ProjectResourceSet]` - Encapsulates the LST to run https://github.com/openrewrite/[OpenRewrite] recipes sequentially.
+* `xref:concepts.adoc#_projectresourcesetserializer[ProjectResourceSetSerializer]` - Serialize the current state of the `ProjectResourceSet` to the filesystem.
+* Some helpers for xref:testing.adoc[testíng] also exist
+
+
+== Using Spring Rewrite Commons
+
+include::partials/snapshots-repository.adoc[]
+
+Then the dependency can be retrieved.
+
+include::partials/dependency-code.adoc[]
+
+
+== Examples
+Some working examples exist to demo what can be built using Spring Rewrite Commons.
+
+* file://spring-rewrite-commons-examples/boot-3-upgrade-atomic[Atomically upgrade a Spring Boot application]
+* file://spring-rewrite-commons-examples/boot-3-upgrade-iterative[Iteratively upgrade a Spring Boot application using PRs]
+* file://spring-rewrite-commons-examples/list-applicable-recipes-example[Find applicable recipes by doing a dry-run]
+
+All examples can be found file://spring-rewrite-commons-examples[here].
+
+== Limitations
+The project has currently some limitations.
+
+. Only JDK 17 supported and required
+. No Gradle support. +
+  OpenRewrite provides a build tool plugin for Gradle projects.
+  This project currently only parses Maven projects.
+. No Kotlin support. +
+OpenRewrite can parse other languages than Java, especially Kotlin. This is not yet supported.
+. Inherited version will just be read from direct parent. Meaning a version from a parent with distance > 1 will be empty (`null`)
+. Maven profiles are currently ignored and 'default' profile is used
+. Styles are not supported +
+OpenRewrite styles are currently not supported.
+. Migrating projects for Maven plugins might fail +
+Maven plugin projects (modules) are currently ignored when building the reactor order.

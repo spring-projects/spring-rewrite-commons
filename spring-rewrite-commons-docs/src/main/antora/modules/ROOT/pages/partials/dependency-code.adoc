@@ -1,0 +1,10 @@
+[tabs]
+======
+Maven::
++
+include::maven-dependency-snippet.adoc[]
+
+Gradle::
++
+include::gradle-dependency-snippet.adoc[]
+======

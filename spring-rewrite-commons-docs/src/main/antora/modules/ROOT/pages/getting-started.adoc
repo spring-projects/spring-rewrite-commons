@@ -1,0 +1,28 @@
+[[getting-started]]
+= Getting Started
+
+This section offers quick guidance to developers on how to get started using Spring Rewrite Commons.
+
+
+////
+== Create a Simple Spring Boot application
+Spring Rewrite Commons is meant to be used in Spring Boot applications.
+To create a blank Boot application, go to https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.2.0&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=spring-rewrite-commons-example&name=spring-rewrite-commons-example&description=Demo%20project%20for%20Spring%20Rewrite%20Commons&packageName=com.example.rewrite[start.spring.io,window=_blank] and press "generate" to download a basic Boot application.
+////
+
+
+== Add Repository
+include::partials/snapshots-repository.adoc[]
+
+== Add dependency
+The dependency to Spring Rewrite Commons must be added to the build file.
+
+include::partials/dependency-code.adoc[]
+
+== Example Application
+This dummy code of a Spring application shows how to use the components provided by Spring Rewrite Commons to parse
+an application and write back the changes to the filesystem.
+
+include::partials/example-application-code.adoc[]
+
+Read more about the xref:components.adoc[available components].
