@@ -33,6 +33,5 @@ jobs:
         with:
           distribution: liberica
           java-version: ${{ matrix.java }}
-          cache: maven
       - name: Build
         run: ./mvnw -B clean verify
