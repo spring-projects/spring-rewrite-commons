@@ -1,6 +1,6 @@
 = Spring Rewrite Commons
 :partials_dir: spring-rewrite-commons-docs/src/main/antora/modules/ROOT/pages/partials
-:project-version: 0.1.0-SNAPSHOTS
+:project-version: 0.1.0-SNAPSHOT
 :projectVersion: {project-version}
 :docs: https://docs.spring.io/spring-rewrite-commons/docs/current-SNAPSHOT/reference/html/
 
