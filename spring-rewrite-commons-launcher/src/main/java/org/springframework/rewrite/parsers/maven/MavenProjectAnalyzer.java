@@ -18,16 +18,19 @@ package org.springframework.rewrite.parsers.maven;
 import org.apache.maven.model.*;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.jetbrains.annotations.NotNull;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parsers.MavenProject;
 import org.springframework.rewrite.parsers.ParserContext;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +63,7 @@ public class MavenProjectAnalyzer {
 		}
 
 		Resource rootPom = allPomFiles.stream()
-			.filter(r -> ResourceUtil.getPath(r).toString().equals(baseDir.resolve(POM_XML).normalize().toString()))
+			.filter(r -> LinuxWindowsPathUnifier.pathEquals(r, baseDir.resolve(POM_XML)))
 			.findFirst()
 			.orElseThrow(
 					() -> new IllegalArgumentException("The provided resources do not contain a root 'pom.xml' file."));
@@ -78,12 +81,14 @@ public class MavenProjectAnalyzer {
 	private List<MavenProject> map(Path baseDir, List<Resource> resources, List<Model> sortedModels) {
 		List<MavenProject> mavenProjects = new ArrayList<>();
 		sortedModels.stream().filter(Objects::nonNull).forEach(m -> {
-			String projectDir = baseDir.resolve(m.getProjectDirectory().toString()).normalize().toString();
+			String projectDir = LinuxWindowsPathUnifier
+				.unifiedPathString(baseDir.resolve(m.getProjectDirectory().toPath()).normalize());
 			List<Resource> filteredResources = resources.stream()
-				.filter(r -> ResourceUtil.getPath(r).toString().startsWith(projectDir))
+				.filter(r -> LinuxWindowsPathUnifier.unifiedPathString(r).startsWith(projectDir))
 				.toList();
-			mavenProjects
-				.add(new MavenProject(baseDir, m.getResource(), m, rewriteMavenArtifactDownloader, filteredResources));
+			MavenProject mavenProject = new MavenProject(baseDir, m.getResource(), m, rewriteMavenArtifactDownloader,
+					filteredResources);
+			mavenProjects.add(mavenProject);
 		});
 		// set all non parent poms as collected projects for root parent pom
 		List<MavenProject> collected = new ArrayList<>(mavenProjects);
@@ -108,20 +113,23 @@ public class MavenProjectAnalyzer {
 
 			String modulePathSegment = path == null ? moduleName : path + "/" + moduleName;
 
-			allPomFiles.stream().filter(resource -> {
-				String modulePath = baseDir.resolve(modulePathSegment)
-					.resolve(POM_XML)
-					.toAbsolutePath()
-					.normalize()
-					.toString();
-				String resourcePath = ResourceUtil.getPath(resource).toAbsolutePath().normalize().toString();
-				return resourcePath.equals(modulePath);
-			})
+			allPomFiles.stream()
+				.filter(getResourcePredicate(baseDir, modulePathSegment))
 				.map(Model::new)
 				.forEach(m -> recursivelyFindReactorModules(baseDir, modulePathSegment, reactorModels, allPomFiles, m)
 					.stream());
 		});
 		return reactorModels;
+	}
+
+	@NotNull
+	private static Predicate<Resource> getResourcePredicate(Path baseDir, String modulePathSegment) {
+		return resource -> {
+			Path pomPath = baseDir.resolve(modulePathSegment).resolve(POM_XML).toAbsolutePath().normalize();
+			String modulePath = LinuxWindowsPathUnifier.unifiedPathString(pomPath);
+			Path resourcePath = ResourceUtil.getPath(resource).toAbsolutePath().normalize();
+			return LinuxWindowsPathUnifier.pathEquals(resourcePath, modulePath);
+		};
 	}
 
 	public List<Model> sortModels(List<Model> reactorModels) {

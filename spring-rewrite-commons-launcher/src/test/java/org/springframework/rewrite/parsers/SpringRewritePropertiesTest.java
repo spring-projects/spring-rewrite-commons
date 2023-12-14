@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SpringRewritePropertiesTest {
@@ -42,7 +45,7 @@ class SpringRewritePropertiesTest {
 		@DisplayName("spring.rewrite.pomCacheDirectory")
 		void defaultPomCacheDirectory() {
 			assertThat(springRewriteProperties.getPomCacheDirectory())
-				.isEqualTo(System.getProperty("user.home") + "/.rewrite-cache");
+				.isEqualTo(Path.of(System.getProperty("user.home")).resolve(".rewrite-cache").toString());
 		}
 
 		@Test

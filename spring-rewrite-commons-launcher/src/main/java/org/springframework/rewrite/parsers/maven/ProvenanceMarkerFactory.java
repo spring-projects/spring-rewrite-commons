@@ -18,6 +18,7 @@ package org.springframework.rewrite.parsers.maven;
 import org.openrewrite.marker.Marker;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parsers.ParserContext;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.nio.file.Path;

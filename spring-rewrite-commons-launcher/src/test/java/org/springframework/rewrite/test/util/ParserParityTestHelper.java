@@ -30,6 +30,7 @@ import org.openrewrite.style.Style;
 import org.springframework.rewrite.parsers.SpringRewriteProperties;
 import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -280,7 +281,7 @@ public class ParserParityTestHelper {
 				.ignoringFields("modules", // checked further down
 						"dependencies", // checked further down
 						"parent.modules" // TODO:
-											// https://github.com/spring-projects-experimental/spring-boot-migrator/issues/991
+				// https://github.com/spring-projects-experimental/spring-boot-migrator/issues/991
 				)
 				.ignoringFieldsOfTypes(UUID.class)
 				.isEqualTo(expected);
@@ -363,20 +364,18 @@ public class ParserParityTestHelper {
 										&& f1.getFragment().equals(f2.getFragment());
 					}
 					else if (actual instanceof String) {
-						try {
-							URI f1 = new URI((String) actual);
-							URI f2 = new URI((String) expected);
-							return f1.getScheme() == null ? (f2.getScheme() == null ? true : false)
-									: f1.getScheme().equals(f2.getScheme())
-											&& (f1.getHost() == null ? (f2.getHost() == null ? true : false)
-													: f1.getHost().equals(f2.getHost()))
-											&& f1.getPath().equals(f2.getPath()) && f1.getFragment() == null
-													? (f2.getFragment() == null ? true : false)
-													: f1.getFragment().equals(f2.getFragment());
-						}
-						catch (URISyntaxException e) {
-							throw new RuntimeException(e);
-						}
+						URI f1 = new File((String) actual).toURI();
+						URI f2 = new File((String) expected).toURI();
+						// @formatter:off
+                        return
+                                f1.getScheme() != null && f2.getScheme() != null ? f1.getScheme().equals(f2.getScheme()) : f1.getScheme() == null && f2.getScheme() == null ? true : false
+                                &&
+                                f1.getHost() != null && f2.getHost() != null ? f1.getHost().equals(f2.getHost()) : f1.getHost() == null && f2.getHost() == null ? true : false
+                                &&
+                                f1.getPath() != null && f2.getPath() != null ? f1.getPath().equals(f2.getPath()) : f1.getPath() == null && f2.getPath() == null ? true : false
+                                &&
+                                f1.getFragment() != null && f2.getFragment() != null ? f1.getFragment().equals(f2.getFragment()) : f1.getFragment() == null && f2.getFragment() == null ? true : false;
+                        // @formatter:on
 					}
 					else {
 						return false;

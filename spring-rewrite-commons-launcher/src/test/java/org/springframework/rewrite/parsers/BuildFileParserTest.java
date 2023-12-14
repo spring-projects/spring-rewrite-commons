@@ -154,10 +154,20 @@ class BuildFileParserTest {
 			Path module1SubmodulePomPath = baseDir.resolve(module1SubmoduleSourcePath);
 			Path parentPomPath = baseDir.resolve(parentSourcePath);
 			Path module1PomXml = baseDir.resolve(module1SourcePath);
-			Map<Path, List<Marker>> provenanceMarkers = Map.of(parentPomPath,
-					List.of(new JavaProject(UUID.randomUUID(), "parent", null)), module1PomXml,
-					List.of(new JavaProject(UUID.randomUUID(), "module1", null)), module1SubmodulePomPath,
-					List.of(new JavaProject(UUID.randomUUID(), "module1/submodule", null)));
+
+			// @formatter:off
+			Map<Path, List<Marker>> provenanceMarkers = Map.of(
+					parentPomPath, List.of(
+							new JavaProject(UUID.randomUUID(), "parent", null)
+					),
+					module1PomXml, List.of(
+							new JavaProject(UUID.randomUUID(), "module1", null)
+					),
+					module1SubmodulePomPath, List.of(
+							new JavaProject(UUID.randomUUID(), "module1/submodule", null)
+					)
+			);
+			// @formatter:on
 
 			ExecutionContext executionContext = new InMemoryExecutionContext(t -> t.printStackTrace());
 			boolean skipMavenParsing = false;
@@ -196,14 +206,14 @@ class BuildFileParserTest {
 		@DisplayName("parse with non-pom resources provided should throw exception")
 		void parseWithNonPomResourcesProvidedShouldThrowException() {
 			Path baseDir = Path.of(".").toAbsolutePath().normalize();
-			Resource nonPomResource = new DummyResource(baseDir, "src/main/java/SomeClass.java",
-					"public class SomeClass {}");
+			Path someClassPath = baseDir.resolve("src/main/java/SomeClass.java");
+			Resource nonPomResource = new DummyResource(baseDir, someClassPath.toString(), "public class SomeClass {}");
 			List<Resource> nonPomResource1 = List.of(nonPomResource);
 			String message = assertThrows(IllegalArgumentException.class, () -> sut.parseBuildFiles(baseDir,
 					nonPomResource1, List.of(), new InMemoryExecutionContext(), false, Map.of()))
 				.getMessage();
-			assertThat(message).isEqualTo("Provided resources which are not Maven build files: '[" + baseDir
-					+ "/src/main/java/SomeClass.java]'");
+			assertThat(message)
+				.isEqualTo("Provided resources which are not Maven build files: '[" + someClassPath + "]'");
 		}
 
 		@Test
@@ -213,20 +223,25 @@ class BuildFileParserTest {
 
 			Path pom1Path = baseDir.resolve("pom.xml");
 			Resource pom1 = new DummyResource(pom1Path, "");
+
 			Path pom2Path = baseDir.resolve("module1/pom.xml");
 			Resource pom2 = new DummyResource(pom2Path, "");
+
 			List<Resource> poms = List.of(pom1, pom2);
 
-			Map<Path, List<Marker>> provenanceMarkers = Map.of(pom1Path,
-					List.of(new JavaProject(UUID.randomUUID(), "pom.xml", null))
-			// no marker for module1/pom.xml
+			// @formatter:off
+			Map<Path, List<Marker>> provenanceMarkers = Map.of(
+					pom1Path, List.of(new JavaProject(UUID.randomUUID(), "pom.xml", null))
+					// no marker for module1/pom.xml
 			);
-
-			String message = assertThrows(IllegalArgumentException.class, () -> sut.parseBuildFiles(baseDir, poms,
-					List.of(), new InMemoryExecutionContext(), false, provenanceMarkers))
+			String message = assertThrows(
+					IllegalArgumentException.class,
+					() -> sut.parseBuildFiles(baseDir, poms, List.of(), new InMemoryExecutionContext(), false, provenanceMarkers)
+				)
 				.getMessage();
-			assertThat(message).isEqualTo("No provenance marker provided for these pom files ["
-					+ Path.of(".").toAbsolutePath().normalize().resolve("module1/pom.xml]"));
+			// @formatter:on
+
+			assertThat(message).isEqualTo("No provenance marker provided for these pom files [" + pom2Path + "]");
 		}
 
 	}

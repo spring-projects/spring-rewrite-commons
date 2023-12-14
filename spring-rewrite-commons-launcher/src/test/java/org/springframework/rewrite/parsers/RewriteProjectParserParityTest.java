@@ -163,14 +163,14 @@ class RewriteProjectParserParityTest {
 			.verifyParity((comparingParsingResult, testedParsingResult) -> {
 				assertThat(
 						comparingParsingResult.sourceFiles().stream().map(sf -> sf.getSourcePath().toString()).toList())
-					.contains("checkstyle/rules.xml");
+					.contains(Path.of("checkstyle/rules.xml").toString());
 				assertThat(
 						comparingParsingResult.sourceFiles().stream().map(sf -> sf.getSourcePath().toString()).toList())
-					.contains("checkstyle/suppressions.xml");
+					.contains(Path.of("checkstyle/suppressions.xml").toString());
 				assertThat(testedParsingResult.sourceFiles().stream().map(sf -> sf.getSourcePath().toString()).toList())
-					.contains("checkstyle/rules.xml");
+					.contains(Path.of("checkstyle/rules.xml").toString());
 				assertThat(testedParsingResult.sourceFiles().stream().map(sf -> sf.getSourcePath().toString()).toList())
-					.contains("checkstyle/suppressions.xml");
+					.contains(Path.of("checkstyle/suppressions.xml").toString());
 			});
 	}
 

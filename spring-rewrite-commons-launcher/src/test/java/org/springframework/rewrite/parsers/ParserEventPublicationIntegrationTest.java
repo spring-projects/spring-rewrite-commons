@@ -26,6 +26,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parsers.events.FinishedParsingResourceEvent;
 import org.springframework.rewrite.parsers.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parsers.events.SuccessfullyParsedProjectEvent;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class ParserEventPublicationIntegrationTest {
 	@Autowired
 	ExecutionContext executionContext;
 
-	private static List<FinishedParsingResourceEvent> capturedEvents = new ArrayList<>();
+	private static List<String> capturedEvents = new ArrayList<>();
 
 	private static StartedParsingProjectEvent startedParsingEvent;
 
@@ -69,19 +70,19 @@ public class ParserEventPublicationIntegrationTest {
 		RewriteProjectParsingResult parsingResult = sut.parse(baseDir, resources);
 
 		assertThat(parsingResult.sourceFiles()).hasSize(5);
-		assertThat(parsingResult.sourceFiles().stream().map(s -> s.getSourcePath().toString()).toList())
-			.containsExactly("pom.xml", "module-b/pom.xml", "module-a/pom.xml",
+		assertThat(parsingResult.sourceFiles()
+			.stream()
+			.map(s -> LinuxWindowsPathUnifier.unifiedPathString(s.getSourcePath()))
+			.toList()).containsExactly("pom.xml", "module-b/pom.xml", "module-a/pom.xml",
 					"module-b/src/test/resources/application.yaml", "module-a/src/main/java/com/acme/SomeClass.java");
 
 		assertThat(capturedEvents).hasSize(5);
 
-		assertThat(capturedEvents.get(0).sourceFile().getSourcePath().toString()).isEqualTo("pom.xml");
-		assertThat(capturedEvents.get(1).sourceFile().getSourcePath().toString()).isEqualTo("module-b/pom.xml");
-		assertThat(capturedEvents.get(2).sourceFile().getSourcePath().toString()).isEqualTo("module-a/pom.xml");
-		assertThat(capturedEvents.get(3).sourceFile().getSourcePath().toString())
-			.isEqualTo("module-b/src/test/resources/application.yaml");
-		assertThat(capturedEvents.get(4).sourceFile().getSourcePath().toString())
-			.isEqualTo("module-a/src/main/java/com/acme/SomeClass.java");
+		assertThat(capturedEvents.get(0)).isEqualTo("pom.xml");
+		assertThat(capturedEvents.get(1)).isEqualTo("module-b/pom.xml");
+		assertThat(capturedEvents.get(2)).isEqualTo("module-a/pom.xml");
+		assertThat(capturedEvents.get(3)).isEqualTo("module-b/src/test/resources/application.yaml");
+		assertThat(capturedEvents.get(4)).isEqualTo("module-a/src/main/java/com/acme/SomeClass.java");
 		// ResourceParser not firing events
 		// TODO: reactivate after
 		// https://github.com/openrewrite/rewrite-maven-plugin/issues/622
@@ -99,7 +100,8 @@ public class ParserEventPublicationIntegrationTest {
 
 		@EventListener(FinishedParsingResourceEvent.class)
 		public void onEvent(FinishedParsingResourceEvent event) {
-			capturedEvents.add(event);
+			String unifiedPathString = LinuxWindowsPathUnifier.unifiedPathString(event.sourceFile().getSourcePath());
+			capturedEvents.add(unifiedPathString);
 		}
 
 		@EventListener(StartedParsingProjectEvent.class)

@@ -90,7 +90,6 @@ public class RewriteResourceParser {
 	}
 
 	public Stream<SourceFile> parse(Path searchDir, List<Resource> resources, Set<Path> alreadyParsed) {
-		// TODO: 945 remove/clean this up
 		List<Resource> resourcesLeft = resources.stream()
 			.filter(r -> alreadyParsed.stream()
 				.noneMatch(path -> ResourceUtil.getPath(r).toString().startsWith(path.toString())))

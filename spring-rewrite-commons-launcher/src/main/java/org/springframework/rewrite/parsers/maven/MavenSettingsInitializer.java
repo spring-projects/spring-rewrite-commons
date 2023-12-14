@@ -22,6 +22,7 @@ import org.openrewrite.maven.MavenSettings;
 import org.openrewrite.maven.internal.RawRepositories;
 import org.openrewrite.maven.tree.MavenRepository;
 import org.springframework.rewrite.scopes.ProjectMetadata;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -50,9 +51,10 @@ public class MavenSettingsInitializer {
 	}
 
 	public void initializeMavenSettings() {
-		Path userHome = Path.of(System.getProperty("user.home"));
+		Path userHome = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
 		String m2RepoPath = userHome.resolve(".m2/repository").toAbsolutePath().normalize() + "/";
-		String repo = "file://" + m2RepoPath;
+		String unifiedM2RepoPath = LinuxWindowsPathUnifier.unifiedPathString(m2RepoPath);
+		String repo = "file://" + unifiedM2RepoPath;
 		Path mavenSettingsFile = userHome.resolve(".m2/settings.xml");
 		Path mavenSecuritySettingsFile = userHome.resolve(".m2/settings-security.xml");
 
@@ -62,7 +64,7 @@ public class MavenSettingsInitializer {
 		MavenSettings.@Nullable ActiveProfiles activeProfiles = new MavenSettings.ActiveProfiles(List.of("default"));
 		MavenSettings.@Nullable Mirrors mirrors = new MavenSettings.Mirrors();
 		MavenSettings.Servers servers = new MavenSettings.Servers();
-		MavenSettings mavenSettings = new MavenSettings(m2RepoPath, mavenRepository, profiles, activeProfiles, mirrors,
+		MavenSettings mavenSettings = new MavenSettings(repo, mavenRepository, profiles, activeProfiles, mirrors,
 				servers);
 
 		// TODO: Add support for global Maven settings (${maven.home}/conf/settings.xml).
