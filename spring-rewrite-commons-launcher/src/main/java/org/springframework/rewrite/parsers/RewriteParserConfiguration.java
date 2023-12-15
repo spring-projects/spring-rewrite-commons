@@ -80,13 +80,8 @@ public class RewriteParserConfiguration {
 	}
 
 	@Bean
-	ModuleParser moduleParser() {
-		return new ModuleParser();
-	}
-
-	@Bean
-	MavenModuleParser mavenModuleParser(SpringRewriteProperties springRewriteProperties, ModuleParser moduleParser) {
-		return new MavenModuleParser(springRewriteProperties, moduleParser);
+	MavenModuleParser mavenModuleParser(SpringRewriteProperties springRewriteProperties) {
+		return new MavenModuleParser(springRewriteProperties);
 	}
 
 	@Bean

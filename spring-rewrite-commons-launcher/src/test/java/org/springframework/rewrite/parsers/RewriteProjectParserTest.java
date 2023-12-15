@@ -91,12 +91,10 @@ class RewriteProjectParserTest {
 	void parseSimpleMavenProject(@TempDir Path tempDir) throws PlexusCipherException {
 		Path basePath = tempDir;
 		SpringRewriteProperties springRewriteProperties = new SpringRewriteProperties();
-		ModuleParser mavenMojoParserPrivateMethods = new ModuleParser();
 		ExecutionContext executionContext = new InMemoryExecutionContext(t -> {
 			throw new RuntimeException(t);
 		});
-		MavenModuleParser mavenModuleParser = new MavenModuleParser(springRewriteProperties,
-				mavenMojoParserPrivateMethods);
+		MavenModuleParser mavenModuleParser = new MavenModuleParser(springRewriteProperties);
 		ProjectMetadata projectMetadata = new ProjectMetadata();
 		MavenSettingsInitializer mavenSettingsInitializer = new MavenSettingsInitializer(executionContext,
 				projectMetadata);
