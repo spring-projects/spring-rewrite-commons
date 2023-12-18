@@ -59,7 +59,7 @@ import static org.openrewrite.Tree.randomId;
  */
 public class MavenModuleParser {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MavenProvenanceMarkerFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MavenModuleParser.class);
 
 	private final SpringRewriteProperties springRewriteProperties;
 
