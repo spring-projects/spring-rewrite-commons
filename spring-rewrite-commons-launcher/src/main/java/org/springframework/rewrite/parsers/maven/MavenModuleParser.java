@@ -189,7 +189,7 @@ public class MavenModuleParser {
 		mainJavaSources.addAll(javaSourcesInTarget);
 		mainJavaSources.addAll(javaSourcesInMain);
 
-		LOGGER.info("[%s] Parsing source files".formatted(currentProject));
+		LOGGER.info("[%s] Parsing main source files".formatted(currentProject));
 
 		// FIXME 945 classpath
 		// - Resolve dependencies to non-reactor projects from Maven repository
@@ -207,6 +207,8 @@ public class MavenModuleParser {
 
 		javaParserBuilder.classpath(dependencies);
 
+		LOGGER.info("Dependencies on main classpath: %s".formatted(dependencies));
+
 		JavaTypeCache typeCache = new JavaTypeCache();
 		javaParserBuilder.typeCache(typeCache);
 
@@ -218,6 +220,8 @@ public class MavenModuleParser {
 			Parser.Input input = new Parser.Input(path, fileAttributes, inputStreamSupplier, isSynthetic);
 			return input;
 		}).toList();
+
+		LOGGER.info("Parsing main Java sources.");
 
 		Set<JavaType.FullyQualified> localClassesCp = new HashSet<>();
 		JavaSourceSet javaSourceSet = sourceSet("main", dependencies, typeCache);
@@ -232,6 +236,8 @@ public class MavenModuleParser {
 				alreadyParsed.add(baseDir.resolve(s.getSourcePath()));
 			})
 			.toList();
+
+		LOGGER.info("Parsed %d main Java source files.".formatted(cus.size()));
 
 		// TODO: This is a hack:
 		// Parsed java sources are not themselves on the classpath (here).
@@ -261,11 +267,14 @@ public class MavenModuleParser {
 			.filter(r -> alreadyParsed.stream().noneMatch(path -> LinuxWindowsPathUnifier.pathStartsWith(r, path)))
 			.toList();
 
+		LOGGER.info("Parsing main resources");
 		List<SourceFile> parsedResourceFiles = rp
 			.parseSourceFiles(currentProject.getModulePath().resolve("src/main/resources"), resourcesLeft,
 					alreadyParsed, executionContext)
 			.map(addProvenance(baseDir, mainProjectProvenance, null))
 			.toList();
+
+		LOGGER.info("Parsed %d main resources".formatted(parsedResourceFiles.size()));
 
 		// TODO: Remove
 		// List<SourceFile> parsedResourceFiles = rp
