@@ -15,6 +15,10 @@
  */
 package org.springframework.rewrite.test.util;
 
+import org.apache.maven.shared.invoker.DefaultInvocationRequest;
+import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.maven.shared.invoker.InvocationRequest;
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.assertj.core.api.SoftAssertions;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.ExecutionContext;
@@ -32,7 +36,6 @@ import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -98,6 +101,8 @@ public class ParserParityTestHelper {
 		RewriteProjectParsingResult expectedParserResult = null;
 		RewriteProjectParsingResult actualParserResult = null;
 
+		resolveDependencies();
+
 		ParserExecutionHelper parserExecutionHelper = new ParserExecutionHelper();
 		if (isParallelParse) {
 			ParallelParsingResult result = parserExecutionHelper.parseParallel(baseDir, springRewriteProperties,
@@ -115,6 +120,39 @@ public class ParserParityTestHelper {
 
 		// additional checks
 		customParserResultParityChecker.accept(actualParserResult, expectedParserResult);
+	}
+
+	private void resolveDependencies() {
+		try {
+			DefaultInvoker defaultInvoker = new DefaultInvoker();
+			InvocationRequest request = new DefaultInvocationRequest();
+			request.setGoals(List.of("clean", "test-compile"));
+			request.setBaseDirectory(baseDir.toFile());
+			// request.setBatchMode(true);
+			request.setPomFile(baseDir.resolve("pom.xml").toFile());
+
+			String mavenHome = "";
+			if (System.getenv("MAVEN_HOME") != null) {
+				mavenHome = System.getenv("MAVEN_HOME");
+			}
+			else if (System.getenv("MVN_HOME") != null) {
+				mavenHome = System.getenv("MVN_HOME");
+			}
+			else if (System.getenv("M2_HOME") != null) {
+				mavenHome = System.getenv("M2_HOME");
+			}
+			else {
+				throw new IllegalStateException("Neither MVN_HOME nor MAVEN_HOME set but required by MavenInvoker.");
+			}
+
+			System.out.println("Using Maven %s".formatted(mavenHome));
+
+			request.setMavenHome(new File(mavenHome));
+			defaultInvoker.execute(request);
+		}
+		catch (MavenInvocationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public interface CustomParserResultParityChecker
@@ -369,12 +407,12 @@ public class ParserParityTestHelper {
 						// @formatter:off
                         return
                                 f1.getScheme() != null && f2.getScheme() != null ? f1.getScheme().equals(f2.getScheme()) : f1.getScheme() == null && f2.getScheme() == null ? true : false
-                                &&
-                                f1.getHost() != null && f2.getHost() != null ? f1.getHost().equals(f2.getHost()) : f1.getHost() == null && f2.getHost() == null ? true : false
-                                &&
-                                f1.getPath() != null && f2.getPath() != null ? f1.getPath().equals(f2.getPath()) : f1.getPath() == null && f2.getPath() == null ? true : false
-                                &&
-                                f1.getFragment() != null && f2.getFragment() != null ? f1.getFragment().equals(f2.getFragment()) : f1.getFragment() == null && f2.getFragment() == null ? true : false;
+                                        &&
+                                        f1.getHost() != null && f2.getHost() != null ? f1.getHost().equals(f2.getHost()) : f1.getHost() == null && f2.getHost() == null ? true : false
+                                        &&
+                                        f1.getPath() != null && f2.getPath() != null ? f1.getPath().equals(f2.getPath()) : f1.getPath() == null && f2.getPath() == null ? true : false
+                                        &&
+                                        f1.getFragment() != null && f2.getFragment() != null ? f1.getFragment().equals(f2.getFragment()) : f1.getFragment() == null && f2.getFragment() == null ? true : false;
                         // @formatter:on
 					}
 					else {
