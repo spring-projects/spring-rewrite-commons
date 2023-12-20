@@ -8,8 +8,9 @@
 /user.home/.m2/settings.xml
 !/user.home/.m2/settings.xml.template
 !/user.home/.m2/settings-security.xml
-/reposilite-data/static
-/reposilite-data/.local
-/reposilite-data/plugins
-/reposilite-data/reposilite.db
-/reposilite-data/configuration.cdn
+#/reposilite-data/static
+#/reposilite-data/.local
+#/reposilite-data/plugins
+#/reposilite-data/repositories
+#/reposilite-data/reposilite.db
+#/reposilite-data--/configuration.cdn
