@@ -15,7 +15,7 @@
  */
 package org.springframework.sbm;
 
-import org.apache.commons.io.FileUtils;
+import net.lingala.zip4j.ZipFile;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
@@ -42,14 +42,11 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
@@ -97,29 +94,51 @@ public class PrivateArtifactRepositoryTest {
 	// All test resources live here
 	public static final String TESTCODE_DIR = "testcode/maven-projects/private-repository";
 
+	public static final String REPOSITORIES_ZIP = Path
+		.of("./testcode/maven-projects/private-repository/reposilite-data.zip")
+		.toAbsolutePath()
+		.toString();
+
+	public static final String DEPENDENCY_CLASS_FQNAME = "com.example.dependency.DependencyClass";
+
+	private static final String NEW_USER_HOME = Path.of(".")
+			.resolve(TESTCODE_DIR + "/user.home")
+			.toAbsolutePath()
+			.normalize()
+			.toString();
+	private static final File LOCAL_MAVEN_REPOSITORY = Path.of(NEW_USER_HOME + "/.m2/repository").toFile();
+
+	private static final Path DEPENDENCY_PATH_IN_LOCAL_MAVEN_REPO = Path
+			.of(NEW_USER_HOME + "/.m2/repository/com/example/dependency/dependency-project")
+			.toAbsolutePath()
+			.normalize();
+
+	// File path was too long under Windows when Maven repository was under TESTCODE_DIR +
+	// "/reposilite-data"
+	// To fix this the repo with jars for reposilite is extracted from a zip to its target
+	// dir.
+	private static final Path TEMP_DIR;
+	static {
+		try {
+			TEMP_DIR = Files.createTempDirectory("reposilite-data");
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		if (!Files.exists(TEMP_DIR.resolve("reposilite-data"))) {
+			TestHelper.unzip(TEMP_DIR);
+		}
+	}
+	private static final Path REPOSILITE_DATA_DIR = TEMP_DIR.resolve("reposilite-data");
+
 	// The private Artifact repository (reposilite) provides the dependency.
 	@Container
 	static GenericContainer reposilite = new GenericContainer(DockerImageName.parse("dzikoysk/reposilite:3.4.10"))
 		.withExposedPorts(8080)
 		// copy required config files and cached dependency to repository
-		.withCopyFileToContainer(MountableFile.forHostPath("./" + TESTCODE_DIR + "/reposilite-data"), "/app/data")
+		.withCopyFileToContainer(MountableFile.forHostPath(REPOSILITE_DATA_DIR), "/app/data")
 		// Create temp user 'user' with password 'secret'
 		.withEnv("REPOSILITE_OPTS", "--token user:secret --shared-config shared.configuration.json");
-
-	public static final String DEPENDENCY_CLASS_FQNAME = "com.example.dependency.DependencyClass";
-
-	private static final String NEW_USER_HOME = Path.of(".")
-		.resolve(TESTCODE_DIR + "/user.home")
-		.toAbsolutePath()
-		.normalize()
-		.toString();
-
-	private static final Path DEPENDENCY_PATH_IN_LOCAL_MAVEN_REPO = Path
-		.of(NEW_USER_HOME + "/.m2/repository/com/example/dependency/dependency-project")
-		.toAbsolutePath()
-		.normalize();
-
-	private static final File LOCAL_MAVEN_REPOSITORY = Path.of(NEW_USER_HOME + "/.m2/repository").toFile();
 
 	private static MavenRepository originalMavenRepository;
 
@@ -146,20 +165,20 @@ public class PrivateArtifactRepositoryTest {
 		Whitebox.setInternalState(MavenRepository.class, "MAVEN_LOCAL_DEFAULT", mavenRepository);
 	}
 
-	@AfterAll
-	static void afterAll() {
-		// set back to initial values
-		System.setProperty("user.home", originalUserHome);
-		Whitebox.setInternalState(MavenRepository.class, "MAVEN_LOCAL_DEFAULT", originalMavenRepository);
-		FileSystemUtils.deleteRecursively(LOCAL_MAVEN_REPOSITORY);
-	}
-
 	@BeforeEach
 	void beforeEach() throws IOException {
 		Integer port = reposilite.getMappedPort(8080);
 		System.out.println("Reposilite: http://localhost:" + port + " login with user:secret");
 		TestHelper.renderTemplates(port);
 		TestHelper.clearDependencyFromLocalMavenRepo();
+	}
+
+	@AfterAll
+	static void afterAll() {
+		// set back to initial values
+		System.setProperty("user.home", originalUserHome);
+		Whitebox.setInternalState(MavenRepository.class, "MAVEN_LOCAL_DEFAULT", originalMavenRepository);
+		FileSystemUtils.deleteRecursively(LOCAL_MAVEN_REPOSITORY);
 	}
 
 	@Test
@@ -275,15 +294,6 @@ public class PrivateArtifactRepositoryTest {
 			}
 		}
 
-	}
-
-	/*
-	 * Currently not used as the dependency is provided to the container (cached). But
-	 * kept in case deployment of the dependency or building the dependent project is
-	 * needed.
-	 */
-	class DeploymentHelper {
-
 		void deployDependency(Path pomXmlPath) throws MavenInvocationException {
 			InvocationRequest request = new DefaultInvocationRequest();
 			request.setPomFile(pomXmlPath.toFile());
@@ -328,86 +338,24 @@ public class PrivateArtifactRepositoryTest {
 			}
 		}
 
-		static void installMavenForTestIfNotExists(Path tempDir) {
-			if (!Path.of("./testcode/maven-projects/private-repository/user.home/apache-maven-3.9.5/bin/mvn")
-				.toFile()
-				.exists()) {
-				String mavenDownloadUrl = "https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip";
-				try {
-					Path mavenInstallDir = Path.of(TESTCODE_DIR + "/user.home");
-					File downloadedMavenZipFile = tempDir.resolve("apache-maven-3.9.5-bin.zip").toFile();
-					FileUtils.copyURLToFile(new URL(mavenDownloadUrl), downloadedMavenZipFile, 10000, 30000);
-					Unzipper.unzip(downloadedMavenZipFile, mavenInstallDir);
-					File file = mavenInstallDir.resolve("apache-maven-3.9.5/bin/mvn").toFile();
-					file.setExecutable(true, false);
-					assertThat(file.canExecute()).isTrue();
-				}
-				catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+		static void unzip(Path repoDir) {
+			try {
+				;
+				ZipFile zipFile = new ZipFile(REPOSITORIES_ZIP);
+				zipFile.extractAll(repoDir.toString());
 			}
-		}
-
-		class Unzipper {
-
-			private static void unzip(File downloadedMavenZipFile, Path mavenInstallDir) {
-				try {
-					byte[] buffer = new byte[1024];
-					ZipInputStream zis = null;
-
-					zis = new ZipInputStream(new FileInputStream(downloadedMavenZipFile));
-
-					ZipEntry zipEntry = zis.getNextEntry();
-					while (zipEntry != null) {
-						File newFile = newFile(mavenInstallDir.toFile(), zipEntry);
-						if (zipEntry.isDirectory()) {
-							if (!newFile.isDirectory() && !newFile.mkdirs()) {
-								throw new IOException("Failed to create directory " + newFile);
-							}
-						}
-						else {
-							// fix for Windows-created archives
-							File parent = newFile.getParentFile();
-							if (!parent.isDirectory() && !parent.mkdirs()) {
-								throw new IOException("Failed to create directory " + parent);
-							}
-
-							// write file content
-							FileOutputStream fos = new FileOutputStream(newFile);
-							int len;
-							while ((len = zis.read(buffer)) > 0) {
-								fos.write(buffer, 0, len);
-							}
-							fos.close();
-						}
-						zipEntry = zis.getNextEntry();
-					}
-					zis.closeEntry();
-					zis.close();
-				}
-				catch (FileNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-				catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-			public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-				File destFile = new File(destinationDir, zipEntry.getName());
-
-				String destDirPath = destinationDir.getCanonicalPath();
-				String destFilePath = destFile.getCanonicalPath();
-
-				if (!destFilePath.startsWith(destDirPath + java.io.File.separator)) {
-					throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-				}
-
-				return destFile;
+			catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 
 		}
 
+		static void mkdir(Path target) {
+			boolean mkdir = target.toFile().mkdir();
+			if (!mkdir) {
+				throw new RuntimeException("Could not create target dir");
+			}
+		}
 	}
 
 }
