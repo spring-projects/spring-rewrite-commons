@@ -20,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.ExecutionContext;
@@ -55,6 +57,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.fail;
  *
  * @author Fabian Krüger
  */
+@DisabledOnOs(value = OS.WINDOWS, disabledReason = "The repository URIs of dependencies differ.")
+@Issue("https://github.com/spring-projects/spring-rewrite-commons/issues/12")
 class RewriteProjectParserParityTest {
 
 	@Test
