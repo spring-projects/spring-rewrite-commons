@@ -8,9 +8,7 @@
 **Parser** Parses Gradle project sources with a help of `GradleProjectData` fetched from Gradle Build process via Gradle Tooling API
 
 ## Building
-Execute first `mvn clean install -DskipTests` to install **plugin** based on the latest sources into local Maven repository
-
-Then execute `mvn clean install` - now tests would be able to find the **plugin** module for their execution.
+Execute `mvn clean install` - **plugin** artifact should go in local maven repo
 
 ## Usage
 See `ProjectParserTest` class under the tests of **parser** module
