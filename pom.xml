@@ -15,7 +15,7 @@
         <module>spring-rewrite-commons-launcher</module>
         <module>spring-rewrite-commons-docs</module>
         <module>spring-rewrite-commons-examples</module>
-        <module>spring-rewrite-commons-gradle</module>
+<!--        <module>spring-rewrite-commons-gradle</module>-->
     </modules>
 
     <organization>
