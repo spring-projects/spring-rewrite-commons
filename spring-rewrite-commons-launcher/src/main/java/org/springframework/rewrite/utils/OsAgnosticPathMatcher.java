@@ -48,7 +48,7 @@ public class OsAgnosticPathMatcher implements PathMatcher {
 	}
 
 	private String unifyPath(String path) {
-		return pathUnifier.unifyPath(path);
+		return pathUnifier.unifiedPathString(path);
 	}
 
 	@Override

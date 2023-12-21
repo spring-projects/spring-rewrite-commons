@@ -60,7 +60,7 @@ public class MavenMojoProjectParserFactory {
 			Collection<String> plainTextMasks, int sizeThresholdMb, boolean runPerSubmodule,
 			PlexusContainer plexusContainer, MavenSession session) {
 		try {
-			Log logger = new Slf4jToMavenLoggerAdapter(LOGGER);
+			Log logger = new Slf4jToMavenLoggerAdapter(LoggerFactory.getLogger(MavenMojoProjectParser.class));
 			RuntimeInformation runtimeInformation = plexusContainer.lookup(RuntimeInformation.class);
 			SettingsDecrypter decrypter = plexusContainer.lookup(SettingsDecrypter.class);
 

@@ -28,6 +28,7 @@ import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parsers.MavenProject;
 import org.springframework.rewrite.test.util.DummyResource;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.io.IOException;
@@ -240,7 +241,7 @@ class MavenProjectAnalyzerTest {
 	 */
 	@Test
 	@DisplayName("reactorBuild")
-	void reactorBuild() {
+	void getSortedProjectsWithMultiModule() {
 		@Language("xml")
 		String parentPom = """
 				<?xml version="1.0" encoding="UTF-8"?>
@@ -272,18 +273,45 @@ class MavenProjectAnalyzerTest {
 				</project>
 				""";
 
-		List<Resource> resources = List.of(new DummyResource(Path.of("pom.xml"), parentPom),
-				new DummyResource(Path.of("example/pom.xml"), modulePom));
+		String javaSource = """
+							package com.example;
+							public class MainSource {
 
-		List<MavenProject> sortedProjects = sut.getSortedProjects(Path.of(".").toAbsolutePath(), resources);
+							}
+				""";
+
+		Path baseDir = Path.of(".").toAbsolutePath().normalize();
+		Path exampleModuleDir = baseDir.resolve("example");
+
+		// @formatter:off
+		List<Resource> resources = List.of(
+				new DummyResource(baseDir.resolve("pom.xml"), parentPom),
+				new DummyResource(exampleModuleDir.resolve("pom.xml"), modulePom),
+				new DummyResource(exampleModuleDir.resolve("src/main/java/com/acme/MainSource.java"), javaSource),
+				new DummyResource(exampleModuleDir.resolve("src/test/java/com/acme/MainSourceTest.java"), javaSource)
+		);
+		// @formatter:on
+
+		List<MavenProject> sortedProjects = sut.getSortedProjects(baseDir, resources);
 
 		assertThat(sortedProjects).hasSize(2);
 
-		String parentPomPath = Path.of(".").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(0).getBasedir().toString()).isEqualTo(parentPomPath);
+		MavenProject parentProject = sortedProjects.get(0);
+		MavenProject exampleProject = sortedProjects.get(1);
 
-		String modulePomPath = Path.of(".").resolve("example").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(1).getBasedir().toString()).isEqualTo(modulePomPath);
+		assertThat(LinuxWindowsPathUnifier.pathEquals(baseDir.normalize(), parentProject.getBasedir())).isTrue();
+		assertThat(LinuxWindowsPathUnifier.pathEquals(exampleProject.getBasedir(),
+				Path.of(".").resolve("example").toAbsolutePath().normalize()));
+
+		assertThat(exampleProject.getMainJavaSources()).hasSize(1);
+		assertThat(LinuxWindowsPathUnifier
+			.unifiedPathString(ResourceUtil.getPath(exampleProject.getMainJavaSources().get(0)))
+			.endsWith("src/main/java/com/acme/MainSource.java"));
+		assertThat(exampleProject.getTestJavaSources()).hasSize(1);
+		assertThat(LinuxWindowsPathUnifier
+			.unifiedPathString(ResourceUtil.getPath(exampleProject.getMainJavaSources().get(0)))
+			.endsWith("src/test/java/com/acme/MainSourceTest.java"));
+
 	}
 
 	/**
@@ -345,10 +373,10 @@ class MavenProjectAnalyzerTest {
 		assertThat(sortedProjects).hasSize(2);
 
 		String parentPomPath = Path.of(".").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(0).getBasedir().toString()).isEqualTo(parentPomPath);
+		assertThat(LinuxWindowsPathUnifier.pathEquals(sortedProjects.get(0).getBasedir(), parentPomPath));
 
 		String modulePomPath = Path.of(".").resolve("example").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(1).getBasedir().toString()).isEqualTo(modulePomPath);
+		assertThat(LinuxWindowsPathUnifier.pathEquals(sortedProjects.get(1).getBasedir(), modulePomPath));
 	}
 
 	/**
@@ -416,11 +444,12 @@ class MavenProjectAnalyzerTest {
 
 		assertThat(sortedProjects).hasSize(2);
 
-		String parentPomPath = Path.of(".").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(0).getBasedir().toString()).isEqualTo(parentPomPath);
+		String parentPomPath = LinuxWindowsPathUnifier.unifiedPathString(Path.of(".").toAbsolutePath().normalize());
+		assertThat(LinuxWindowsPathUnifier.pathEquals(sortedProjects.get(0).getBasedir(), parentPomPath)).isTrue();
 
-		String modulePomPath = Path.of(".").resolve("example").toAbsolutePath().normalize().toString();
-		assertThat(sortedProjects.get(1).getBasedir().toString()).isEqualTo(modulePomPath);
+		String modulePomPath = LinuxWindowsPathUnifier
+			.unifiedPathString(Path.of(".").resolve("example").toAbsolutePath().normalize());
+		assertThat(LinuxWindowsPathUnifier.pathEquals(sortedProjects.get(1).getBasedir(), modulePomPath)).isTrue();
 	}
 
 	/**

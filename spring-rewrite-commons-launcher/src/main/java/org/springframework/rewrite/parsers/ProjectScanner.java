@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,9 +58,8 @@ public class ProjectScanner {
 		if (!baseDir.toFile().exists()) {
 			throw new IllegalArgumentException("Provided path does not exist: " + baseDir);
 		}
-		Path absoluteRootPath = baseDir.toAbsolutePath();
-		String unifiedPath = new LinuxWindowsPathUnifier().unifyPath(absoluteRootPath.toString() + "/**");
-		String pattern = "file:" + unifiedPath;
+		Path absoluteRootPath = baseDir;
+		String pattern = "file:" + absoluteRootPath.toString() + "/**";
 		try {
 			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
 				.getResources(pattern);
@@ -72,7 +72,7 @@ public class ProjectScanner {
 			int numIgnored = resources.length - numResulting;
 			LOGGER.debug("Scan returns %s resources, %d resources were ignored.".formatted(numResulting, numIgnored));
 			LOGGER.trace("Resources resulting from scan: %s".formatted(resultingResources.stream()
-				.map(r -> absoluteRootPath.relativize(ResourceUtil.getPath(r)).toString())
+				.map(getResourceStringFunction(absoluteRootPath))
 				.collect(Collectors.joining(", "))));
 
 			return resultingResources;
@@ -80,6 +80,11 @@ public class ProjectScanner {
 		catch (IOException e) {
 			throw new RuntimeException("Can't get resources for pattern '" + pattern + "'", e);
 		}
+	}
+
+	@NotNull
+	private static Function<Resource, String> getResourceStringFunction(Path absoluteRootPath) {
+		return r -> LinuxWindowsPathUnifier.relativize(absoluteRootPath, ResourceUtil.getPath(r)).toString();
 	}
 
 	@NotNull

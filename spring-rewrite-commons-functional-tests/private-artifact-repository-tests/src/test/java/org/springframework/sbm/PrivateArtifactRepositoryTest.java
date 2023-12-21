@@ -102,16 +102,17 @@ public class PrivateArtifactRepositoryTest {
 	public static final String DEPENDENCY_CLASS_FQNAME = "com.example.dependency.DependencyClass";
 
 	private static final String NEW_USER_HOME = Path.of(".")
-			.resolve(TESTCODE_DIR + "/user.home")
-			.toAbsolutePath()
-			.normalize()
-			.toString();
+		.resolve(TESTCODE_DIR + "/user.home")
+		.toAbsolutePath()
+		.normalize()
+		.toString();
+
 	private static final File LOCAL_MAVEN_REPOSITORY = Path.of(NEW_USER_HOME + "/.m2/repository").toFile();
 
 	private static final Path DEPENDENCY_PATH_IN_LOCAL_MAVEN_REPO = Path
-			.of(NEW_USER_HOME + "/.m2/repository/com/example/dependency/dependency-project")
-			.toAbsolutePath()
-			.normalize();
+		.of(NEW_USER_HOME + "/.m2/repository/com/example/dependency/dependency-project")
+		.toAbsolutePath()
+		.normalize();
 
 	// File path was too long under Windows when Maven repository was under TESTCODE_DIR +
 	// "/reposilite-data"
@@ -356,6 +357,7 @@ public class PrivateArtifactRepositoryTest {
 				throw new RuntimeException("Could not create target dir");
 			}
 		}
+
 	}
 
 }

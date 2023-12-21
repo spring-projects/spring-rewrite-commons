@@ -35,6 +35,8 @@ import org.springframework.rewrite.parsers.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parsers.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 import org.springframework.rewrite.scopes.ScanScope;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
+import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -120,7 +122,7 @@ public class RewriteProjectParser {
 	}
 
 	/**
-	 * Parse given {@link Resource}s in {@code baseDir} to OpenRewrite AST representation.
+	 * Parse given {@link Resource}s in {@code baseDir} to OpenRewrite LST.
 	 */
 	public RewriteProjectParsingResult parse(Path givenBaseDir, List<Resource> resources) {
 		scanScope.clear(beanFactory);
@@ -175,8 +177,8 @@ public class RewriteProjectParser {
 		if (!givenBaseDir.isAbsolute()) {
 			givenBaseDir = givenBaseDir.toAbsolutePath().normalize();
 		}
-		final Path baseDir = givenBaseDir;
-		return baseDir;
+		String cleanedPath = StringUtils.cleanPath(givenBaseDir.toString());
+		return Path.of(cleanedPath);
 	}
 
 }

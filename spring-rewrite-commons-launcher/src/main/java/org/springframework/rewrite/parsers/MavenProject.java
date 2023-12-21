@@ -25,6 +25,7 @@ import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parsers.maven.MavenRuntimeInformation;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.io.File;
@@ -88,15 +89,26 @@ public class MavenProject {
 		return pomFile;
 	}
 
+	/**
+	 * @return absolute Path of Module
+	 */
+	public Path getModulePath() {
+		return projectRoot.resolve(getModuleDir());
+	}
+
+	/**
+	 * @return Path for Module relative to {@code baseDir}.
+	 */
 	public Path getModuleDir() {
 		if (getBasedir() == null) {
 			return null;
 		}
-		else if (projectRoot.relativize(ResourceUtil.getPath(pomFile)).toString().equals("pom.xml")) {
+		else if ("pom.xml"
+			.equals(LinuxWindowsPathUnifier.relativize(projectRoot, ResourceUtil.getPath(pomFile)).toString())) {
 			return Path.of("");
 		}
 		else {
-			return projectRoot.relativize(ResourceUtil.getPath(pomFile)).getParent();
+			return LinuxWindowsPathUnifier.relativize(projectRoot, ResourceUtil.getPath(pomFile)).getParent();
 		}
 	}
 
@@ -218,7 +230,11 @@ public class MavenProject {
 
 	@NotNull
 	private static Predicate<Resource> whenIn(Path sourceDirectory) {
-		return r -> ResourceUtil.getPath(r).toString().startsWith(sourceDirectory.toString());
+		return r -> {
+			String resourcePath = LinuxWindowsPathUnifier.unifiedPathString(r);
+			String sourceDirectoryPath = LinuxWindowsPathUnifier.unifiedPathString(sourceDirectory);
+			return resourcePath.startsWith(sourceDirectoryPath);
+		};
 	}
 
 	public List<Resource> getJavaSourcesInTarget() {
@@ -230,11 +246,12 @@ public class MavenProject {
 	}
 
 	public List<Resource> getMainJavaSources() {
-		return listJavaSources(resources, getProjectRoot().resolve(getModuleDir()).resolve("src/main/java"));
+		Path sourceDir = getProjectRoot().resolve(getModuleDir()).resolve("src/main/java");
+		return listJavaSources(resources, sourceDir);
 	}
 
-	public Path getModulePath() {
-		return projectRoot.resolve(getModuleDir());
+	public List<Resource> getTestJavaSources() {
+		return listJavaSources(resources, getProjectRoot().resolve(getModuleDir()).resolve("src/test/java"));
 	}
 
 	public ProjectId getProjectId() {

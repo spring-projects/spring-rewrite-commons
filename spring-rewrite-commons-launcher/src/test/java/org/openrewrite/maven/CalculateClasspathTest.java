@@ -31,6 +31,7 @@ import org.springframework.rewrite.parsers.RewriteProjectParser;
 import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
 import org.springframework.rewrite.test.util.DummyResource;
 import org.springframework.rewrite.test.util.TestProjectHelper;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -100,7 +101,7 @@ public class CalculateClasspathTest {
 				}
 				""";
 
-		Path baseDir = tmpDir.resolve("/example-1").toAbsolutePath().normalize();
+		Path baseDir = LinuxWindowsPathUnifier.unifiedPath(tmpDir.resolve("/example-1").toAbsolutePath().normalize());
 		List<Resource> resources = List.of(new DummyResource(baseDir.resolve("pom.xml"), pom),
 				new DummyResource(baseDir.resolve("src/main/java/com/example/MainClass.java"), mainClass),
 				new DummyResource(baseDir.resolve("src/test/java/com/example/TestClass.java"), testClass));
@@ -109,13 +110,16 @@ public class CalculateClasspathTest {
 
 		// verify types in use
 		SourceFile mainSourceFile = parsingResult.sourceFiles().get(1);
+		assertThat(mainSourceFile).isInstanceOf(J.CompilationUnit.class);
 		J.CompilationUnit mainCu = (J.CompilationUnit) mainSourceFile;
+
 		// Having Min annotation resolved proves type resolution is working for main
 		// resources
 		assertThat(mainCu.getTypesInUse().getTypesInUse().stream().map(t -> t.toString()))
 			.containsExactlyInAnyOrder("int", "String", "javax.validation.constraints.Min");
 
 		SourceFile testSourceFile = parsingResult.sourceFiles().get(2);
+		assertThat(testSourceFile).isInstanceOf(J.CompilationUnit.class);
 		J.CompilationUnit testCu = (J.CompilationUnit) testSourceFile;
 		// Having Test annotation resolved proves type resolution is working for test
 		// resources

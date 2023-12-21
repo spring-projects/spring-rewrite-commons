@@ -15,6 +15,7 @@
  */
 package org.springframework.rewrite.parsers.maven;
 
+import org.jetbrains.annotations.NotNull;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
@@ -24,6 +25,7 @@ import org.openrewrite.xml.tree.Xml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 import org.springframework.util.Assert;
 
@@ -101,8 +103,13 @@ public class BuildFileParser {
 	private List<Resource> findResourcesWithoutProvenanceMarker(Path baseDir, List<Resource> buildFileResources,
 			Map<Path, List<Marker>> provenanceMarkers) {
 		return buildFileResources.stream()
-			.filter(r -> !provenanceMarkers.containsKey(baseDir.resolve(ResourceUtil.getPath(r)).normalize()))
+			.filter(r -> !provenanceMarkers.containsKey(ResourceUtil.getPath(r)))
 			.toList();
+	}
+
+	@NotNull
+	private static Path getUnifiedPath(Path baseDir, Resource r) {
+		return LinuxWindowsPathUnifier.unifiedPath(baseDir.resolve(ResourceUtil.getPath(r)));
 	}
 
 	private static List<Resource> retrieveNonPomFiles(List<Resource> buildFileResources) {
@@ -167,7 +174,7 @@ public class BuildFileParser {
 
 	private static boolean filterTestResources(Resource r) {
 		String path = ResourceUtil.getPath(r).toString();
-		boolean underTest = path.contains("src/test");
+		boolean underTest = path.contains(Path.of("src/test").toString());
 		if (underTest) {
 			LOGGER.info("Ignore build file '%s' having 'src/test' in its path indicating it's a build file for tests."
 				.formatted(path));

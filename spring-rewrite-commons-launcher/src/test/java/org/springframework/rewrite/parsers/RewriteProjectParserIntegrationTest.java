@@ -17,6 +17,9 @@ package org.springframework.rewrite.parsers;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.java.tree.J;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Fabian Krüger
  */
+@DisabledOnOs(value = OS.WINDOWS, disabledReason = "The repository URIs of dependencies differ.")
+@Issue("https://github.com/spring-projects/spring-rewrite-commons/issues/12")
 @SpringBootTest(classes = { SbmSupportRewriteConfiguration.class, SbmTestConfiguration.class })
 public class RewriteProjectParserIntegrationTest {
 

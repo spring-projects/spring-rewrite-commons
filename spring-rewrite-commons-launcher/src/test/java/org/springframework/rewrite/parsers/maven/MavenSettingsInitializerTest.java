@@ -23,6 +23,7 @@ import org.openrewrite.maven.tree.MavenRepository;
 import org.sonatype.plexus.components.cipher.PlexusCipherException;
 import org.springframework.rewrite.parsers.RewriteExecutionContext;
 import org.springframework.rewrite.scopes.ProjectMetadata;
+import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -57,13 +58,10 @@ class MavenSettingsInitializerTest {
 		MavenRepository localRepository = mavenExecutionContextView.getLocalRepository();
 		assertThat(localRepository.getSnapshots()).isNull();
 
-		String tmpDir = removeTrailingSlash(System.getProperty("java.io.tmpdir"));
-		String customLocalRepository = "file://" + Path.of(System.getProperty("user.home"))
-			.resolve(".m2/repository")
-			.toAbsolutePath()
-			.normalize()
-			.toString();// new URI("file://" + tmpDir).toString();
-		assertThat(removeTrailingSlash(localRepository.getUri())).isEqualTo(customLocalRepository);
+		String expectedCustomLocalRepository = "file://" + LinuxWindowsPathUnifier.unifiedPathString(
+				Path.of(System.getProperty("user.home")).resolve(".m2/repository").toAbsolutePath().normalize());
+
+		assertThat(removeTrailingSlash(localRepository.getUri())).isEqualTo(expectedCustomLocalRepository);
 		assertThat(localRepository.getSnapshots()).isNull();
 		assertThat(localRepository.isKnownToExist()).isTrue();
 		assertThat(localRepository.getUsername()).isNull();
