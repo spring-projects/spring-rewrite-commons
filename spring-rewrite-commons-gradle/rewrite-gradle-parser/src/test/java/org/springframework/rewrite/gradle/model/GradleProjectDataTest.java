@@ -25,6 +25,10 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test requires spring rewrite gradle plugin available maven. Hence once model and plugin
+ * are built and installed parser is built and its tests are ran
+ */
 public class GradleProjectDataTest {
 
 	@Test
