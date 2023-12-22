@@ -29,6 +29,7 @@
             <groupId>dev.gradleplugins</groupId>
             <artifactId>gradle-api</artifactId>
             <version>${gradle.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
