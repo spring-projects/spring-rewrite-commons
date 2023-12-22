@@ -17,10 +17,13 @@ package org.springframework.rewrite.gradle.model;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.rewrite.gradle.Utils;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;

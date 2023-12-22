@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>rewrite-gradle-plugin</artifactId>
+    <name>Spring Rewrite Gradle Plugin</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
