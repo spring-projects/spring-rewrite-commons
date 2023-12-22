@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>spring-rewrite-commons-gradle</artifactId>
+    <name>Spring Rewrite Gradle Aggregate Project</name>
     <packaging>pom</packaging>
 
     <properties>
