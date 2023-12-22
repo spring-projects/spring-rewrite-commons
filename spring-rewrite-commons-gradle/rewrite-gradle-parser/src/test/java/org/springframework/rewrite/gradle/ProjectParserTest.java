@@ -16,6 +16,7 @@
 package org.springframework.rewrite.gradle;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.openrewrite.InMemoryExecutionContext;
@@ -34,6 +35,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -47,8 +49,18 @@ public class ProjectParserTest {
 	private static final Options OPTIONS = new Options(Collections.emptyList(), false, Collections.emptyList(),
 			Integer.MAX_VALUE, Collections.emptyList());
 
-	private Path downloadPetclinic(Path dir) throws Exception {
-		unzip(new URL(
+	private static Path petclincPath;
+
+	private static Path rewriteGradleModelPath;
+
+	@BeforeAll
+	static void setupAll(@TempDir Path dir) throws Exception {
+		petclincPath = downloadPetclinic(dir.resolve("petclinic"));
+		rewriteGradleModelPath = downloadRewriteGradleToolingModel(dir.resolve("rewrite-gradle-tooling-model"));
+	}
+
+	private static Path downloadPetclinic(Path dir) throws Exception {
+		Utils.unzip(new URL(
 				"https://github.com/spring-projects/spring-petclinic/archive/0aa3adb56f500c41564411c32cd301affe284ecc.zip"),
 				dir);
 		return Files.list(dir)
@@ -58,55 +70,80 @@ public class ProjectParserTest {
 			.orElseThrow();
 	}
 
-	private static void unzip(URL url, Path destDir) throws IOException {
-		File dir = destDir.toFile();
-		// create output directory if it doesn't exist
-		if (!dir.exists())
-			dir.mkdirs();
-		InputStream is;
-		// buffer for read and write data to file
-		byte[] buffer = new byte[1024];
-		try {
-			is = url.openStream();
-			ZipInputStream zis = new ZipInputStream(is);
-			ZipEntry ze = zis.getNextEntry();
-			while (ze != null) {
-				if (!ze.isDirectory()) {
-					String fileName = ze.getName();
-					File newFile = new File(destDir + File.separator + fileName);
-					System.out.println("Unzipping to " + newFile.getAbsolutePath());
-					// create directories for sub directories in zip
-					new File(newFile.getParent()).mkdirs();
-					FileOutputStream fos = new FileOutputStream(newFile);
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-					}
-					fos.close();
-				}
-				// close this ZipEntry
-				zis.closeEntry();
-				ze = zis.getNextEntry();
-			}
-			// close last ZipEntry
-			zis.closeEntry();
-			zis.close();
-			is.close();
-		}
-		catch (IOException e) {
-			throw e;
-		}
+	private static Path downloadRewriteGradleToolingModel(Path dir) throws Exception {
+		Utils.unzip(new URL(
+				"https://github.com/openrewrite/rewrite-gradle-tooling-model/archive/5907af9f3861a16361a7fc7d91b2ab57dcfea697.zip"),
+				dir);
+		return Files.list(dir)
+			.filter(Files::isDirectory)
+			.filter(p -> p.getFileName().toString().startsWith("rewrite-gradle-tooling-model-"))
+			.findFirst()
+			.orElseThrow();
 	}
 
 	@Test
-	void sanity(@TempDir Path dir) throws Exception {
-		Path petClinic = downloadPetclinic(dir.resolve("petclinic"));
+	void sanity() throws Exception {
 		GradleProjectData gp = SpringRewriteModelBuilder.forProjectDirectory(GradleProjectData.class,
-				petClinic.toFile(), petClinic.resolve("build.gradle").toFile());
+				petclincPath.toFile(), petclincPath.resolve("build.gradle").toFile());
 		List<SourceFile> sources = new ProjectParser(gp, OPTIONS, log)
 			.parse(new InMemoryExecutionContext(t -> Assertions.fail("Parser Error", t)))
 			.toList();
 		assertThat(sources.size()).isEqualTo(114);
+	}
+
+	@Test
+	void multiProjectRootModel() {
+		GradleProjectData gp = SpringRewriteModelBuilder.forProjectDirectory(GradleProjectData.class,
+				rewriteGradleModelPath.toFile(), rewriteGradleModelPath.resolve("build.gradle.kts").toFile());
+
+		assertThat(gp.isRootProject()).isTrue();
+		assertThat(gp.getGroup()).isEqualTo("org.openrewrite.gradle.tooling");
+		assertThat(gp.getName()).isEqualTo("rewrite-gradle-tooling-model");
+		assertThat(gp.getVersion()).isEqualTo("0.1.0-dev.0.uncommitted");
+		assertThat(gp.getPlugins().size()).isEqualTo(9);
+		assertThat(gp.getMavenRepositories().isEmpty()).isTrue();
+
+		assertThat(gp.getSubprojects().size()).isEqualTo(2);
+
+		Iterator<GradleProjectData> itr = gp.getSubprojects().iterator();
+
+		GradleProjectData modelProject = itr.next();
+		assertThat(modelProject.isRootProject()).isFalse();
+		assertThat(modelProject.getGroup()).isEqualTo("org.openrewrite.gradle.tooling");
+		assertThat(modelProject.getName()).isEqualTo("model");
+		assertThat(modelProject.getVersion()).isEqualTo("unspecified");
+		assertThat(modelProject.getMavenRepositories().size()).isEqualTo(3);
+
+		GradleProjectData pluginProject = itr.next();
+		assertThat(pluginProject.isRootProject()).isFalse();
+		assertThat(pluginProject.getGroup()).isEqualTo("org.openrewrite.gradle.tooling");
+		assertThat(pluginProject.getName()).isEqualTo("plugin");
+		assertThat(pluginProject.getVersion()).isEqualTo("unspecified");
+		assertThat(pluginProject.getMavenRepositories().size()).isEqualTo(3);
+	}
+
+	@Test
+	void multiProjectSubProjectModel() {
+		GradleProjectData gp = SpringRewriteModelBuilder.forProjectDirectory(GradleProjectData.class,
+				rewriteGradleModelPath.toFile(), rewriteGradleModelPath.resolve("model/build.gradle.kts").toFile());
+
+		assertThat(gp.isRootProject()).isFalse();
+		assertThat(gp.getGroup()).isEqualTo("org.openrewrite.gradle.tooling");
+		assertThat(gp.getName()).isEqualTo("model");
+		assertThat(gp.getVersion()).isEqualTo("unspecified");
+		assertThat(gp.getMavenRepositories().size()).isEqualTo(3);
+		assertThat(gp.getSubprojects().isEmpty()).isTrue();
+		assertThat(gp.getRootProjectDir().toPath().toString().endsWith(rewriteGradleModelPath.toString())).isTrue();
+	}
+
+	@Test
+	void parseMultiProject() throws Exception {
+		GradleProjectData gp = SpringRewriteModelBuilder.forProjectDirectory(GradleProjectData.class,
+				rewriteGradleModelPath.toFile(), rewriteGradleModelPath.resolve("build.gradle").toFile());
+		List<SourceFile> sources = new ProjectParser(gp, OPTIONS, log)
+			.parse(new InMemoryExecutionContext(t -> Assertions.fail("Parser Error", t)))
+			.toList();
+		assertThat(sources.size()).isEqualTo(48);
 	}
 
 }

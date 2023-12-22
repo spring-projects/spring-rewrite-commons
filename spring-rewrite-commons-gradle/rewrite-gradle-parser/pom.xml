@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>rewrite-gradle-parser</artifactId>
+    <name>Spring Rewrite Gradle Project Parser</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
