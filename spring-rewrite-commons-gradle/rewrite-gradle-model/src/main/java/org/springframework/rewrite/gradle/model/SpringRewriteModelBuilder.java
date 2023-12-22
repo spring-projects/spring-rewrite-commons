@@ -47,11 +47,11 @@ public class SpringRewriteModelBuilder {
 			arguments.add(buildFile.getAbsolutePath());
 		}
 		arguments.add("--init-script");
-		Path init = projectDir.toPath().resolve("openrewrite-tooling.gradle").toAbsolutePath();
+		Path init = projectDir.toPath().resolve("spring-openrewrite-tooling.gradle").toAbsolutePath();
 		arguments.add(init.toString());
 		try (ProjectConnection connection = connector.connect()) {
 			ModelBuilder<T> customModelBuilder = connection.model(type);
-			try (InputStream is = SpringRewriteModelBuilder.class.getResourceAsStream("/init.gradle")) {
+			try (InputStream is = SpringRewriteModelBuilder.class.getResourceAsStream("/init-spring-rewrite.gradle")) {
 				if (is == null) {
 					throw new IllegalStateException("Expected to find init.gradle on the classpath");
 				}
