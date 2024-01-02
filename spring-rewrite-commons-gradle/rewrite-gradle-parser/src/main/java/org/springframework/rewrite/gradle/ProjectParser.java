@@ -20,9 +20,6 @@ import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.SourceFile;
 import org.openrewrite.gradle.GradleParser;
 import org.openrewrite.gradle.toolingapi.GradleSettings;
-import org.springframework.rewrite.gradle.model.GradleProjectData;
-import org.springframework.rewrite.gradle.model.JavaSourceSetData;
-import org.springframework.rewrite.gradle.model.KotlinSourceSetData;
 import org.openrewrite.groovy.GroovyParser;
 import org.openrewrite.internal.StringUtils;
 import org.openrewrite.internal.lang.Nullable;
@@ -40,8 +37,13 @@ import org.openrewrite.style.NamedStyles;
 import org.openrewrite.text.PlainTextParser;
 import org.openrewrite.tree.ParseError;
 import org.slf4j.Logger;
+import org.springframework.rewrite.gradle.model.GradleProjectData;
+import org.springframework.rewrite.gradle.model.JavaSourceSetData;
+import org.springframework.rewrite.gradle.model.KotlinSourceSetData;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -52,8 +54,9 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 import static org.openrewrite.PathUtils.separatorsToUnix;
 import static org.openrewrite.Tree.randomId;
 
