@@ -46,7 +46,7 @@ jobs:
         run:  mvn  -B -Pfunctional-tests spring-javaformat:validate
       - name: Build (Windows, no functional tests)
         if: runner.os == 'Windows'
-        run: ./mvnw -B clean verify
+        run: ./mvnw -B clean install
       - name: Build (Non Windows)
         if: runner.os != 'Windows'
-        run: ./mvnw -B -Pfunctional-tests clean verify
+        run: ./mvnw -B -Pfunctional-tests clean install
