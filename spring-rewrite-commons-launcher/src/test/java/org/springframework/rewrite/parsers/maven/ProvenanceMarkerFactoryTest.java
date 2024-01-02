@@ -129,7 +129,7 @@ class ProvenanceMarkerFactoryTest {
 				GitProvenance expectedGitProvenance = GitProvenance.fromProjectDirectory(baseDir,
 						BuildEnvironment.build(System::getenv));
 				GitProvenance gitProvenance = findMarker(markers, GitProvenance.class);
-				assertThat(countGetters(gitProvenance)).isEqualTo(9);
+				assertThat(countGetters(gitProvenance)).isEqualTo(10);
 				assertThat(gitProvenance.getId()).isInstanceOf(UUID.class);
 				assertThat(gitProvenance.getBranch()).isEqualTo(branch);
 				assertThat(gitProvenance.getEol()).isEqualTo(GitProvenance.EOL.Native);
@@ -139,6 +139,8 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(gitProvenance.getChange()).isEqualTo(gitHash);
 				assertThat(gitProvenance.getOrganizationName()).isEqualTo("spring-projects");
 				assertThat(gitProvenance.getOrganizationName("https://github.com")).isEqualTo("spring-projects");
+				assertThat(gitProvenance.getCommitters()).isNotNull(); // notEmpty failed
+																		// in GH
 
 				OperatingSystemProvenance operatingSystemProvenance = findMarker(markers,
 						OperatingSystemProvenance.class);

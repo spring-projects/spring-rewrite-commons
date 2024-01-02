@@ -35,7 +35,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.rewrite.boot.autoconfigure.ScopeConfiguration;
 import org.springframework.rewrite.parsers.events.RewriteParsingEventListenerAdapter;
 import org.springframework.rewrite.parsers.maven.*;
-import org.springframework.rewrite.project.resource.SbmApplicationProperties;
 import org.springframework.rewrite.scopes.annotations.ScanScope;
 
 import java.io.PrintWriter;
@@ -49,7 +48,7 @@ import java.util.function.Consumer;
  * @author Fabian Krüger
  */
 @AutoConfiguration(after = { ScopeConfiguration.class })
-@EnableConfigurationProperties({ SpringRewriteProperties.class, SbmApplicationProperties.class })
+@EnableConfigurationProperties({ SpringRewriteProperties.class })
 @Import({ org.springframework.rewrite.scopes.ScanScope.class, ScopeConfiguration.class,
 		RewriteParserMavenConfiguration.class })
 public class RewriteParserConfiguration {

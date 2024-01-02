@@ -47,26 +47,23 @@ public class MavenMojoProjectParserFactory {
 
 	public MavenMojoProjectParser create(Path baseDir, List<MavenProject> mavenProjects,
 			PlexusContainer plexusContainer, MavenSession session) {
-		return buildMavenMojoProjectParser(baseDir, mavenProjects, springRewriteProperties.isPomCacheEnabled(),
-				springRewriteProperties.getPomCacheDirectory(), springRewriteProperties.isSkipMavenParsing(),
-				springRewriteProperties.getIgnoredPathPatterns(), springRewriteProperties.getPlainTextMasks(),
-				springRewriteProperties.getSizeThresholdMb(), springRewriteProperties.isRunPerSubmodule(),
-				plexusContainer, session);
+		return buildMavenMojoProjectParser(baseDir, plexusContainer, session);
 	}
 
 	@NotNull
-	private MavenMojoProjectParser buildMavenMojoProjectParser(Path baseDir, List<MavenProject> mavenProjects,
-			boolean pomCacheEnabled, String pomCacheDirectory, boolean skipMavenParsing, Collection<String> exclusions,
-			Collection<String> plainTextMasks, int sizeThresholdMb, boolean runPerSubmodule,
-			PlexusContainer plexusContainer, MavenSession session) {
+	private MavenMojoProjectParser buildMavenMojoProjectParser(Path baseDir, PlexusContainer plexusContainer,
+			MavenSession session) {
 		try {
 			Log logger = new Slf4jToMavenLoggerAdapter(LoggerFactory.getLogger(MavenMojoProjectParser.class));
 			RuntimeInformation runtimeInformation = plexusContainer.lookup(RuntimeInformation.class);
 			SettingsDecrypter decrypter = plexusContainer.lookup(SettingsDecrypter.class);
 
-			MavenMojoProjectParser sut = new MavenMojoProjectParser(logger, baseDir, pomCacheEnabled, pomCacheDirectory,
-					runtimeInformation, skipMavenParsing, exclusions, plainTextMasks, sizeThresholdMb, session,
-					decrypter, runPerSubmodule);
+			MavenMojoProjectParser sut = new MavenMojoProjectParser(logger, baseDir,
+					springRewriteProperties.isPomCacheEnabled(), springRewriteProperties.getPomCacheDirectory(),
+					runtimeInformation, springRewriteProperties.isSkipMavenParsing(),
+					springRewriteProperties.getIgnoredPathPatterns(), springRewriteProperties.getPlainTextMasks(),
+					springRewriteProperties.getSizeThresholdMb(), session, decrypter,
+					springRewriteProperties.isRunPerSubmodule(), springRewriteProperties.isParseAdditionalResources());
 
 			return sut;
 		}
