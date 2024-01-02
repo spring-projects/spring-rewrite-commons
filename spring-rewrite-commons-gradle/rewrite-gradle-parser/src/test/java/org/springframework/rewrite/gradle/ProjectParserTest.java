@@ -21,24 +21,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.SourceFile;
-import org.openrewrite.style.NamedStyles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.rewrite.gradle.model.GradleProjectData;
 import org.springframework.rewrite.gradle.model.SpringRewriteModelBuilder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -113,6 +106,7 @@ public class ProjectParserTest {
 		assertThat(modelProject.getName()).isEqualTo("model");
 		assertThat(modelProject.getVersion()).isEqualTo("unspecified");
 		assertThat(modelProject.getMavenRepositories().size()).isEqualTo(3);
+		assertThat(modelProject.getRootProjectDir().toPath().relativize(modelProject.getProjectDir().toPath()).toString()).isEqualTo("model");
 
 		GradleProjectData pluginProject = itr.next();
 		assertThat(pluginProject.isRootProject()).isFalse();
@@ -120,6 +114,7 @@ public class ProjectParserTest {
 		assertThat(pluginProject.getName()).isEqualTo("plugin");
 		assertThat(pluginProject.getVersion()).isEqualTo("unspecified");
 		assertThat(pluginProject.getMavenRepositories().size()).isEqualTo(3);
+		assertThat(modelProject.getRootProjectDir().toPath().relativize(pluginProject.getProjectDir().toPath()).toString()).isEqualTo("plugin");
 	}
 
 	@Test
@@ -133,7 +128,7 @@ public class ProjectParserTest {
 		assertThat(gp.getVersion()).isEqualTo("unspecified");
 		assertThat(gp.getMavenRepositories().size()).isEqualTo(3);
 		assertThat(gp.getSubprojects().isEmpty()).isTrue();
-		assertThat(gp.getRootProjectDir().toPath().toString().endsWith(rewriteGradleModelPath.toString())).isTrue();
+		assertThat(gp.getRootProjectDir().toPath().relativize(gp.getProjectDir().toPath()).toString()).isEqualTo("model");
 	}
 
 	@Test
