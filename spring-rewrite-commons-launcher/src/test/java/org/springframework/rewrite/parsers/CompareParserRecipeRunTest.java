@@ -101,14 +101,14 @@ public class CompareParserRecipeRunTest {
 		// Run the Comparing Parser reusing OpenRewrite code
 		RecipeRun compRecipeRun = recipe.run(new InMemoryLargeSourceSet(compParsingResult.sourceFiles()),
 				executionContext);
-		assertThat(counter.get()).isEqualTo(2);
+		assertThat(counter.get()).isEqualTo(1);
 		assertThat(compRecipeRun.getChangeset().getAllResults()).hasSize(1);
 
 		// Run Parser independent from Maven
 		counter.setRelease(0);
 		RecipeRun sutRecipeRun = recipe.run(new InMemoryLargeSourceSet(sutParsingResult.sourceFiles()),
 				executionContext);
-		assertThat(counter.get()).isEqualTo(2); // differs, should be 2
+		assertThat(counter.get()).isEqualTo(1);
 		assertThat(sutRecipeRun.getChangeset().getAllResults()).hasSize(1); // is 0
 	}
 

@@ -87,6 +87,11 @@ public class SpringRewriteProperties {
 	 */
 	private boolean failOnInvalidActiveRecipes = true;
 
+	/**
+	 * Whether resources outside 'src/main/resoources' should be parsed.
+	 */
+	private boolean parseAdditionalResources = true;
+
 	public boolean isSkipMavenParsing() {
 		return skipMavenParsing;
 	}
@@ -157,6 +162,14 @@ public class SpringRewriteProperties {
 
 	public void setFailOnInvalidActiveRecipes(boolean failOnInvalidActiveRecipes) {
 		this.failOnInvalidActiveRecipes = failOnInvalidActiveRecipes;
+	}
+
+	public boolean isParseAdditionalResources() {
+		return parseAdditionalResources;
+	}
+
+	public void setParseAdditionalResources(boolean parseAdditionalResources) {
+		this.parseAdditionalResources = parseAdditionalResources;
 	}
 
 }
