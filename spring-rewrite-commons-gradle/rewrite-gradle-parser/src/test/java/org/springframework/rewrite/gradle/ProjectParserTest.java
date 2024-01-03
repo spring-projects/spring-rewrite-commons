@@ -106,7 +106,9 @@ public class ProjectParserTest {
 		assertThat(modelProject.getName()).isEqualTo("model");
 		assertThat(modelProject.getVersion()).isEqualTo("unspecified");
 		assertThat(modelProject.getMavenRepositories().size()).isEqualTo(3);
-		assertThat(modelProject.getRootProjectDir().toPath().relativize(modelProject.getProjectDir().toPath()).toString()).isEqualTo("model");
+		assertThat(
+				modelProject.getRootProjectDir().toPath().relativize(modelProject.getProjectDir().toPath()).toString())
+			.isEqualTo("model");
 
 		GradleProjectData pluginProject = itr.next();
 		assertThat(pluginProject.isRootProject()).isFalse();
@@ -114,7 +116,9 @@ public class ProjectParserTest {
 		assertThat(pluginProject.getName()).isEqualTo("plugin");
 		assertThat(pluginProject.getVersion()).isEqualTo("unspecified");
 		assertThat(pluginProject.getMavenRepositories().size()).isEqualTo(3);
-		assertThat(modelProject.getRootProjectDir().toPath().relativize(pluginProject.getProjectDir().toPath()).toString()).isEqualTo("plugin");
+		assertThat(
+				modelProject.getRootProjectDir().toPath().relativize(pluginProject.getProjectDir().toPath()).toString())
+			.isEqualTo("plugin");
 	}
 
 	@Test
@@ -128,7 +132,8 @@ public class ProjectParserTest {
 		assertThat(gp.getVersion()).isEqualTo("unspecified");
 		assertThat(gp.getMavenRepositories().size()).isEqualTo(3);
 		assertThat(gp.getSubprojects().isEmpty()).isTrue();
-		assertThat(gp.getRootProjectDir().toPath().relativize(gp.getProjectDir().toPath()).toString()).isEqualTo("model");
+		assertThat(gp.getRootProjectDir().toPath().relativize(gp.getProjectDir().toPath()).toString())
+			.isEqualTo("model");
 	}
 
 	@Test
