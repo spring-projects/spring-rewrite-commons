@@ -2,6 +2,7 @@ name: CI
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     paths-ignore:
       - '.github/**'
@@ -46,18 +47,19 @@ jobs:
         run:  ./mvnw  -B -Pfunctional-tests spring-javaformat:validate
       - name: Build (Windows, no functional tests)
         if: runner.os == 'Windows'
-        run: ./mvnw -B clean package
+        run: ./mvnw -B clean install
       - name: Build (Non Windows)
         if: runner.os != 'Windows'
-        run: ./mvnw -B -Pfunctional-tests clean package
+        run: ./mvnw -B -Pfunctional-tests clean install
   deploy:
+    # Deploy when in own repo, on main, and previous build succeeded
+    if: |
+      github.ref == 'ref/head/main' && 
+      github.repository == 'spring-projects/spring-rewrite-commons'
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Snapshot
-        if: | 
-          github.ref == 'ref/head/main' && 
-          github.repository == 'spring-projects/spring-rewrite-commons'
         env:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
