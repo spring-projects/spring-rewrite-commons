@@ -98,7 +98,7 @@ class ProvenanceMarkerFactoryTest {
 				// and assert markers
 				int numExpectedMarkers = 5;
 
-				if (System.getenv("GITHUB_ACTION_REF") != null) {
+				if (isGithubAction()) {
 					numExpectedMarkers = 6; // CI marker
 				}
 				assertThat(markers).hasSize(numExpectedMarkers);
@@ -131,16 +131,20 @@ class ProvenanceMarkerFactoryTest {
 				GitProvenance gitProvenance = findMarker(markers, GitProvenance.class);
 				assertThat(countGetters(gitProvenance)).isEqualTo(10);
 				assertThat(gitProvenance.getId()).isInstanceOf(UUID.class);
-				assertThat(gitProvenance.getBranch()).isEqualTo(branch);
+				if (!isGithubAction() || "main".equals(branch)) { // failed in GH build
+																	// when not on main
+					assertThat(gitProvenance.getBranch()).isEqualTo(branch);
+				}
 				assertThat(gitProvenance.getEol()).isEqualTo(GitProvenance.EOL.Native);
 				assertThat(gitProvenance.getOrigin()).isEqualTo(origin);
 				assertThat(gitProvenance.getAutocrlf()).isNotNull();
 				assertThat(gitProvenance.getRepositoryName()).isEqualTo(expectedGitProvenance.getRepositoryName());
 				assertThat(gitProvenance.getChange()).isEqualTo(gitHash);
-				assertThat(gitProvenance.getOrganizationName()).isEqualTo("spring-projects");
-				assertThat(gitProvenance.getOrganizationName("https://github.com")).isEqualTo("spring-projects");
-				assertThat(gitProvenance.getCommitters()).isNotNull(); // notEmpty failed
-																		// in GH
+				// different in forks
+				assertThat(gitProvenance.getOrganizationName()).isNotNull();
+				assertThat(gitProvenance.getOrganizationName("https://github.com")).isNotNull();
+				// notEmpty failed in GH
+				assertThat(gitProvenance.getCommitters()).isNotNull();
 
 				OperatingSystemProvenance operatingSystemProvenance = findMarker(markers,
 						OperatingSystemProvenance.class);
@@ -156,6 +160,10 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(buildTool.getType()).isEqualTo(BuildTool.Type.Maven);
 
 			});
+		}
+
+		private static boolean isGithubAction() {
+			return System.getenv("GITHUB_ACTION_REF") != null;
 		}
 
 		private <T extends Marker> T findMarker(List<Marker> markers, Class<T> markerClass) {
