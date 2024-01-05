@@ -43,10 +43,22 @@ jobs:
           # https://github.com/abiosoft/colima/blob/main/docs/FAQ.md#cannot-connect-to-the-docker-daemon-at-unixvarrundockersock-is-the-docker-daemon-running
           sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
       - name: Verify formatting
-        run:  mvn  -B -Pfunctional-tests spring-javaformat:validate
+        run:  ./mvnw  -B -Pfunctional-tests spring-javaformat:validate
       - name: Build (Windows, no functional tests)
         if: runner.os == 'Windows'
-        run: ./mvnw -B clean install
+        run: ./mvnw -B clean package
       - name: Build (Non Windows)
         if: runner.os != 'Windows'
-        run: ./mvnw -B -Pfunctional-tests clean install
+        run: ./mvnw -B -Pfunctional-tests clean package
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Snapshot
+        if: | 
+          github.ref == 'ref/head/main' && 
+          github.repository == 'spring-projects/spring-rewrite-commons'
+        env:
+          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: ./mvnw -B -DskipTests clean deploy -Partifactory
