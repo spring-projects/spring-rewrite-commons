@@ -9,7 +9,6 @@ ____
 Spring Rewrite Commons provides a set of components to parse a Java project to https://github.com/openrewrite[OpenRewrite,window=_blank] LST and apply recipes outside a build tool plugin.
 ____
 
-
 == Get started
 
 === Add Dependency
