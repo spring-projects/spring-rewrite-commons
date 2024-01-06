@@ -34,29 +34,30 @@ jobs:
         with:
           distribution: liberica
           java-version: ${{ matrix.java }}
-      - name: Setup docker (missing on MacOS)
-        if: runner.os == 'macos'
-        run: |
-          brew install docker
-          colima start
-
-          # For testcontainers to find the Colima socket
-          # https://github.com/abiosoft/colima/blob/main/docs/FAQ.md#cannot-connect-to-the-docker-daemon-at-unixvarrundockersock-is-the-docker-daemon-running
-          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
+# this takes minutes and stretches build time
+#      - name: Setup docker (missing on MacOS)
+#        if: runner.os == 'macos'
+#        run: |
+#          brew install docker
+#          colima start
+#
+#          # For testcontainers to find the Colima socket
+#          # https://github.com/abiosoft/colima/blob/main/docs/FAQ.md#cannot-connect-to-the-docker-daemon-at-unixvarrundockersock-is-the-docker-daemon-running
+#          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
       - name: Verify formatting
         run:  ./mvnw  -B -Pfunctional-tests spring-javaformat:validate
-      - name: Build (Windows, no functional tests)
-        if: runner.os == 'Windows'
+      - name: Build (Windows and MacOS, no functional tests)
+        if: runner.os != 'Linux'
         run: ./mvnw -B clean install
-      - name: Build (Non Windows)
-        if: runner.os != 'Windows'
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
         run: ./mvnw -B -Pfunctional-tests clean install
   deploy:
     # Only when previous build succeeded
     needs: build
     # and on main branch and own repo
     if: |
-      github.ref_name == 'main' && 
+      github.ref_name == '28/merge' && 
       github.repository == 'spring-projects/spring-rewrite-commons'
     runs-on: ubuntu-latest
     steps:
