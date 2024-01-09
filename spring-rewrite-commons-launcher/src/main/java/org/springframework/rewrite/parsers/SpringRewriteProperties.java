@@ -15,6 +15,7 @@
  */
 package org.springframework.rewrite.parsers;
 
+import org.openrewrite.java.JavaParser;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.nio.file.Path;
@@ -91,6 +92,11 @@ public class SpringRewriteProperties {
 	 * Whether resources outside 'src/main/resoources' should be parsed.
 	 */
 	private boolean parseAdditionalResources = true;
+
+	/**
+	 * Whether {@link JavaParser} should log compilation warnings and errors.
+	 */
+	private boolean logCompilationWarningsAndErrors = false;
 
 	public boolean isSkipMavenParsing() {
 		return skipMavenParsing;
@@ -170,6 +176,14 @@ public class SpringRewriteProperties {
 
 	public void setParseAdditionalResources(boolean parseAdditionalResources) {
 		this.parseAdditionalResources = parseAdditionalResources;
+	}
+
+	public boolean isLogCompilationWarningsAndErrors() {
+		return logCompilationWarningsAndErrors;
+	}
+
+	public void setLogCompilationWarningsAndErrors(boolean logCompilationWarningsAndErrors) {
+		this.logCompilationWarningsAndErrors = logCompilationWarningsAndErrors;
 	}
 
 }
