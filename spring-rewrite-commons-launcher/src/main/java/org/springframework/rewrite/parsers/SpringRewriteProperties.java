@@ -185,4 +185,5 @@ public class SpringRewriteProperties {
 	public void setLogCompilationWarningsAndErrors(boolean logCompilationWarningsAndErrors) {
 		this.logCompilationWarningsAndErrors = logCompilationWarningsAndErrors;
 	}
+
 }
