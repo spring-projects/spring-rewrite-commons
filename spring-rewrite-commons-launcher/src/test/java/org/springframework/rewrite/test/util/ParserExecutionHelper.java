@@ -20,7 +20,7 @@ import org.openrewrite.InMemoryExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.rewrite.boot.autoconfigure.SbmSupportRewriteConfiguration;
+import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.parsers.SpringRewriteProperties;
 import org.springframework.rewrite.parsers.RewriteProjectParser;
 import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
@@ -109,7 +109,7 @@ public class ParserExecutionHelper {
 	public RewriteProjectParsingResult parseWithRewriteProjectParser(Path baseDir,
 			SpringRewriteProperties springRewriteProperties) {
 		AtomicReference<RewriteProjectParsingResult> atomicRef = new AtomicReference<>();
-		new ApplicationContextRunner().withUserConfiguration(SbmSupportRewriteConfiguration.class)
+		new ApplicationContextRunner().withUserConfiguration(SpringRewriteCommonsConfiguration.class)
 			.withBean("spring.rewrite-" + SpringRewriteProperties.class.getName(), SpringRewriteProperties.class,
 					() -> springRewriteProperties)
 			.run(appCtx -> {
