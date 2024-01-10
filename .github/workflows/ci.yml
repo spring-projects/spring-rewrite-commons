@@ -79,5 +79,5 @@ jobs:
           echo JFROG_CLI_BUILD_NAME=spring-rewrite-commons-main >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
-          jf mvn clean -f ./pom.xml install -B -DskipTests
+          jf mvn clean -f ./pom.xml install -B -Pjavadoc -DskipTests
           jf rt build-publish
