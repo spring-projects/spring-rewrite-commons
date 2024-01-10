@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>boot-3-upgrade-iterative</artifactId>
+    <artifactId>boot-3-upgrade-iterative-example</artifactId>
 
     <name>Boot 3 Iterative Upgrade Example</name>
     <description>Example of iterative Boot upgrade with PRs</description>

@@ -17,8 +17,8 @@
     <description>Examples using Spring Rewrite Commons</description>
 
     <modules>
-        <module>boot-3-upgrade-atomic</module>
-        <module>boot-3-upgrade-iterative</module>
+        <module>boot-3-upgrade-atomic-example</module>
+        <module>boot-3-upgrade-iterative-example</module>
         <module>list-applicable-recipes-example</module>
     </modules>
 
