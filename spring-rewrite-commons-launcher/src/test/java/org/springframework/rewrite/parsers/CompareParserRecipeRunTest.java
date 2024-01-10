@@ -15,7 +15,6 @@
  */
 package org.springframework.rewrite.parsers;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.ExecutionContext;
@@ -29,7 +28,7 @@ import org.openrewrite.marker.Markers;
 import org.openrewrite.marker.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.rewrite.boot.autoconfigure.SbmSupportRewriteConfiguration;
+import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.parsers.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.parsers.maven.SbmTestConfiguration;
 import org.springframework.rewrite.test.util.ParallelParsingResult;
@@ -45,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Fabian Krüger
  */
-@SpringBootTest(classes = { SbmSupportRewriteConfiguration.class, SbmTestConfiguration.class })
+@SpringBootTest(classes = { SpringRewriteCommonsConfiguration.class, SbmTestConfiguration.class })
 public class CompareParserRecipeRunTest {
 
 	@Autowired
