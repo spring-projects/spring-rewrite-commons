@@ -184,14 +184,13 @@ public class RewriteResourceParser {
 
 		QuarkParser quarkParser = new QuarkParser();
 
-		filteredResources.forEach(resource -> {
+		resourcesLeft.forEach(path -> {
 			// See
 			// https://github.com/quarkusio/quarkus/blob/main/devtools/project-core-extension-codestarts/src/main/resources/codestarts/quarkus/extension-codestarts/resteasy-reactive-codestart/java/src/main/java/org/acme/%7Bresource.class-name%7D.tpl.qute.java
 			// for an example of why we don't want qute files be parsed as java
-			Path path = ResourceUtil.getPath(resource);
-			// if (javaParser.accept(path) && !path.toString().endsWith(".qute.java")) {
-			// javaPaths.add(path);
-			// }
+			if (javaParser.accept(path) && !path.toString().endsWith(".qute.java")) {
+				javaPaths.add(path);
+			}
 			if (jsonParser.accept(path)) {
 				jsonPaths.add(path);
 			}
@@ -209,7 +208,8 @@ public class RewriteResourceParser {
 			}
 			/*
 			 * else if(pythonParser.accept(path)) { pythonPaths.add(path); }
-			 */ else if (hclParser.accept(path)) {
+			 */
+			else if (hclParser.accept(path)) {
 				hclPaths.add(path);
 			}
 			else if (quarkParser.accept(path)) {

@@ -23,7 +23,7 @@ import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.java.tree.J;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.rewrite.boot.autoconfigure.SbmSupportRewriteConfiguration;
+import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.parsers.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.parsers.maven.SbmTestConfiguration;
 import org.springframework.rewrite.test.util.ParserParityTestHelper;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DisabledOnOs(value = OS.WINDOWS, disabledReason = "The repository URIs of dependencies differ.")
 @Issue("https://github.com/spring-projects/spring-rewrite-commons/issues/12")
-@SpringBootTest(classes = { SbmSupportRewriteConfiguration.class, SbmTestConfiguration.class })
+@SpringBootTest(classes = { SpringRewriteCommonsConfiguration.class, SbmTestConfiguration.class })
 public class RewriteProjectParserIntegrationTest {
 
 	@Autowired

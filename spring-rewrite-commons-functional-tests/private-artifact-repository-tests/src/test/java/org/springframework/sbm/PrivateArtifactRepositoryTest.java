@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.rewrite.boot.autoconfigure.SbmSupportRewriteConfiguration;
+import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.parsers.RewriteProjectParser;
 import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
 import org.springframework.rewrite.parsers.maven.SbmTestConfiguration;
@@ -86,7 +86,7 @@ import static org.assertj.core.api.Fail.fail;
  *
  * @author Fabian Krüger
  */
-@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, SbmSupportRewriteConfiguration.class,
+@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, SpringRewriteCommonsConfiguration.class,
 		SbmTestConfiguration.class })
 @Testcontainers
 public class PrivateArtifactRepositoryTest {
