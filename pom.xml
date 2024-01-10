@@ -13,9 +13,9 @@
 
     <modules>
         <module>spring-rewrite-commons-launcher</module>
-        <module>spring-rewrite-commons-docs</module>
-        <module>spring-rewrite-commons-examples</module>
-        <module>spring-rewrite-commons-gradle</module>
+        <!--        <module>spring-rewrite-commons-docs</module>-->
+        <!--        <module>spring-rewrite-commons-examples</module>-->
+        <!--        <module>spring-rewrite-commons-gradle</module>-->
     </modules>
 
     <organization>
@@ -82,8 +82,8 @@
         <url>https://github.com/spring-projects/rewrite-commons</url>
         <connection>scm:git:https://github.com/spring-projects/spring-rewrite-commons</connection>
         <developerConnection>scm:git:https://github.com/spring-projects/spring-rewrite-commons.git</developerConnection>
-      <tag>spring-rewrite-commons-0.1.0</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <issueManagement>
         <system>Github Issues</system>
         <url>https://github.com/spring-projects/spring-rewrite-commons/issues</url>
@@ -92,16 +92,6 @@
         <system>Github Actions</system>
         <url>https://github.com/spring-projects/spring-rewrite-commons/actions</url>
     </ciManagement>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>spring-snapshots</id>
-            <url>https://repo.spring.io/libs-snapshot-local</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </snapshotRepository>
-    </distributionManagement>
     <licenses>
         <license>
             <name>Apache-2.0</name>
@@ -272,58 +262,37 @@ limitations under the License.
             </modules>
         </profile>
         <profile>
-            <id>artifactory</id>
-            <properties>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
+            <id>javadoc</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jfrog.buildinfo</groupId>
-                        <artifactId>artifactory-maven-plugin</artifactId>
-                        <version>${artifactory-maven-plugin.version}</version>
-                        <inherited>false</inherited>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.4.1</version>
                         <executions>
                             <execution>
-                                <id>deploy-to-artifactory</id>
+                                <id>attach-javadocs</id>
                                 <goals>
-                                    <goal>publish</goal>
+                                    <goal>jar</goal>
                                 </goals>
-                                <configuration>
-                                    <publisher>
-                                        <contextUrl>https://repo.spring.io</contextUrl>
-                                        <!--suppress UnresolvedMavenProperty -->
-                                        <username>${env.ARTIFACTORY_USERNAME}</username>
-                                        <!--suppress UnresolvedMavenProperty -->
-                                        <password>${env.ARTIFACTORY_PASSWORD}</password>
-                                        <repoKey>libs-milestone-local</repoKey>
-                                        <snapshotRepoKey>libs-snapshot-local</snapshotRepoKey>
-                                    </publisher>
-                                    <buildInfo>
-                                        <buildName>CI build for sbm-support-rewrite ${project.version}</buildName>
-                                    </buildInfo>
-                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-            <repositories>
-                <repository>
-                    <id>spring-milestone</id>
-                    <url>https://repo.spring.io/milestone</url>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>spring-snapshot</id>
-                    <url>https://repo.spring.io/snapshot</url>
-                    <releases>
-                        <enabled>false</enabled>
-                    </releases>
-                </repository>
-            </repositories>
         </profile>
     </profiles>
 </project>
