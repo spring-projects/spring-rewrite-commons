@@ -50,12 +50,6 @@ public class MavenTypeResolutionTest {
 
 		private static RewriteProjectParsingResult parsingResult;
 
-		/**
-		 * Given: A Project with pom file containing dependency to @SpringBootApplication
-		 * and a simple Java class When: The project is parsed Then: The classpath should
-		 * contain the simple class and the @SpringBootApplication annotation. The
-		 * typesInUse is empty because the simple class does not import/use any types
-		 */
 		@Test
 		@Order(1)
 		@DisplayName("parsed project should have correct classpath")
@@ -69,12 +63,6 @@ public class MavenTypeResolutionTest {
 			verifyTypesOnClasspathAndNoTypesInUse(parsingResult);
 		}
 
-		/**
-		 * Given: The parsed project from (1) When: The annotation is added to the simple
-		 * class Then: The classpath should contain the simple class and
-		 * the @SpringBootApplication annotation. The typesInUse contains
-		 * the @SpringBootApplication
-		 */
 		@Test
 		@Order(2)
 		@DisplayName("annotating the class adds the annotation to typesInUse")
