@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.rewrite.boot.autoconfigure.ProjectResourceSetConfiguration;
 import org.springframework.rewrite.boot.autoconfigure.ScopeConfiguration;
 import org.springframework.rewrite.parsers.events.RewriteParsingEventListenerAdapter;
 import org.springframework.rewrite.parsers.maven.*;
@@ -50,7 +51,7 @@ import java.util.function.Consumer;
 @AutoConfiguration(after = { ScopeConfiguration.class })
 @EnableConfigurationProperties({ SpringRewriteProperties.class })
 @Import({ org.springframework.rewrite.scopes.ScanScope.class, ScopeConfiguration.class,
-		RewriteParserMavenConfiguration.class })
+		RewriteParserMavenConfiguration.class, ProjectResourceSetConfiguration.class })
 public class RewriteParserConfiguration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RewriteParserConfiguration.class);
