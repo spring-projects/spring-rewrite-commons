@@ -58,7 +58,7 @@
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
         <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
         <versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
-        <spring-javaformat-maven-plugin.version>0.0.39</spring-javaformat-maven-plugin.version>
+        <spring-javaformat-maven-plugin.version>0.0.41</spring-javaformat-maven-plugin.version>
         <license-maven-plugin.version>4.3</license-maven-plugin.version>
         <artifactory-maven-plugin.version>3.6.1</artifactory-maven-plugin.version>
         <asciidoctor-maven-plugin.version>2.2.3</asciidoctor-maven-plugin.version>
