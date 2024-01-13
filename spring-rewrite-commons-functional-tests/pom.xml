@@ -23,6 +23,7 @@
 
     <modules>
         <module>private-artifact-repository-tests</module>
+        <module>dependency-resolution-tests</module>
     </modules>
 
     <properties>
