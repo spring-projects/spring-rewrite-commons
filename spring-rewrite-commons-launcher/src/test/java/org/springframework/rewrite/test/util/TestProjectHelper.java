@@ -120,4 +120,10 @@ public class TestProjectHelper {
 		ResourceUtil.write(targetDir, resources);
 	}
 
+	public TestProjectHelper addResource(String relativePath, String content) {
+		DummyResource dummyResource = new DummyResource(targetDir.resolve(relativePath), content);
+		this.resources.add(dummyResource);
+		return this;
+	}
+
 }

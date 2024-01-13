@@ -186,7 +186,7 @@
                         </goals>
                         <configuration>
                             <classifier>test</classifier>
-                            <includes>**/parsers/maven/**</includes>
+                            <includes>**/parsers/maven/**,**/test/util/**</includes>
                         </configuration>
                     </execution>
                 </executions>
