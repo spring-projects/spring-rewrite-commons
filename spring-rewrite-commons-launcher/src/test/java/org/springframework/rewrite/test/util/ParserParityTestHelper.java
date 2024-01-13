@@ -239,7 +239,9 @@ public class ParserParityTestHelper {
 			Markers givenMarkers = curGivenSourceFile.getMarkers();
 			List<Marker> actualMarkersList = givenMarkers.getMarkers();
 
-			assertThat(actualMarkersList.size()).isEqualTo(expectedMarkersList.size());
+			assertThat(actualMarkersList.stream().map(m -> m.getClass().getSimpleName()).toList())
+				.containsAll(expectedMarkersList.stream().map(m -> m.getClass().getSimpleName()).toList()); // ClasspathDependencies
+																											// marker
 
 			SoftAssertions softAssertions = new SoftAssertions();
 
