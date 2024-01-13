@@ -57,7 +57,7 @@ class SpringRewritePropertiesTest {
 		@Test
 		@DisplayName("spring.rewrite.plainTextMasks")
 		void defaultPlainTextMasks() {
-			assertThat(springRewriteProperties.getPlainTextMasks()).containsExactlyInAnyOrder("*.txt");
+			assertThat(springRewriteProperties.getPlainTextMasks()).containsExactlyInAnyOrder("**.txt");
 		}
 
 		@Test
@@ -88,7 +88,8 @@ class SpringRewritePropertiesTest {
 		@DisplayName("spring.rewrite.ignoredPathPatterns")
 		void defaultIgnoredPathPatterns() {
 			assertThat(springRewriteProperties.getIgnoredPathPatterns()).containsExactlyInAnyOrder(".idea/**",
-					"**/.idea/**", ".mvn/**", "**/.mvn/**", "**/target/**", "**.git/**", "target/**");
+					"**/.idea/**", ".mvn/**", "**/.mvn/**", "**/target/**", "**.git/**", "target/**", "**/.gitignore",
+					"**/lib/**");
 		}
 
 	}

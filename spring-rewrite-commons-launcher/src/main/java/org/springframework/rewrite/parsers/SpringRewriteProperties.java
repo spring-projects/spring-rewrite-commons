@@ -57,7 +57,7 @@ public class SpringRewriteProperties {
 	 * Comma-separated list of patterns used to create PathMatcher The pattern should not
 	 * contain a leading 'glob:'
 	 */
-	private Set<String> plainTextMasks = Set.of("*.txt");
+	private Set<String> plainTextMasks = Set.of("**.txt");
 
 	/**
 	 * Project resources exceeding this threshold will not be parsed and provided as
@@ -80,7 +80,7 @@ public class SpringRewriteProperties {
 	 * being parsed.
 	 */
 	private Set<String> ignoredPathPatterns = Set.of("**/target/**", "target/**", "**/.idea/**", ".idea/**", ".mvn/**",
-			"**/.mvn/**", "**.git/**");
+			"**/.mvn/**", "**.git/**", "**/lib/**", "**/.gitignore");
 
 	/**
 	 * Whether the discovery should fail on invalid active recipes. TODO: Move to
