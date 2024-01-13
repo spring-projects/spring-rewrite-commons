@@ -224,7 +224,6 @@ public class MavenModuleParser {
 		LOGGER.info("Parsing main Java sources.");
 
 		Set<JavaType.FullyQualified> localClassesCp = new HashSet<>();
-		JavaSourceSet javaSourceSet = sourceSet("main", dependencies, typeCache);
 		List<? extends SourceFile> cus = javaParserBuilder.build()
 			.parseInputs(inputs, baseDir, executionContext)
 			.peek(s -> {
@@ -244,9 +243,12 @@ public class MavenModuleParser {
 		// The actual parsing happens when the stream is terminated (toList),
 		// therefore the toList() must be called before the parsed compilation units can
 		// be added to the classpath
+		JavaSourceSet javaSourceSet = sourceSet("main", dependencies, typeCache);
 		List<Marker> mainProjectProvenance = new ArrayList<>(provenanceMarkers);
 		javaSourceSet = appendToClasspath(localClassesCp, javaSourceSet);
 		mainProjectProvenance.add(javaSourceSet);
+		ClasspathDependencies classpathDependencies = new ClasspathDependencies(dependencies);
+		mainProjectProvenance.add(classpathDependencies);
 
 		List<Path> parsedJavaPaths = javaSourcesInTarget.stream().map(ResourceUtil::getPath).toList();
 		Stream<SourceFile> parsedMainJava = cus.stream()
