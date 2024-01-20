@@ -85,9 +85,10 @@ public class MavenModuleParser {
 				.setCharset(Charset.forName(mavenSourceEncoding.toString()));
 		}
 
+		boolean logCompilationWarningsAndErrors = springRewriteProperties.isLogCompilationWarningsAndErrors();
 		JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder = JavaParser.fromJavaVersion()
 			.styles(styles)
-			.logCompilationWarningsAndErrors(springRewriteProperties.isLogCompilationWarningsAndErrors());
+			.logCompilationWarningsAndErrors(logCompilationWarningsAndErrors);
 
 		Path buildFilePath = currentProject.getBasedir().resolve(moduleBuildFile.getSourcePath());
 		LOGGER.info("Parsing module " + buildFilePath);
