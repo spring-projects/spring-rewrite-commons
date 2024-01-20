@@ -24,8 +24,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <rewrite-spring.version>5.0.10</rewrite-spring.version>
-        <rewrite-migrate-java.version>2.3.0</rewrite-migrate-java.version>
+        <rewrite-recipe-bom.version>2.6.2</rewrite-recipe-bom.version>
     </properties>
 
     <dependencyManagement>
@@ -37,13 +36,10 @@
             </dependency>
             <dependency>
                 <groupId>org.openrewrite.recipe</groupId>
-                <artifactId>rewrite-spring</artifactId>
-                <version>${rewrite-spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openrewrite.recipe</groupId>
-                <artifactId>rewrite-migrate-java</artifactId>
-                <version>${rewrite-migrate-java.version}</version>
+                <artifactId>rewrite-recipe-bom</artifactId>
+                <version>${rewrite-recipe-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
