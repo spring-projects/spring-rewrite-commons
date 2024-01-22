@@ -33,6 +33,7 @@ import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.style.Style;
 import org.springframework.rewrite.parsers.SpringRewriteProperties;
 import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
+import org.springframework.rewrite.parsers.maven.ClasspathDependencies;
 
 import java.io.File;
 import java.net.URI;
@@ -236,7 +237,9 @@ public class ParserParityTestHelper {
 		static void verifyEqualSourceFileMarkers(SourceFile curExpectedSourceFile, SourceFile curGivenSourceFile) {
 			Markers expectedMarkers = curExpectedSourceFile.getMarkers();
 			List<Marker> expectedMarkersList = expectedMarkers.getMarkers();
-			Markers givenMarkers = curGivenSourceFile.getMarkers();
+
+			// Remove custom marker that only exists here
+			Markers givenMarkers = curGivenSourceFile.getMarkers().removeByType(ClasspathDependencies.class);
 			List<Marker> actualMarkersList = givenMarkers.getMarkers();
 
 			assertThat(actualMarkersList.stream().map(m -> m.getClass().getSimpleName()).toList())
