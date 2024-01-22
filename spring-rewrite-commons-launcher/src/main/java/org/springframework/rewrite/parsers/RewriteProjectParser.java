@@ -35,7 +35,6 @@ import org.springframework.rewrite.parsers.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parsers.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 import org.springframework.rewrite.scopes.ScanScope;
-import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;

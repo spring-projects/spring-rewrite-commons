@@ -25,7 +25,6 @@ import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
-import org.sonatype.plexus.components.cipher.PlexusCipherException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -88,7 +87,7 @@ class RewriteProjectParserTest {
 
 	@Test
 	@DisplayName("Parse simple Maven project")
-	void parseSimpleMavenProject(@TempDir Path tempDir) throws PlexusCipherException {
+	void parseSimpleMavenProject(@TempDir Path tempDir) {
 		Path basePath = tempDir;
 		SpringRewriteProperties springRewriteProperties = new SpringRewriteProperties();
 		ExecutionContext executionContext = new InMemoryExecutionContext(t -> {
