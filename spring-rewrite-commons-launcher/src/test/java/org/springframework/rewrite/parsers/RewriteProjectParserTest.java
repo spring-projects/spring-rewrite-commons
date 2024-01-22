@@ -97,13 +97,16 @@ class RewriteProjectParserTest {
 		ProjectMetadata projectMetadata = new ProjectMetadata();
 		MavenSettingsInitializer mavenSettingsInitializer = new MavenSettingsInitializer(executionContext,
 				projectMetadata);
+		RewriteMavenArtifactDownloader artifactDownloader = mock(RewriteMavenArtifactDownloader.class);
+		MavenProjectGraph projectCollector = new MavenProjectGraph();
+		MavenProjectFactory mavenProjectFactory = new MavenProjectFactory(artifactDownloader);
 		RewriteProjectParser projectParser = new RewriteProjectParser(
 				new ProvenanceMarkerFactory(new MavenProvenanceMarkerFactory()),
 				new BuildFileParser(mavenSettingsInitializer), new SourceFileParser(mavenModuleParser),
 				new StyleDetector(), springRewriteProperties, mock(ParsingEventListener.class),
 				mock(ApplicationEventPublisher.class), new ScanScope(), mock(ConfigurableListableBeanFactory.class),
 				new ProjectScanner(new DefaultResourceLoader(), springRewriteProperties), executionContext,
-				new MavenProjectAnalyzer(mock(RewriteMavenArtifactDownloader.class)));
+				new MavenProjectAnalyzer(new MavenProjectSorter(projectCollector), mavenProjectFactory));
 
 		List<String> parsedFiles = new ArrayList<>();
 		ParsingExecutionContextView.view(executionContext).setParsingListener(new ParsingEventListener() {

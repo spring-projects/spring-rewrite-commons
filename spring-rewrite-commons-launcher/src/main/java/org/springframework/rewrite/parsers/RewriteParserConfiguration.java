@@ -102,7 +102,10 @@ public class RewriteParserConfiguration {
 
 	@Bean
 	MavenProjectAnalyzer mavenProjectAnalyzer(MavenArtifactDownloader artifactDownloader) {
-		return new MavenProjectAnalyzer(artifactDownloader);
+		MavenProjectGraph mavenProjectGraph = new MavenProjectGraph();
+		MavenProjectSorter mavenProjectSorter = new MavenProjectSorter(mavenProjectGraph);
+		MavenProjectFactory mavenProjectFactory = new MavenProjectFactory(artifactDownloader);
+		return new MavenProjectAnalyzer(mavenProjectSorter, mavenProjectFactory);
 	}
 
 	@Bean
