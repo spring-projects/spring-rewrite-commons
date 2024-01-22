@@ -25,7 +25,6 @@ import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
-import org.sonatype.plexus.components.cipher.PlexusCipherException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -88,7 +87,7 @@ class RewriteProjectParserTest {
 
 	@Test
 	@DisplayName("Parse simple Maven project")
-	void parseSimpleMavenProject(@TempDir Path tempDir) throws PlexusCipherException {
+	void parseSimpleMavenProject(@TempDir Path tempDir) {
 		Path basePath = tempDir;
 		SpringRewriteProperties springRewriteProperties = new SpringRewriteProperties();
 		ExecutionContext executionContext = new InMemoryExecutionContext(t -> {
@@ -98,13 +97,16 @@ class RewriteProjectParserTest {
 		ProjectMetadata projectMetadata = new ProjectMetadata();
 		MavenSettingsInitializer mavenSettingsInitializer = new MavenSettingsInitializer(executionContext,
 				projectMetadata);
+		RewriteMavenArtifactDownloader artifactDownloader = mock(RewriteMavenArtifactDownloader.class);
+		MavenProjectGraph projectCollector = new MavenProjectGraph();
+		MavenProjectFactory mavenProjectFactory = new MavenProjectFactory(artifactDownloader);
 		RewriteProjectParser projectParser = new RewriteProjectParser(
 				new ProvenanceMarkerFactory(new MavenProvenanceMarkerFactory()),
 				new BuildFileParser(mavenSettingsInitializer), new SourceFileParser(mavenModuleParser),
 				new StyleDetector(), springRewriteProperties, mock(ParsingEventListener.class),
 				mock(ApplicationEventPublisher.class), new ScanScope(), mock(ConfigurableListableBeanFactory.class),
 				new ProjectScanner(new DefaultResourceLoader(), springRewriteProperties), executionContext,
-				new MavenProjectAnalyzer(mock(RewriteMavenArtifactDownloader.class)));
+				new MavenProjectAnalyzer(new MavenProjectSorter(projectCollector), mavenProjectFactory));
 
 		List<String> parsedFiles = new ArrayList<>();
 		ParsingExecutionContextView.view(executionContext).setParsingListener(new ParsingEventListener() {

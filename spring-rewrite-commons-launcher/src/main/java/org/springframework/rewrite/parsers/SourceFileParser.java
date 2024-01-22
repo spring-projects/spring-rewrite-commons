@@ -46,6 +46,9 @@ public class SourceFileParser {
 
 		Set<SourceFile> parsedSourceFiles = new LinkedHashSet<>();
 
+		// we use the map to look up previous parsing results when building the classpath
+		// of a module
+		Map<MavenProject, ModuleParsingResult> parsingResultsMap = new HashMap<>();
 		parserContext.getSortedProjects().forEach(currentMavenProject -> {
 			Xml.Document moduleBuildFile = currentMavenProject.getSourceFile();
 			List<Marker> markers = provenanceMarkers.get(currentMavenProject.getPomFilePath());
@@ -53,9 +56,30 @@ public class SourceFileParser {
 				LOGGER.warn("Could not find provenance markers for resource '%s'"
 					.formatted(parserContext.getMatchingBuildFileResource(currentMavenProject)));
 			}
-			List<SourceFile> sourceFiles = moduleParser.parseModuleSourceFiles(resources, currentMavenProject,
-					moduleBuildFile, markers, styles, executionContext, baseDir);
-			parsedSourceFiles.addAll(sourceFiles);
+			ModuleParsingResult result = moduleParser.parseModule(baseDir, resources, currentMavenProject,
+					moduleBuildFile, markers, styles, executionContext, parsingResultsMap);
+
+			parsingResultsMap.put(currentMavenProject, result);
+
+			// Maybe..
+			// Return ModuleParsingResult
+			// mpr.getMainClasspath()
+			// mpr.getTestClasspath()
+			// if(currentMavenProject.dependsOn(mpr.getModule())
+			// requirements:
+			// - provide jars that define the classpath
+			// - provide classes from (transitive) module(s)
+
+			// Retrieve and append the shared classpath from previously parsed modules
+			Set<Path> classpath = new HashSet<>();
+			Map<MavenProject, Set<Path>> modelClasspathMap = new HashMap<>();
+			currentMavenProject.getDependentProjects().forEach(m -> {
+				Set<Path> dependencyPaths = modelClasspathMap.get(m);
+				classpath.addAll(dependencyPaths);
+			});
+			// TODO: provide the classpath to ModuleParser
+
+			parsedSourceFiles.addAll(result.sourceFiles());
 		});
 
 		return new ArrayList<>(parsedSourceFiles);

@@ -35,7 +35,6 @@ import org.springframework.rewrite.parsers.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parsers.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 import org.springframework.rewrite.scopes.ScanScope;
-import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;
@@ -140,7 +139,8 @@ public class RewriteProjectParser {
 		List<NamedStyles> styles = List.of();
 
 		// Get the ordered otherSourceFiles of projects
-		ParserContext parserContext = mavenProjectAnalyzer.createParserContext(baseDir, resources);
+		List<MavenProject> sortedProjects = mavenProjectAnalyzer.getBuildProjects(baseDir, resources);
+		ParserContext parserContext = new ParserContext(baseDir, resources, sortedProjects);
 
 		// generate provenance
 		Map<Path, List<Marker>> provenanceMarkers = provenanceMarkerFactory.generateProvenanceMarkers(baseDir,

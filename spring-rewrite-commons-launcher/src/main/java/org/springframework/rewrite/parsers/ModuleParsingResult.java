@@ -16,14 +16,20 @@
 package org.springframework.rewrite.parsers;
 
 import org.openrewrite.SourceFile;
-import org.openrewrite.java.internal.JavaTypeCache;
-import org.openrewrite.java.tree.JavaType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Fabian Krüger
  */
-public record SourceSetParsingResult(List<SourceFile> sourceFiles, List<JavaType.FullyQualified> classpath,
-		JavaTypeCache typeCache) {
+public record ModuleParsingResult(MavenProject currentProject, SourceSetParsingResult mainSourcesParsingResult,
+		SourceSetParsingResult testSourcesParsingResult, List<SourceFile> resourceFilesList) {
+	public List<? extends SourceFile> sourceFiles() {
+		List<SourceFile> allSourceFiles = new ArrayList<>();
+		allSourceFiles.addAll(mainSourcesParsingResult.sourceFiles());
+		allSourceFiles.addAll(testSourcesParsingResult.sourceFiles());
+		allSourceFiles.addAll(resourceFilesList);
+		return allSourceFiles;
+	}
 }

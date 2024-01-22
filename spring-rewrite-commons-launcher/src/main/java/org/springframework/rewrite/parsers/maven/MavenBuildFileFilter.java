@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.parsers;
+package org.springframework.rewrite.parsers.maven;
 
-import org.openrewrite.SourceFile;
-import org.openrewrite.java.internal.JavaTypeCache;
-import org.openrewrite.java.tree.JavaType;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.core.io.Resource;
+import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.util.List;
 
 /**
  * @author Fabian Krüger
  */
-public record SourceSetParsingResult(List<SourceFile> sourceFiles, List<JavaType.FullyQualified> classpath,
-		JavaTypeCache typeCache) {
+class MavenBuildFileFilter {
+
+	private static final String POM_XML = "pom.xml";
+
+	@NotNull
+	static List<Resource> filterBuildFiles(List<Resource> resources) {
+		return resources.stream()
+			.filter(r -> ResourceUtil.getPath(r).getFileName().toString().equals(POM_XML))
+			.toList();
+	}
+
 }

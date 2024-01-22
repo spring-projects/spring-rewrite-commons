@@ -101,7 +101,7 @@ public class CalculateClasspathTest {
 				}
 				""";
 
-		Path baseDir = LinuxWindowsPathUnifier.unifiedPath(tmpDir.resolve("/example-1").toAbsolutePath().normalize());
+		Path baseDir = LinuxWindowsPathUnifier.unifiedPath(tmpDir.resolve("example-1").toAbsolutePath().normalize());
 		List<Resource> resources = List.of(new DummyResource(baseDir.resolve("pom.xml"), pom),
 				new DummyResource(baseDir.resolve("src/main/java/com/example/MainClass.java"), mainClass),
 				new DummyResource(baseDir.resolve("src/test/java/com/example/TestClass.java"), testClass));

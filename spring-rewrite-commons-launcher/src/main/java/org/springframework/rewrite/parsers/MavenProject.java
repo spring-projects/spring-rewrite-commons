@@ -15,8 +15,9 @@
  */
 package org.springframework.rewrite.parsers;
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
+import org.apache.maven.model.*;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.maven.tree.MavenResolutionResult;
 import org.openrewrite.maven.tree.ResolvedDependency;
@@ -29,11 +30,9 @@ import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -43,14 +42,24 @@ public class MavenProject {
 
 	private final Path projectRoot;
 
-	private final Resource pomFile;
+	private final MavenBuildFile buildFile;
 
-	// FIXME: 945 temporary method, model should nopt come from Maven
-	private final Model pomModel;
+	/**
+	 * All {@link MavenProject}s of this build.
+	 */
+	private List<MavenProject> reactorProjects = new ArrayList<>();
 
-	private List<MavenProject> collectedProjects = new ArrayList<>();
+	/**
+	 * List of {@link MavenProject}s that depend on this project.
+	 */
+	private final List<MavenProject> dependentProjects = new ArrayList<>();
 
-	private Xml.Document sourceFile;
+	/**
+	 * List of {@link MavenProject}s this project depends on.
+	 */
+	private final List<MavenProject> dependencyProjects = new ArrayList<>();
+
+	private final List<MavenProject> moduleProjects = new ArrayList<>();
 
 	private final MavenArtifactDownloader rewriteMavenArtifactDownloader;
 
@@ -58,35 +67,58 @@ public class MavenProject {
 
 	private ProjectId projectId;
 
-	public MavenProject(Path projectRoot, Resource pomFile, Model pomModel,
+	public MavenProject(Path baseDir, Resource rootPom, MavenArtifactDownloader rewriteMavenArtifactDownloader,
+			List<Resource> resources) {
+		this(baseDir, rootPom, List.of(), rewriteMavenArtifactDownloader, resources);
+	}
+
+	public MavenProject(Path baseDir, Resource pomFile, List<MavenProject> dependsOnModels,
 			MavenArtifactDownloader rewriteMavenArtifactDownloader, List<Resource> resources) {
-		this.projectRoot = projectRoot;
-		this.pomFile = pomFile;
-		this.pomModel = pomModel;
+		this.projectRoot = baseDir;
+		this.buildFile = new MavenBuildFile(pomFile);
+		if (dependsOnModels != null) {
+			this.dependentProjects.addAll(dependsOnModels);
+		}
 		this.rewriteMavenArtifactDownloader = rewriteMavenArtifactDownloader;
 		this.resources = resources;
 		projectId = new ProjectId(getGroupId(), getArtifactId());
 	}
 
+	public List<MavenProject> getDependentProjects() {
+		return dependentProjects;
+	}
+
+	public void setDependencyProjects(List<MavenProject> dependencyProjects) {
+		this.dependencyProjects.clear();
+		this.dependencyProjects.addAll(dependencyProjects);
+	}
+
+	public List<MavenProject> getDependencyProjects() {
+		return dependencyProjects;
+	}
+
 	public File getFile() {
-		return ResourceUtil.getPath(pomFile).toFile();
+		return buildFile.getPath().toFile();
+	}
+
+	public MavenBuildFile getBuildFile() {
+		return buildFile;
 	}
 
 	public Path getBasedir() {
 		// TODO: 945 Check if this is correct
-		return pomFile == null ? null : ResourceUtil.getPath(pomFile).getParent();
+		return buildFile == null ? null : buildFile.getPath().getParent();
 	}
 
-	public void setCollectedProjects(List<MavenProject> collected) {
-		this.collectedProjects = collected;
+	public void setReactorProjects(List<MavenProject> collected) {
+		this.reactorProjects = collected;
 	}
 
+	/**
+	 * @return all {@link MavenProject}s belonging to the same reactor build.
+	 */
 	public List<MavenProject> getCollectedProjects() {
-		return collectedProjects;
-	}
-
-	public Resource getResource() {
-		return pomFile;
+		return reactorProjects;
 	}
 
 	/**
@@ -103,29 +135,28 @@ public class MavenProject {
 		if (getBasedir() == null) {
 			return null;
 		}
-		else if ("pom.xml"
-			.equals(LinuxWindowsPathUnifier.relativize(projectRoot, ResourceUtil.getPath(pomFile)).toString())) {
+		else if ("pom.xml".equals(LinuxWindowsPathUnifier.relativize(projectRoot, buildFile.getPath()).toString())) {
 			return Path.of("");
 		}
 		else {
-			return LinuxWindowsPathUnifier.relativize(projectRoot, ResourceUtil.getPath(pomFile)).getParent();
+			return LinuxWindowsPathUnifier.relativize(projectRoot, buildFile.getPath()).getParent();
 		}
 	}
 
 	public String getGroupIdAndArtifactId() {
-		return this.pomModel.getGroupId() + ":" + pomModel.getArtifactId();
+		return this.buildFile.getGroupIdAndArtifactId();
 	}
 
 	public Path getPomFilePath() {
-		return ResourceUtil.getPath(pomFile);
+		return buildFile.getPath();
 	}
 
 	public Plugin getPlugin(String s) {
-		return pomModel.getBuild() == null ? null : pomModel.getBuild().getPluginsAsMap().get(s);
+		return buildFile.getBuild() == null ? null : buildFile.getBuild().getPluginsAsMap().get(s);
 	}
 
 	public Properties getProperties() {
-		return pomModel.getProperties();
+		return buildFile.getProperties();
 	}
 
 	public MavenRuntimeInformation getMavenRuntimeInformation() {
@@ -134,15 +165,15 @@ public class MavenProject {
 	}
 
 	public String getName() {
-		return pomModel.getName();
+		return buildFile.getName();
 	}
 
 	public String getGroupId() {
-		return pomModel.getGroupId() == null ? pomModel.getParent().getGroupId() : pomModel.getGroupId();
+		return buildFile.getGroupId() == null ? buildFile.getParent().getGroupId() : buildFile.getGroupId();
 	}
 
 	public String getArtifactId() {
-		return pomModel.getArtifactId();
+		return buildFile.getArtifactId();
 	}
 
 	/**
@@ -150,30 +181,25 @@ public class MavenProject {
 	 * version will be null.
 	 */
 	public String getVersion() {
-		return pomModel.getVersion() == null ? pomModel.getParent().getVersion() : pomModel.getVersion();
+		return buildFile.getVersion() == null ? buildFile.getParent().getVersion() : buildFile.getVersion();
 	}
 
 	@Override
 	public String toString() {
-		String groupId = pomModel.getGroupId() == null ? pomModel.getParent().getGroupId() : pomModel.getGroupId();
-		return groupId + ":" + pomModel.getArtifactId();
+		String groupId = buildFile.getGroupId() == null ? buildFile.getParent().getGroupId() : buildFile.getGroupId();
+		return groupId + ":" + buildFile.getArtifactId();
 	}
 
 	public String getBuildDirectory() {
-		String s = pomModel.getBuild() != null ? pomModel.getBuild().getDirectory() : null;
-		return s == null
-				? ResourceUtil.getPath(pomFile).getParent().resolve("target").toAbsolutePath().normalize().toString()
+		String s = buildFile.getBuild() != null ? buildFile.getBuild().getDirectory() : null;
+		return s == null ? buildFile.getPath().getParent().resolve("target").toAbsolutePath().normalize().toString()
 				: s;
 	}
 
 	public String getSourceDirectory() {
-		String s = pomModel.getBuild() != null ? pomModel.getBuild().getSourceDirectory() : null;
-		return s == null ? ResourceUtil.getPath(pomFile)
-			.getParent()
-			.resolve("src/main/java")
-			.toAbsolutePath()
-			.normalize()
-			.toString() : s;
+		String s = buildFile.getBuild() != null ? buildFile.getBuild().getSourceDirectory() : null;
+		return s == null
+				? buildFile.getPath().getParent().resolve("src/main/java").toAbsolutePath().normalize().toString() : s;
 	}
 
 	public List<Path> getCompileClasspathElements() {
@@ -187,7 +213,20 @@ public class MavenProject {
 
 	@NotNull
 	private List<Path> getClasspathElements(Scope scope) {
-		MavenResolutionResult pom = getSourceFile().getMarkers().findFirst(MavenResolutionResult.class).get();
+		Xml.Document pomSourceFile = getSourceFile();
+		return getClasspathJars(scope, pomSourceFile);
+	}
+
+	@NotNull
+	private List<Path> getClasspathJars(Scope scope, Xml.Document pomSourceFile) {
+		MavenArtifactDownloader downloader = rewriteMavenArtifactDownloader;
+		return getClasspathJars(scope, pomSourceFile, downloader);
+	}
+
+	@NotNull
+	public static List<Path> getClasspathJars(Scope scope, Xml.Document pomSourceFile,
+			MavenArtifactDownloader downloader) {
+		MavenResolutionResult pom = pomSourceFile.getMarkers().findFirst(MavenResolutionResult.class).get();
 		List<ResolvedDependency> resolvedDependencies = pom.getDependencies().get(scope);
 		if (resolvedDependencies != null) {
 			return resolvedDependencies
@@ -195,7 +234,7 @@ public class MavenProject {
 				//
 				.stream()
 				.filter(rd -> rd.getRepository() != null)
-				.map(rd -> rewriteMavenArtifactDownloader.downloadArtifact(rd))
+				.map(rd -> downloader.downloadArtifact(rd))
 				.filter(Objects::nonNull)
 				.distinct()
 				.toList();
@@ -206,17 +245,13 @@ public class MavenProject {
 	}
 
 	public String getTestSourceDirectory() {
-		String s = pomModel.getBuild() != null ? pomModel.getBuild().getSourceDirectory() : null;
-		return s == null ? ResourceUtil.getPath(pomFile)
-			.getParent()
-			.resolve("src/test/java")
-			.toAbsolutePath()
-			.normalize()
-			.toString() : s;
+		String s = buildFile.getBuild() != null ? buildFile.getBuild().getSourceDirectory() : null;
+		return s == null
+				? buildFile.getPath().getParent().resolve("src/test/java").toAbsolutePath().normalize().toString() : s;
 	}
 
 	public void setSourceFile(Xml.Document sourceFile) {
-		this.sourceFile = sourceFile;
+		this.buildFile.setSourceFile(sourceFile);
 	}
 
 	private static List<Resource> listJavaSources(List<Resource> resources, Path sourceDirectory) {
@@ -245,6 +280,9 @@ public class MavenProject {
 		return this.resources;
 	}
 
+	/**
+	 * @return All {@link Resource}s found under {@code src/main/java} of this project.
+	 */
 	public List<Resource> getMainJavaSources() {
 		Path sourceDir = getProjectRoot().resolve(getModuleDir()).resolve("src/main/java");
 		return listJavaSources(resources, sourceDir);
@@ -259,31 +297,316 @@ public class MavenProject {
 	}
 
 	public Object getProjectEncoding() {
-		return getPomModel().getProperties().get("project.build.sourceEncoding");
+		return buildFile.getProperties().get("project.build.sourceEncoding");
 	}
 
 	public Path getProjectRoot() {
 		return projectRoot;
 	}
 
+	@Deprecated
 	public Resource getPomFile() {
-		return pomFile;
-	}
-
-	public Model getPomModel() {
-		return pomModel;
+		return buildFile.getPomFileResource();
 	}
 
 	public Xml.Document getSourceFile() {
-		return sourceFile;
+		return buildFile.getSourceFile();
 	}
 
-	public MavenArtifactDownloader getRewriteMavenArtifactDownloader() {
-		return rewriteMavenArtifactDownloader;
+	public boolean dependsOn(MavenProject model) {
+		return dependentProjects.stream()
+			.anyMatch(
+					m -> m.getGroupId().equals(model.getGroupId()) && m.getArtifactId().equals(model.getArtifactId()));
 	}
 
-	public void setProjectId(ProjectId projectId) {
-		this.projectId = projectId;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		MavenProject that = (MavenProject) o;
+		return Objects.equals(buildFile, that.buildFile);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(buildFile);
+	}
+
+	public class MavenBuildFile extends org.apache.maven.model.Model {
+
+		private final Resource pomFileResource;
+
+		// FIXME: 945 temporary method, model should nopt come from Maven
+		@Deprecated
+		private final Resource resource;
+
+		private Xml.Document sourceFile;
+
+		private final org.apache.maven.model.Model delegate;
+
+		private static final MavenXpp3Reader XPP_3_READER = new MavenXpp3Reader();
+
+		public MavenBuildFile(Resource pomFileResource) {
+			this.pomFileResource = pomFileResource;
+			assertPomFile(pomFileResource);
+			this.resource = pomFileResource;
+			try {
+				this.delegate = XPP_3_READER.read(ResourceUtil.getInputStream(resource));
+				this.delegate.setPomFile(resource.getFile());
+				List<Dependency> dependencies = this.delegate.getDependencies();
+				dependencies.forEach(d -> {
+
+				});
+			}
+			catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			catch (XmlPullParserException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private void assertPomFile(Resource resource) {
+			if (!LinuxWindowsPathUnifier.unifiedPathString(resource).endsWith("pom.xml")) {
+				throw new IllegalArgumentException(
+						"Provided resource '%s' is not a pom.xml file.".formatted(ResourceUtil.getPath(resource)));
+			}
+		}
+
+		public void setSourceFile(Xml.Document sourceFile) {
+			this.sourceFile = sourceFile;
+		}
+
+		public Xml.Document getSourceFile() {
+			return sourceFile;
+		}
+
+		public String getContent() {
+			return ResourceUtil.getContent(pomFileResource);
+		}
+
+		public Path getPath() {
+			return ResourceUtil.getPath(pomFileResource);
+		}
+
+		public Resource getPomFileResource() {
+			return pomFileResource;
+		}
+
+		// Model methods
+		@Override
+		public String toString() {
+			return (delegate.getGroupId() == null ? delegate.getParent().getGroupId() : delegate.getGroupId()) + ":"
+					+ delegate.getArtifactId();
+		}
+
+		@Override
+		public String getArtifactId() {
+			return delegate.getArtifactId();
+		}
+
+		@Override
+		public Build getBuild() {
+			return delegate.getBuild();
+		}
+
+		@Override
+		public String getChildProjectUrlInheritAppendPath() {
+			return delegate.getChildProjectUrlInheritAppendPath();
+		}
+
+		@Override
+		public CiManagement getCiManagement() {
+			return delegate.getCiManagement();
+		}
+
+		@Override
+		public List<Contributor> getContributors() {
+			return delegate.getContributors();
+		}
+
+		@Override
+		public String getDescription() {
+			return delegate.getDescription();
+		}
+
+		@Override
+		public List<Developer> getDevelopers() {
+			return delegate.getDevelopers();
+		}
+
+		@Override
+		public String getGroupId() {
+			return delegate.getGroupId();
+		}
+
+		@Override
+		public String getInceptionYear() {
+			return delegate.getInceptionYear();
+		}
+
+		@Override
+		public IssueManagement getIssueManagement() {
+			return delegate.getIssueManagement();
+		}
+
+		@Override
+		public List<License> getLicenses() {
+			return delegate.getLicenses();
+		}
+
+		@Override
+		public List<MailingList> getMailingLists() {
+			return delegate.getMailingLists();
+		}
+
+		@Override
+		public String getModelEncoding() {
+			return delegate.getModelEncoding();
+		}
+
+		@Override
+		public String getModelVersion() {
+			return delegate.getModelVersion();
+		}
+
+		@Override
+		public String getName() {
+			String name = delegate.getName();
+			if (name == null) {
+				name = delegate.getArtifactId();
+			}
+			return name;
+		}
+
+		@Override
+		public Organization getOrganization() {
+			return delegate.getOrganization();
+		}
+
+		@Override
+		public String getPackaging() {
+			return delegate.getPackaging();
+		}
+
+		@Override
+		public Parent getParent() {
+			return delegate.getParent();
+		}
+
+		@Override
+		public Prerequisites getPrerequisites() {
+			return delegate.getPrerequisites();
+		}
+
+		@Override
+		public List<Profile> getProfiles() {
+			return delegate.getProfiles();
+		}
+
+		@Override
+		public Scm getScm() {
+			return delegate.getScm();
+		}
+
+		@Override
+		public String getUrl() {
+			return delegate.getUrl();
+		}
+
+		@Override
+		public String getVersion() {
+			return delegate.getVersion();
+		}
+
+		@Override
+		public File getPomFile() {
+			return delegate.getPomFile();
+		}
+
+		@Override
+		public File getProjectDirectory() {
+			return delegate.getPomFile().toPath().getParent().toFile();
+		}
+
+		@Override
+		public String getId() {
+			return delegate.getId();
+		}
+
+		@Override
+		public List<Dependency> getDependencies() {
+			return delegate.getDependencies();
+		}
+
+		@Override
+		public DependencyManagement getDependencyManagement() {
+			return delegate.getDependencyManagement();
+		}
+
+		@Override
+		public DistributionManagement getDistributionManagement() {
+			return delegate.getDistributionManagement();
+		}
+
+		@Override
+		public InputLocation getLocation(Object key) {
+			return delegate.getLocation(key);
+		}
+
+		@Override
+		public List<String> getModules() {
+			return delegate.getModules();
+		}
+
+		@Override
+		public List<Repository> getPluginRepositories() {
+			return delegate.getPluginRepositories();
+		}
+
+		@Override
+		public Properties getProperties() {
+			return delegate.getProperties();
+		}
+
+		@Override
+		public Reporting getReporting() {
+			return delegate.getReporting();
+		}
+
+		@Override
+		public Object getReports() {
+			return delegate.getReports();
+		}
+
+		@Override
+		public List<Repository> getRepositories() {
+			return delegate.getRepositories();
+		}
+
+		public String getGroupIdAndArtifactId() {
+			return getGroupId() + ":" + getArtifactId();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			MavenBuildFile that = (MavenBuildFile) o;
+			Path thisPath = ResourceUtil.getPath(this.pomFileResource);
+			Path thatPath = ResourceUtil.getPath(that.pomFileResource);
+			return Objects.equals(thisPath, thatPath);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(pomFileResource);
+		}
+
 	}
 
 }
