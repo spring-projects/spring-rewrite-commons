@@ -16,6 +16,7 @@
 package org.springframework.rewrite.parsers;
 
 import org.openrewrite.SourceFile;
+import org.openrewrite.java.internal.JavaTypeCache;
 import org.openrewrite.java.tree.JavaType;
 
 import java.util.List;
@@ -23,5 +24,6 @@ import java.util.List;
 /**
  * @author Fabian Krüger
  */
-public record SourceSetParsingResult(List<SourceFile> sourceFiles, List<JavaType.FullyQualified> classpath) {
+public record SourceSetParsingResult(List<SourceFile> sourceFiles, List<JavaType.FullyQualified> classpath,
+		JavaTypeCache typeCache) {
 }

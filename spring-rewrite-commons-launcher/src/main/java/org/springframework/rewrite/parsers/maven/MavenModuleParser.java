@@ -67,9 +67,9 @@ public class MavenModuleParser {
 		this.springRewriteProperties = springRewriteProperties;
 	}
 
-	public List<SourceFile> parseModuleSourceFiles(List<Resource> resources, MavenProject currentProject,
+	public ModuleParsingResult parseModule(Path baseDir, List<Resource> resources, MavenProject currentProject,
 			Xml.Document moduleBuildFile, List<Marker> provenanceMarkers, List<NamedStyles> styles,
-			ExecutionContext executionContext, Path baseDir) {
+			ExecutionContext executionContext, Map<MavenProject, ModuleParsingResult> parsingResultsMap) {
 
 		List<SourceFile> sourceFiles = new ArrayList<>();
 		// 146:149: get source encoding from maven
@@ -103,12 +103,12 @@ public class MavenModuleParser {
 		alreadyParsed.add(moduleBuildFilePath);
 		alreadyParsed.addAll(skipResourceScanDirs);
 
-		SourceSetParsingResult mainSourcesParsingResult = processMainSources(baseDir, resources, moduleBuildFile,
-				javaParserBuilder, rp, provenanceMarkers, alreadyParsed, executionContext, currentProject);
+		SourceSetParsingResult mainSourcesParsingResult = parseMainSourceSet(baseDir, currentProject, javaParserBuilder,
+				parsingResultsMap, executionContext, alreadyParsed, provenanceMarkers, resources, rp);
 
-		SourceSetParsingResult testSourcesParsingResult = processTestSources(baseDir, moduleBuildFile,
-				javaParserBuilder, rp, provenanceMarkers, alreadyParsed, executionContext, currentProject, resources,
-				mainSourcesParsingResult.classpath());
+		SourceSetParsingResult testSourcesParsingResult = parseTestSourceSet(baseDir, currentProject, javaParserBuilder,
+				parsingResultsMap, executionContext, alreadyParsed, provenanceMarkers, resources, rp,
+				mainSourcesParsingResult);
 		// Collect the dirs of modules parsed in previous steps
 
 		// parse other project resources
@@ -123,7 +123,199 @@ public class MavenModuleParser {
 		sourceFiles.addAll(mainAndTestSources);
 		sourceFiles.addAll(resourceFilesList);
 
-		return sourceFiles;
+		ModuleParsingResult moduleParsingResult = new ModuleParsingResult(currentProject, mainSourcesParsingResult,
+				testSourcesParsingResult, resourceFilesList);
+		return moduleParsingResult;
+	}
+
+	/**
+	 * Parse main source set {@code src/main} from current module. The classpath for Java
+	 * sources is created from jars and compilation units of dependency project previously
+	 * parsed. The parsed java sources are collected and provided with the result and can
+	 * be used by subsequent parse to build tha classpath.
+	 */
+	SourceSetParsingResult parseMainSourceSet(@Nullable Path baseDir, MavenProject currentProject,
+			JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder,
+			Map<MavenProject, ModuleParsingResult> parsingResultsMap, ExecutionContext executionContext,
+			Set<Path> alreadyParsed, List<Marker> provenanceMarkers, List<Resource> resources,
+			RewriteResourceParser rp) {
+		// collect and prepare all types for classpath and TypeCache
+		// java sources in current source set
+		List<Resource> javaSourcesInSrc = currentProject.getMainJavaSources();
+		// jars from dependencies
+		List<Path> classpathJars = currentProject.getCompileClasspathElements();
+
+		LOGGER.debug("Dependencies on main classpath: %s".formatted(classpathJars));
+		javaParserBuilder.classpath(classpathJars);
+
+		// sources from other dependency modules
+		List<SourceFile> sourceFilesFromOtherModules = currentProject.getDependencyProjects()
+			.stream()
+			// get their parsing result
+			.map(project -> parsingResultsMap.get(project))
+			.flatMap(result -> result.mainSourcesParsingResult().sourceFiles().stream())
+			.toList();
+
+		String[] dependsOnSources = sourceFilesFromOtherModules.stream()
+			.map(SourceFile::printAll)
+			.toArray(String[]::new);
+		javaParserBuilder.dependsOn(dependsOnSources);
+
+		JavaTypeCache typeCache = getJavaTypeCache(currentProject, parsingResultsMap, sourceFilesFromOtherModules);
+		javaParserBuilder.typeCache(typeCache);
+
+		Set<JavaType.FullyQualified> sourceSetClassesCp = new HashSet<>();
+
+		// Add test sources from dependency projects to classpath
+		sourceFilesFromOtherModules.stream()
+			.filter(J.CompilationUnit.class::isInstance)
+			.map(J.CompilationUnit.class::cast)
+			.flatMap(s -> s.getClasses().stream())
+			.map(J.ClassDeclaration::getType)
+			.forEach(sourceSetClassesCp::add);
+
+		return parseSourceSet(baseDir, currentProject, javaSourcesInSrc, javaParserBuilder, sourceSetClassesCp,
+				executionContext, alreadyParsed, classpathJars, typeCache, provenanceMarkers, "main", resources, rp,
+				"src/main");
+	}
+
+	/**
+	 * Parse test source set {@code src/test} from current module. The classpath for Java
+	 * sources is created from jars and compilation units of dependency project previously
+	 * parsed. The parsed java sources are collected and provided with the result and can
+	 * be used by subsequent parse to build tha classpath.
+	 */
+	SourceSetParsingResult parseTestSourceSet(@Nullable Path baseDir, MavenProject currentProject,
+			JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder,
+			Map<MavenProject, ModuleParsingResult> parsingResultsMap, ExecutionContext executionContext,
+			Set<Path> alreadyParsed, List<Marker> provenanceMarkers, List<Resource> resources, RewriteResourceParser rp,
+			SourceSetParsingResult mainSourcesParsingResult) {
+		// collect and prepare all types for classpath and TypeCache
+		// java sources in current source set
+		List<Resource> javaSourcesInSrc = currentProject.getTestJavaSources();
+		// jars from dependencies
+		List<Path> classpathJars = currentProject.getTestClasspathElements();
+
+		LOGGER.debug("Dependencies on main classpath: %s".formatted(classpathJars));
+		javaParserBuilder.classpath(classpathJars);
+
+		// sources from other dependency modules
+		List<SourceFile> sourceFilesFromOtherModules = currentProject.getDependencyProjects()
+			.stream()
+			// get their parsing result
+			.map(project -> parsingResultsMap.get(project))
+			.flatMap(result -> {
+				return Stream.concat(result.mainSourcesParsingResult().sourceFiles().stream(),
+						result.testSourcesParsingResult().sourceFiles().stream());
+			})
+			.toList();
+
+		List<SourceFile> sourceFilesFromMain = mainSourcesParsingResult.sourceFiles();
+		String[] dependsOnSources = Stream.concat(sourceFilesFromMain.stream(), sourceFilesFromOtherModules.stream())
+			.map(SourceFile::printAll)
+			.toArray(String[]::new);
+		javaParserBuilder.dependsOn(dependsOnSources);
+
+		JavaTypeCache typeCache = getJavaTypeCache(currentProject, parsingResultsMap, sourceFilesFromOtherModules);
+		javaParserBuilder.typeCache(typeCache);
+
+		Set<JavaType.FullyQualified> sourceSetClassesCp = new HashSet<>();
+
+		// Add test sources from dependency projects to classpath
+		Stream.concat(sourceFilesFromMain.stream(), sourceFilesFromOtherModules.stream())
+			.filter(J.CompilationUnit.class::isInstance)
+			.map(J.CompilationUnit.class::cast)
+			.flatMap(s -> s.getClasses().stream())
+			.map(J.ClassDeclaration::getType)
+			.forEach(sourceSetClassesCp::add);
+
+		return parseSourceSet(baseDir, currentProject, javaSourcesInSrc, javaParserBuilder, sourceSetClassesCp,
+				executionContext, alreadyParsed, classpathJars, typeCache, provenanceMarkers, "test", resources, rp,
+				"src/test");
+	}
+
+	SourceSetParsingResult parseSourceSet(@Nullable Path baseDir, MavenProject currentProject,
+			List<Resource> javaSourcesInSrc, JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder,
+			Set<JavaType.FullyQualified> localClassesCp, ExecutionContext executionContext, Set<Path> alreadyParsed,
+			List<Path> classpathJars, JavaTypeCache typeCache, List<Marker> provenanceMarkers, String sourceSetName,
+			List<Resource> resources, RewriteResourceParser rp, String sourceDir) {
+		// collect source files from module src dir
+		List<Resource> javaSources = new ArrayList<>();
+		List<Resource> javaSourcesInTarget = currentProject.getJavaSourcesInTarget();
+		javaSources.addAll(javaSourcesInTarget);
+		javaSources.addAll(javaSourcesInSrc);
+
+		Iterable<Parser.Input> inputs = javaSources.stream().map(r -> {
+			FileAttributes fileAttributes = null;
+			Path path = ResourceUtil.getPath(r);
+			boolean isSynthetic = Files.exists(path);
+			Supplier<InputStream> inputStreamSupplier = () -> ResourceUtil.getInputStream(r);
+			Parser.Input input = new Parser.Input(path, fileAttributes, inputStreamSupplier, isSynthetic);
+			return input;
+		}).toList();
+
+		// collecting parsed compilation units to the classpath (localClassesCp).
+		List<? extends SourceFile> cus = javaParserBuilder.build()
+			.parseInputs(inputs, baseDir, executionContext)
+			.peek(s -> {
+				((J.CompilationUnit) s).getClasses()
+					.stream()
+					.map(J.ClassDeclaration::getType)
+					.forEach(localClassesCp::add);
+
+				alreadyParsed.add(baseDir.resolve(s.getSourcePath()));
+			})
+			.toList();
+
+		JavaSourceSet javaSourceSet = sourceSet(sourceSetName, classpathJars, typeCache);
+		List<Marker> markers = new ArrayList<>(provenanceMarkers);
+
+		javaSourceSet = appendToClasspath(localClassesCp, javaSourceSet);
+		ClasspathDependencies classpathDependencies = new ClasspathDependencies(classpathJars);
+
+		markers.add(javaSourceSet);
+		markers.add(classpathDependencies);
+
+		List<Path> parsedJavaPaths = javaSourcesInTarget.stream().map(ResourceUtil::getPath).toList();
+		Stream<SourceFile> parsedJavaSources = cus.stream().map(addProvenance(baseDir, markers, parsedJavaPaths));
+		LOGGER.debug("[%s] Scanned %d java source files in main scope.".formatted(currentProject, javaSources.size()));
+
+		// Filter out any generated source files from the returned list, as we do not want
+		// to apply the recipe to the
+		// generated files.
+		Path buildDirectory = LinuxWindowsPathUnifier.unifiedPath(Paths.get(currentProject.getBuildDirectory()));
+		List<SourceFile> filteredJavaSources = filterOutResourcesInDir(parsedJavaSources, buildDirectory);
+
+		int sourcesParsedBefore = alreadyParsed.size();
+		alreadyParsed.addAll(parsedJavaPaths);
+
+		List<Resource> resourcesLeft = resources.stream()
+			.filter(r -> alreadyParsed.stream().noneMatch(path -> LinuxWindowsPathUnifier.pathStartsWith(r, path)))
+			.toList();
+
+		LOGGER.info("Parsing test resources");
+		Path searchDir = currentProject.getModulePath().resolve(sourceDir).resolve("resources");
+		List<SourceFile> parsedResourceFiles = rp
+			.parseSourceFiles(searchDir, resourcesLeft, alreadyParsed, executionContext)
+			.map(addProvenance(baseDir, markers, null))
+			.toList();
+
+		LOGGER.info("Parsed %d main resources".formatted(parsedResourceFiles.size()));
+
+		// TODO: Remove
+		// List<SourceFile> parsedResourceFiles = rp
+		// .parse(currentProject.getModulePath().resolve("src/main/resources"), resources,
+		// alreadyParsed)
+		// .map(addProvenance(baseDir, mainProjectProvenance, null))
+		// .toList();
+
+		LOGGER.debug("[%s] Scanned %d resource files in main scope.".formatted(currentProject,
+				(alreadyParsed.size() - sourcesParsedBefore)));
+		// Any resources parsed from "main/resources" should also have the main source set
+		// added to them.
+		filteredJavaSources.addAll(parsedResourceFiles);
+		return new SourceSetParsingResult(filteredJavaSources, javaSourceSet.getClasspath(), typeCache);
+
 	}
 
 	/**
@@ -164,134 +356,26 @@ public class MavenModuleParser {
 	private Set<Path> pathsToOtherMavenProjects(MavenProject mavenProject, Path moduleBuildFile) {
 		return mavenProject.getCollectedProjects()
 			.stream()
-			.filter(p -> !p.getFile().toPath().toString().equals(moduleBuildFile.toString()))
+			.filter(p -> !LinuxWindowsPathUnifier.pathEquals(p.getBuildFile().getPath(), moduleBuildFile))
 			.map(p -> p.getFile().toPath().getParent())
 			.collect(Collectors.toSet());
 	}
 
-	/**
-	 * Parse Java sources and resources under {@code src/main} of current module.
-	 */
-	public SourceSetParsingResult processMainSources(Path baseDir, List<Resource> resources,
-			Xml.Document moduleBuildFile, JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder,
-			RewriteResourceParser rp, List<Marker> provenanceMarkers, Set<Path> alreadyParsed,
-			ExecutionContext executionContext, MavenProject currentProject) {
-		LOGGER.info("Processing main sources in module '%s'".formatted(currentProject.getProjectId()));
-		// FIXME: 945
-		// Some annotation processors output generated sources to the /target directory.
-		// These are added for parsing but
-		// should be filtered out of the final SourceFile list.
-
-		List<Resource> mainJavaSources = new ArrayList<>();
-		List<Resource> javaSourcesInTarget = currentProject.getJavaSourcesInTarget(); // listJavaSources(resources,
-		// currentProject.getBasedir().resolve(currentProject.getBuildDirectory()));
-		List<Resource> javaSourcesInMain = currentProject.getMainJavaSources(); // listJavaSources(resources,
-		// currentProject.getBasedir().resolve(currentProject.getSourceDirectory()));
-		mainJavaSources.addAll(javaSourcesInTarget);
-		mainJavaSources.addAll(javaSourcesInMain);
-
-		LOGGER.info("[%s] Parsing main source files".formatted(currentProject));
-
-		// FIXME 945 classpath
-		// - Resolve dependencies to non-reactor projects from Maven repository
-		// - Resolve dependencies to reactor projects by providing the sources
-		// javaParserBuilder.classpath(byte[])
-
-		// we're processing a module here. The classpath of the module consists of all
-		// declared dependencies and their transitive dependencies too.
-		// For dependencies to projects that belong to the current rector...
-		// They'd either need to be built with Maven before to guarantee that the jars are
-		// installed to local Maven repo.
-		// Or, the classpath must be created from the sources of the project.
-
-		List<Path> dependencies = currentProject.getCompileClasspathElements();
-
-		javaParserBuilder.classpath(dependencies);
-
-		LOGGER.info("Dependencies on main classpath: %s".formatted(dependencies));
-
-		JavaTypeCache typeCache = new JavaTypeCache();
-		javaParserBuilder.typeCache(typeCache);
-
-		Iterable<Parser.Input> inputs = mainJavaSources.stream().map(r -> {
-			FileAttributes fileAttributes = null;
-			Path path = ResourceUtil.getPath(r);
-			boolean isSynthetic = Files.exists(path);
-			Supplier<InputStream> inputStreamSupplier = () -> ResourceUtil.getInputStream(r);
-			Parser.Input input = new Parser.Input(path, fileAttributes, inputStreamSupplier, isSynthetic);
-			return input;
-		}).toList();
-
-		LOGGER.info("Parsing main Java sources.");
-
-		Set<JavaType.FullyQualified> localClassesCp = new HashSet<>();
-		List<? extends SourceFile> cus = javaParserBuilder.build()
-			.parseInputs(inputs, baseDir, executionContext)
-			.peek(s -> {
-				((J.CompilationUnit) s).getClasses()
-					.stream()
-					.map(J.ClassDeclaration::getType)
-					.forEach(localClassesCp::add);
-
-				alreadyParsed.add(baseDir.resolve(s.getSourcePath()));
-			})
-			.toList();
-
-		LOGGER.info("Parsed %d main Java source files.".formatted(cus.size()));
-
-		// TODO: This is a hack:
-		// Parsed java sources are not themselves on the classpath (here).
-		// The actual parsing happens when the stream is terminated (toList),
-		// therefore the toList() must be called before the parsed compilation units can
-		// be added to the classpath
-		JavaSourceSet javaSourceSet = sourceSet("main", dependencies, typeCache);
-		List<Marker> mainProjectProvenance = new ArrayList<>(provenanceMarkers);
-		javaSourceSet = appendToClasspath(localClassesCp, javaSourceSet);
-		mainProjectProvenance.add(javaSourceSet);
-		ClasspathDependencies classpathDependencies = new ClasspathDependencies(dependencies);
-		mainProjectProvenance.add(classpathDependencies);
-
-		List<Path> parsedJavaPaths = javaSourcesInTarget.stream().map(ResourceUtil::getPath).toList();
-		Stream<SourceFile> parsedMainJava = cus.stream()
-			.map(addProvenance(baseDir, mainProjectProvenance, parsedJavaPaths));
-		LOGGER.debug(
-				"[%s] Scanned %d java source files in main scope.".formatted(currentProject, mainJavaSources.size()));
-
-		// Filter out any generated source files from the returned list, as we do not want
-		// to apply the recipe to the
-		// generated files.
-		Path buildDirectory = LinuxWindowsPathUnifier.unifiedPath(Paths.get(currentProject.getBuildDirectory()));
-		List<SourceFile> filteredMainJava = filterOutResourcesInDir(parsedMainJava, buildDirectory);
-
-		int sourcesParsedBefore = alreadyParsed.size();
-		alreadyParsed.addAll(parsedJavaPaths);
-
-		List<Resource> resourcesLeft = resources.stream()
-			.filter(r -> alreadyParsed.stream().noneMatch(path -> LinuxWindowsPathUnifier.pathStartsWith(r, path)))
-			.toList();
-
-		LOGGER.info("Parsing main resources");
-		List<SourceFile> parsedResourceFiles = rp
-			.parseSourceFiles(currentProject.getModulePath().resolve("src/main/resources"), resourcesLeft,
-					alreadyParsed, executionContext)
-			.map(addProvenance(baseDir, mainProjectProvenance, null))
-			.toList();
-
-		LOGGER.info("Parsed %d main resources".formatted(parsedResourceFiles.size()));
-
-		// TODO: Remove
-		// List<SourceFile> parsedResourceFiles = rp
-		// .parse(currentProject.getModulePath().resolve("src/main/resources"), resources,
-		// alreadyParsed)
-		// .map(addProvenance(baseDir, mainProjectProvenance, null))
-		// .toList();
-
-		LOGGER.debug("[%s] Scanned %d resource files in main scope.".formatted(currentProject,
-				(alreadyParsed.size() - sourcesParsedBefore)));
-		// Any resources parsed from "main/resources" should also have the main source set
-		// added to them.
-		filteredMainJava.addAll(parsedResourceFiles);
-		return new SourceSetParsingResult(filteredMainJava, javaSourceSet.getClasspath());
+	private static JavaTypeCache getJavaTypeCache(MavenProject currentProject,
+			Map<MavenProject, ModuleParsingResult> parsingResultsMap, List<SourceFile> sourceFilesFromOtherModules) {
+		JavaTypeCache typeCache;
+		if (!sourceFilesFromOtherModules.isEmpty()) {
+			Optional<JavaTypeCache> optJavaTypeCache = currentProject.getDependencyProjects()
+				.stream()
+				.map(mp -> parsingResultsMap.get(mp).mainSourcesParsingResult().typeCache())
+				.max(Comparator.comparing(JavaTypeCache::size));
+			typeCache = optJavaTypeCache.orElseThrow(() -> new IllegalStateException(
+					"No TypeCahche from previous build found for project " + currentProject.getProjectId()));
+		}
+		else {
+			typeCache = new JavaTypeCache();
+		}
+		return typeCache;
 	}
 
 	@NotNull
@@ -320,86 +404,6 @@ public class MavenModuleParser {
 	@NotNull
 	private static JavaSourceSet sourceSet(String name, List<Path> dependencies, JavaTypeCache typeCache) {
 		return JavaSourceSet.build(name, dependencies, typeCache, false);
-	}
-
-	/**
-	 * Parse Java sources and resource files under {@code src/test}.
-	 */
-	public SourceSetParsingResult processTestSources(Path baseDir, Xml.Document moduleBuildFile,
-			JavaParser.Builder<? extends JavaParser, ?> javaParserBuilder, RewriteResourceParser rp,
-			List<Marker> provenanceMarkers, Set<Path> alreadyParsed, ExecutionContext executionContext,
-			MavenProject currentProject, List<Resource> resources, List<JavaType.FullyQualified> classpath) {
-		LOGGER.info("Processing test sources in module '%s'".formatted(currentProject.getProjectId()));
-
-		List<Path> testDependencies = currentProject.getTestClasspathElements();
-
-		javaParserBuilder.classpath(testDependencies);
-		JavaTypeCache typeCache = new JavaTypeCache();
-		javaParserBuilder.typeCache(typeCache);
-
-		List<Resource> testJavaSources = currentProject.getTestJavaSources();
-		// listJavaSources(resources,
-		// currentProject.getBasedir().resolve(currentProject.getTestSourceDirectory()));
-		// alreadyParsed.addAll(testJavaSources.stream().map(ResourceUtil::getPath).toList());
-
-		Iterable<Parser.Input> inputs = testJavaSources.stream()
-			.map(r -> new Parser.Input(ResourceUtil.getPath(r), () -> ResourceUtil.getInputStream(r)))
-			.toList();
-
-		final List<JavaType.FullyQualified> localClassesCp = new ArrayList<>();
-		List<? extends SourceFile> cus = javaParserBuilder.build()
-			.parseInputs(inputs, baseDir, executionContext)
-			.peek(s -> {
-				((J.CompilationUnit) s).getClasses()
-					.stream()
-					.map(J.ClassDeclaration::getType)
-					.forEach(localClassesCp::add);
-				alreadyParsed.add(baseDir.resolve(s.getSourcePath()));
-			})
-			.toList();
-
-		List<Marker> markers = new ArrayList<>(provenanceMarkers);
-
-		JavaSourceSet javaSourceSet = sourceSet("test", testDependencies, typeCache);
-		Set<JavaType.FullyQualified> curClasspath = Stream.concat(classpath.stream(), localClassesCp.stream())
-			.collect(Collectors.toSet());
-		javaSourceSet = appendToClasspath(curClasspath, javaSourceSet);
-		markers.add(javaSourceSet);
-		Stream<SourceFile> parsedJava = cus.stream().map(addProvenance(baseDir, markers, null));
-
-		LOGGER.debug(
-				"[%s] Scanned %d java source files in test scope.".formatted(currentProject, testJavaSources.size()));
-		Stream<SourceFile> sourceFiles = parsedJava;
-
-		// Any resources parsed from "test/resources" should also have the test source set
-		// added to them.
-		int sourcesParsedBefore = alreadyParsed.size();
-		Stream<SourceFile> parsedResourceFiles = rp
-			.parse(currentProject.getBasedir().resolve("src/test/resources"), resources, alreadyParsed)
-			.map(addProvenance(baseDir, markers, null));
-		LOGGER.debug("[%s] Scanned %d resource files in test scope.".formatted(currentProject,
-				(alreadyParsed.size() - sourcesParsedBefore)));
-		sourceFiles = Stream.concat(sourceFiles, parsedResourceFiles);
-		List<SourceFile> result = sourceFiles.toList();
-		return new SourceSetParsingResult(result, javaSourceSet.getClasspath());
-	}
-
-	// FIXME: 945 take Java sources from resources
-	private static List<Resource> listJavaSources(List<Resource> resources, Path sourceDirectory) {
-		return resources.stream()
-			.filter(whenIn(LinuxWindowsPathUnifier.unifiedPath(sourceDirectory)))
-			.filter(whenFileNameEndsWithJava())
-			.toList();
-	}
-
-	@NotNull
-	private static Predicate<Resource> whenFileNameEndsWithJava() {
-		return p -> ResourceUtil.getPath(p).getFileName().toString().endsWith(".java");
-	}
-
-	@NotNull
-	private static Predicate<Resource> whenIn(Path sourceDirectory) {
-		return r -> ResourceUtil.getPath(r).toString().startsWith(sourceDirectory.toString());
 	}
 
 }
