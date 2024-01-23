@@ -39,4 +39,4 @@ jobs:
         run: ./mvnw -B clean install
       - name: Build (Linux)
         if: runner.os == 'Linux'
-        run: ./mvnw -B -Pfunctional-tests clean install
+        run: ./mvnw -B -Pfunctional-tests,javadoc clean install

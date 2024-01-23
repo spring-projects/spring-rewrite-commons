@@ -36,8 +36,8 @@ public class MavenProjectGraph {
 
 	/**
 	 * Create a Maven module dependency graph starting from pom.xml in {@code baseDir}.
-	 * The dependency and dependants for all {@MavenModule}s are added when they are part
-	 * of the build.
+	 * The dependency and dependants for all {@link MavenProject}s are added when they are
+	 * part of the build.
 	 */
 	public Map<MavenProject, Set<MavenProject>> from(Path baseDir, List<MavenProject> allMavenProjects) {
 		// build map of projectId -> MavenProject
