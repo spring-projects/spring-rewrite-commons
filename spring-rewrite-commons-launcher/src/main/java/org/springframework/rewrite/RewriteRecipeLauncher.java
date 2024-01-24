@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.execution;
+package org.springframework.rewrite;
 
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.Recipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.resource.ProjectResourceSet;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;
