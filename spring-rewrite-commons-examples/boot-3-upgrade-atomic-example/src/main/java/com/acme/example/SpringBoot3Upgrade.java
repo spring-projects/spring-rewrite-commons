@@ -20,7 +20,7 @@ import org.openrewrite.SourceFile;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.rewrite.parser.RewriteProjectParser;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.resource.ProjectResourceSet;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;

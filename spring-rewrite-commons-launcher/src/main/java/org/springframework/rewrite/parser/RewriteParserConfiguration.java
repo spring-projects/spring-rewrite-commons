@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.ProjectResourceSetConfiguration;
 import org.springframework.rewrite.boot.autoconfigure.ScopeConfiguration;
 import org.springframework.rewrite.parser.events.RewriteParsingEventListenerAdapter;

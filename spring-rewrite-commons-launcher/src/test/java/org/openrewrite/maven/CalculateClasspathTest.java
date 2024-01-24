@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parser.RewriteParserConfiguration;
-import org.springframework.rewrite.parser.RewriteProjectParser;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.test.util.DummyResource;
 import org.springframework.rewrite.test.util.TestProjectHelper;

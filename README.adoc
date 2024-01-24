@@ -40,7 +40,7 @@ package com.acme.example;
 import org.openrewrite.Recipe;
 import org.openrewrite.SourceFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.rewrite.parser.RewriteProjectParser;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.resource.ProjectResourceSet;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;

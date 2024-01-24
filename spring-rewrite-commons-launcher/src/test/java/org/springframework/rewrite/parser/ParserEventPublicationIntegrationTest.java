@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.events.FinishedParsingResourceEvent;
 import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
@@ -43,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ParserEventPublicationIntegrationTest {
 
 	@Autowired
-	RewriteProjectParser sut;
+    RewriteProjectParser sut;
 
 	@Autowired
 	ProjectScanner projectScanner;

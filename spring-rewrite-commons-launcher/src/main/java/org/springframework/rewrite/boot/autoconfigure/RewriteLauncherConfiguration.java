@@ -19,7 +19,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.rewrite.execution.RewriteRecipeLauncher;
-import org.springframework.rewrite.parser.RewriteProjectParser;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;
 import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;

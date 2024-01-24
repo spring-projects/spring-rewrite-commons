@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.maven.*;
 import org.springframework.rewrite.scopes.ProjectMetadata;
 import org.springframework.rewrite.scopes.ScanScope;

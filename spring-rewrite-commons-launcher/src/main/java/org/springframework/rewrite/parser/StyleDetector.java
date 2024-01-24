@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 public class StyleDetector {
 
-	List<SourceFile> sourcesWithAutoDetectedStyles(Stream<SourceFile> sourceFiles) {
+	public List<SourceFile> sourcesWithAutoDetectedStyles(Stream<SourceFile> sourceFiles) {
 		org.openrewrite.java.style.Autodetect.Detector javaDetector = org.openrewrite.java.style.Autodetect.detector();
 		org.openrewrite.xml.style.Autodetect.Detector xmlDetector = org.openrewrite.xml.style.Autodetect.detector();
 		List<SourceFile> sourceFileList = sourceFiles.peek(javaDetector::sample).peek(xmlDetector::sample).toList();

@@ -23,6 +23,7 @@ import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.java.tree.J;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.parser.maven.SbmTestConfiguration;
