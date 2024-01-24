@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project;
+package org.springframework.rewrite.project.resource;
 
 import org.openrewrite.SourceFile;
 import org.springframework.rewrite.project.resource.RewriteSourceFileHolder;

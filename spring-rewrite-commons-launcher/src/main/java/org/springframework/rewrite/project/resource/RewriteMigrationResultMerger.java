@@ -17,7 +17,6 @@ package org.springframework.rewrite.project.resource;
 
 import org.openrewrite.Result;
 import org.openrewrite.SourceFile;
-import org.springframework.rewrite.project.RewriteSourceFileWrapper;
 import org.springframework.rewrite.project.resource.finder.AbsolutePathResourceFinder;
 
 import java.nio.file.Path;

@@ -18,7 +18,7 @@ package org.springframework.rewrite.boot.autoconfigure;
 import org.openrewrite.ExecutionContext;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.rewrite.project.RewriteSourceFileWrapper;
+import org.springframework.rewrite.project.resource.RewriteSourceFileWrapper;
 import org.springframework.rewrite.project.resource.*;
 
 /**
