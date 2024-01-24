@@ -21,11 +21,15 @@ import org.springframework.rewrite.parsers.RewriteParserConfiguration;
 
 /**
  * Configuration for all components.
+ * @deprecated
+ * Use {@link RewriteLauncherConfiguration} instead
  *
  * @author Fabian Krüger
  */
+@Deprecated(forRemoval = true)
 @AutoConfiguration
-@Import({ RecipeDiscoveryConfiguration.class, RewriteParserConfiguration.class, ProjectResourceSetConfiguration.class, RewriteLauncherConfiguration.class })
+@Import({ RecipeDiscoveryConfiguration.class, RewriteParserConfiguration.class, ProjectResourceSetConfiguration.class,
+		RewriteLauncherConfiguration.class })
 public class SpringRewriteCommonsConfiguration {
 
 }
