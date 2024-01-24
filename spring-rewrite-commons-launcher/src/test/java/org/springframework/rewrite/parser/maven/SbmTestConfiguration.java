@@ -22,8 +22,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.RewriteParserConfiguration;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.scopes.ScanScope;
 
 /**

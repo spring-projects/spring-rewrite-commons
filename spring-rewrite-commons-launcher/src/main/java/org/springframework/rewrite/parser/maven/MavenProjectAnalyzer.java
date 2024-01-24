@@ -20,7 +20,9 @@ import org.springframework.rewrite.parser.MavenProject;
 import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Implements the ordering of Maven (reactor) build projects. See <a href=

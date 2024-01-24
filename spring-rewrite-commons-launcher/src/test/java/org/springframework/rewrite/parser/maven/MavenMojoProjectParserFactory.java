@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.openrewrite.maven.MavenMojoProjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.Slf4jToMavenLoggerAdapter;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
 
 import java.nio.file.Path;
 import java.util.List;

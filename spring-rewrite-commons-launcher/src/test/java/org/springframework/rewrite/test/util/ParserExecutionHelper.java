@@ -21,9 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
-import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.maven.ComparingParserFactory;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 

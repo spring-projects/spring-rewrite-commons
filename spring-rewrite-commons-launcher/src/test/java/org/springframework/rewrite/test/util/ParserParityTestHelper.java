@@ -31,8 +31,8 @@ import org.openrewrite.maven.tree.MavenResolutionResult;
 import org.openrewrite.maven.tree.ResolvedDependency;
 import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.style.Style;
-import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.maven.ClasspathDependencies;
 
 import java.io.File;
