@@ -43,13 +43,13 @@ import static java.util.Collections.emptyList;
  *
  * @author Fabian Krüger
  */
-public class BuildFileParser {
+public class MavenBuildFileParser {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BuildFileParser.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MavenBuildFileParser.class);
 
 	private final MavenSettingsInitializer mavenSettingsInitilizer;
 
-	public BuildFileParser(MavenSettingsInitializer mavenSettingsInitilizer) {
+	public MavenBuildFileParser(MavenSettingsInitializer mavenSettingsInitilizer) {
 		this.mavenSettingsInitilizer = mavenSettingsInitilizer;
 	}
 

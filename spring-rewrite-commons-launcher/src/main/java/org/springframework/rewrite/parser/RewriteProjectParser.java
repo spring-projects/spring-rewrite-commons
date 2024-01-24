@@ -30,7 +30,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
-import org.springframework.rewrite.parser.maven.BuildFileParser;
+import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
 import org.springframework.rewrite.parser.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parser.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
@@ -71,7 +71,7 @@ public class RewriteProjectParser {
 
 	private final ProvenanceMarkerFactory provenanceMarkerFactory;
 
-	private final BuildFileParser buildFileParser;
+	private final MavenBuildFileParser buildFileParser;
 
 	private final SourceFileParser sourceFileParser;
 
@@ -93,7 +93,7 @@ public class RewriteProjectParser {
 
 	private final MavenProjectAnalyzer mavenProjectAnalyzer;
 
-	public RewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory, BuildFileParser buildFileParser,
+	public RewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory, MavenBuildFileParser buildFileParser,
 			SourceFileParser sourceFileParser, StyleDetector styleDetector,
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, ScanScope scanScope, ConfigurableListableBeanFactory beanFactory,

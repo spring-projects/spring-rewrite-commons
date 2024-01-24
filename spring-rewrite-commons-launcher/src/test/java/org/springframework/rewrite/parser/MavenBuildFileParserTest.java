@@ -27,7 +27,7 @@ import org.openrewrite.java.marker.JavaProject;
 import org.openrewrite.marker.Marker;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.parser.maven.BuildFileParser;
+import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
 import org.springframework.rewrite.parser.maven.MavenSettingsInitializer;
 import org.springframework.rewrite.scopes.ProjectMetadata;
 import org.springframework.rewrite.test.util.DummyResource;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Fabian Krüger
  */
-class BuildFileParserTest {
+class MavenBuildFileParserTest {
 
 	@Nested
 	public class GivenSimpleMavenMultiModuleProject {
@@ -100,7 +100,7 @@ class BuildFileParserTest {
 				</project>
 				""";
 
-		private BuildFileParser sut;
+		private MavenBuildFileParser sut;
 
 		@BeforeEach
 		void beforeEach() {
@@ -109,7 +109,7 @@ class BuildFileParserTest {
 			});
 			MavenSettingsInitializer mavenSettingsInitializer = new MavenSettingsInitializer(executionContext,
 					new ProjectMetadata());
-			sut = new BuildFileParser(mavenSettingsInitializer);
+			sut = new MavenBuildFileParser(mavenSettingsInitializer);
 		}
 
 		@Test

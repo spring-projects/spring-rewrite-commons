@@ -102,7 +102,7 @@ class RewriteProjectParserTest {
 		MavenProjectFactory mavenProjectFactory = new MavenProjectFactory(artifactDownloader);
 		RewriteProjectParser projectParser = new RewriteProjectParser(
 				new ProvenanceMarkerFactory(new MavenProvenanceMarkerFactory()),
-				new BuildFileParser(mavenSettingsInitializer), new SourceFileParser(mavenModuleParser),
+				new MavenBuildFileParser(mavenSettingsInitializer), new SourceFileParser(mavenModuleParser),
 				new StyleDetector(), springRewriteProperties, mock(ParsingEventListener.class),
 				mock(ApplicationEventPublisher.class), new ScanScope(), mock(ConfigurableListableBeanFactory.class),
 				new ProjectScanner(new DefaultResourceLoader(), springRewriteProperties), executionContext,
