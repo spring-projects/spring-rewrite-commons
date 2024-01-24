@@ -34,7 +34,7 @@ import org.springframework.rewrite.parser.RewriteExecutionContext;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.maven.ClasspathDependencies;
-import org.springframework.rewrite.support.openrewrite.GenericOpenRewriteRecipe;
+import org.springframework.rewrite.recipes.GenericOpenRewriteRecipe;
 import org.springframework.rewrite.test.util.ParserExecutionHelper;
 import org.springframework.rewrite.test.util.TestProjectHelper;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.support.openrewrite;
+package org.springframework.rewrite.recipes;
 
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
