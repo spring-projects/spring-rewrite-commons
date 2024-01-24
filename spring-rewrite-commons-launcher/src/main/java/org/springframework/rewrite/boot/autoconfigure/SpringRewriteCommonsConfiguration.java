@@ -25,7 +25,7 @@ import org.springframework.rewrite.parsers.RewriteParserConfiguration;
  * @author Fabian Krüger
  */
 @AutoConfiguration
-@Import({ RecipeDiscoveryConfiguration.class, RewriteParserConfiguration.class, ProjectResourceSetConfiguration.class })
+@Import({ RecipeDiscoveryConfiguration.class, RewriteParserConfiguration.class, ProjectResourceSetConfiguration.class, RewriteLauncherConfiguration.class })
 public class SpringRewriteCommonsConfiguration {
 
 }
