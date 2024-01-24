@@ -13,29 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource;
+package org.springframework.rewrite.resource.finder;
 
-import java.nio.file.Path;
+import org.springframework.rewrite.resource.ProjectResourceSet;
 
-/**
- * Defines operations on all project resources found during scan. All file resources need
- * to implement this interface.
- */
-public interface ProjectResource {
+import java.util.List;
+import java.util.stream.Collectors;
 
-	String print();
+public class DeletedResourcePathStringFilter implements ProjectResourceFinder<List<String>> {
 
-	/**
-	 * @return Path relative to module root.
-	 */
-	Path getSourcePath();
-
-	Path getAbsolutePath();
-
-	void delete();
-
-	boolean isDeleted();
-
-	void moveTo(Path newPath);
+	@Override
+	public List<String> apply(ProjectResourceSet projectResourceSet) {
+		return projectResourceSet.streamIncludingDeleted()
+			.filter(r -> r.isDeleted() && !r.getAbsolutePath().toFile().isDirectory())
+			.map(r -> r.getAbsolutePath().toString())
+			.collect(Collectors.toList());
+	}
 
 }

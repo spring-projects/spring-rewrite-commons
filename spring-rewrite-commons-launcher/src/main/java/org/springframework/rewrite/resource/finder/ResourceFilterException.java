@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource;
+package org.springframework.rewrite.resource.finder;
 
-public interface InternalProjectResource extends ProjectResource {
+public class ResourceFilterException extends RuntimeException {
 
-	void resetHasChanges();
-
-	void markAsChanged();
-
-	boolean hasChanges();
-
-	boolean isDeleted();
+	public ResourceFilterException(String s) {
+		super(s);
+	}
 
 }

@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource.finder;
+package org.springframework.rewrite.resource.finder;
 
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
+import org.springframework.rewrite.resource.ProjectResourceSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DeletedResourcePathStringFilter implements ProjectResourceFinder<List<String>> {
+public class ModifiedResourcePathStringFilter implements ProjectResourceFinder<List<String>> {
 
 	@Override
 	public List<String> apply(ProjectResourceSet projectResourceSet) {
-		return projectResourceSet.streamIncludingDeleted()
-			.filter(r -> r.isDeleted() && !r.getAbsolutePath().toFile().isDirectory())
+		return projectResourceSet.stream()
+			.filter(r -> r.hasChanges() && !r.isDeleted() && !r.getAbsolutePath().toFile().isDirectory())
 			.map(r -> r.getAbsolutePath().toString())
 			.collect(Collectors.toList());
 	}

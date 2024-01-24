@@ -21,9 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.rewrite.parser.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
-import org.springframework.rewrite.project.resource.ProjectResourceSetFactory;
-import org.springframework.rewrite.project.resource.ProjectResourceSetSerializer;
+import org.springframework.rewrite.resource.ProjectResourceSet;
+import org.springframework.rewrite.resource.ProjectResourceSetFactory;
+import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 import org.springframework.util.StopWatch;
 

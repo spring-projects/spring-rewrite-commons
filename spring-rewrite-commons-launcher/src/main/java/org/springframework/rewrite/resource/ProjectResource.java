@@ -13,12 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource.finder;
+package org.springframework.rewrite.resource;
 
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
+import java.nio.file.Path;
 
-public interface ProjectResourceFinder<T> {
+/**
+ * Defines operations on all project resources found during scan. All file resources need
+ * to implement this interface.
+ */
+public interface ProjectResource {
 
-	T apply(ProjectResourceSet projectResourceSet);
+	String print();
+
+	/**
+	 * @return Path relative to module root.
+	 */
+	Path getSourcePath();
+
+	Path getAbsolutePath();
+
+	void delete();
+
+	boolean isDeleted();
+
+	void moveTo(Path newPath);
 
 }

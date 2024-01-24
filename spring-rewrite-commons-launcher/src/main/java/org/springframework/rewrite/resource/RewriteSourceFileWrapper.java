@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource;
+package org.springframework.rewrite.resource;
 
 import org.openrewrite.SourceFile;
-import org.springframework.rewrite.project.resource.RewriteSourceFileHolder;
 
 import java.nio.file.Path;
 import java.util.List;

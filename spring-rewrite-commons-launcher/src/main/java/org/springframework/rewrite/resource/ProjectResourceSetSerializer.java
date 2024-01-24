@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource.finder;
+package org.springframework.rewrite.resource;
 
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
+public class ProjectResourceSetSerializer {
 
-import java.util.List;
-import java.util.stream.Collectors;
+	private final ProjectResourceSerializer resourceSerializer;
 
-public class ModifiedResourcePathStringFilter implements ProjectResourceFinder<List<String>> {
+	public ProjectResourceSetSerializer(ProjectResourceSerializer resourceSerializer) {
+		this.resourceSerializer = resourceSerializer;
+	}
 
-	@Override
-	public List<String> apply(ProjectResourceSet projectResourceSet) {
-		return projectResourceSet.stream()
-			.filter(r -> r.hasChanges() && !r.isDeleted() && !r.getAbsolutePath().toFile().isDirectory())
-			.map(r -> r.getAbsolutePath().toString())
-			.collect(Collectors.toList());
+	public void writeChanges(ProjectResourceSet projectResourceSet) {
+		projectResourceSet.streamIncludingDeleted().forEach(resourceSerializer::writeChanges);
+		projectResourceSet.clearDeletedResources();
 	}
 
 }

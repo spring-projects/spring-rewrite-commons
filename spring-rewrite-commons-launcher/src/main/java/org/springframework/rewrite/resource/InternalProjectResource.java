@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource;
+package org.springframework.rewrite.resource;
 
-public abstract class BaseProjectResource implements InternalProjectResource {
+public interface InternalProjectResource extends ProjectResource {
 
-	protected boolean isChanged = false;
+	void resetHasChanges();
 
-	private boolean isDeleted = false;
+	void markAsChanged();
 
-	public boolean hasChanges() {
-		return isChanged;
-	}
+	boolean hasChanges();
 
-	public void resetHasChanges() {
-		isChanged = false;
-	}
-
-	public void markAsChanged() {
-		isChanged = true;
-	}
-
-	public void delete() {
-		isDeleted = true;
-		markAsChanged();
-	}
-
-	public boolean isDeleted() {
-		return isDeleted;
-	}
+	boolean isDeleted();
 
 }

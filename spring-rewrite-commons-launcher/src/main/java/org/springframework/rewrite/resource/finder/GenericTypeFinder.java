@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource.finder;
+package org.springframework.rewrite.resource.finder;
 
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
+import org.springframework.rewrite.resource.ProjectResourceSet;
 
 import java.util.List;
 import java.util.Optional;

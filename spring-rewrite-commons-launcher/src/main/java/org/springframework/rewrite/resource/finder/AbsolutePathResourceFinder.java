@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource.finder;
+package org.springframework.rewrite.resource.finder;
 
 import org.openrewrite.SourceFile;
-import org.springframework.rewrite.project.resource.ProjectResourceSet;
-import org.springframework.rewrite.project.resource.RewriteSourceFileHolder;
+import org.springframework.rewrite.resource.ProjectResourceSet;
+import org.springframework.rewrite.resource.RewriteSourceFileHolder;
 
 import java.nio.file.Path;
 import java.util.Optional;

@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.project.resource;
+package org.springframework.rewrite.resource.finder;
 
-public class ProjectResourceSetSerializer {
+import org.springframework.rewrite.resource.ProjectResourceSet;
 
-	private final ProjectResourceSerializer resourceSerializer;
+public interface ProjectResourceFinder<T> {
 
-	public ProjectResourceSetSerializer(ProjectResourceSerializer resourceSerializer) {
-		this.resourceSerializer = resourceSerializer;
-	}
-
-	public void writeChanges(ProjectResourceSet projectResourceSet) {
-		projectResourceSet.streamIncludingDeleted().forEach(resourceSerializer::writeChanges);
-		projectResourceSet.clearDeletedResources();
-	}
+	T apply(ProjectResourceSet projectResourceSet);
 
 }

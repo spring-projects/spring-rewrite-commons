@@ -18,8 +18,7 @@ package org.springframework.rewrite.boot.autoconfigure;
 import org.openrewrite.ExecutionContext;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.rewrite.project.resource.RewriteSourceFileWrapper;
-import org.springframework.rewrite.project.resource.*;
+import org.springframework.rewrite.resource.*;
 
 /**
  * Configuration for {@link ProjectResourceSet} related beans.
@@ -51,7 +50,7 @@ public class ProjectResourceSetConfiguration {
 
 	@Bean
 	ProjectResourceSetFactory projectResourceSetFactory(RewriteMigrationResultMerger rewriteMigrationResultMerger,
-			RewriteSourceFileWrapper sourceFileWrapper, ExecutionContext executionContext) {
+														RewriteSourceFileWrapper sourceFileWrapper, ExecutionContext executionContext) {
 		return new ProjectResourceSetFactory(rewriteMigrationResultMerger, sourceFileWrapper, executionContext);
 	}
 
