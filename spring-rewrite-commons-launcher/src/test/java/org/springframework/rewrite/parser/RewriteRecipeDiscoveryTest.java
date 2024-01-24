@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.openrewrite.Recipe;
 import org.openrewrite.config.*;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 import org.springframework.rewrite.test.util.OpenRewriteDummyRecipeInstaller;
 
 import java.nio.file.Path;

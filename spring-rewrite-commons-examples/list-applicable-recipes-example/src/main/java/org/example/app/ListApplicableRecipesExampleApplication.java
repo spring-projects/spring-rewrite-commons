@@ -29,7 +29,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parser.ProjectScanner;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 
 import java.nio.file.Path;
 import java.util.Arrays;

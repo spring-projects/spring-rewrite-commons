@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.recipes;
+package org.springframework.rewrite;
 
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.Recipe;

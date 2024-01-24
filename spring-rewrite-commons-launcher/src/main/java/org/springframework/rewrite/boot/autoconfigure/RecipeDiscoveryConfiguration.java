@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.rewrite.parser.RewriteParserConfiguration;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 
 /**
  * Configuration for {@link RewriteRecipeDiscovery}.

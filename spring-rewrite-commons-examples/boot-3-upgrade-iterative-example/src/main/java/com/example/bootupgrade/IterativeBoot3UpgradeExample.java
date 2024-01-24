@@ -48,7 +48,7 @@ import org.springframework.rewrite.parser.events.StartedParsingResourceEvent;
 import org.springframework.rewrite.resource.ProjectResourceSet;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;
 import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.FileSystemUtils;

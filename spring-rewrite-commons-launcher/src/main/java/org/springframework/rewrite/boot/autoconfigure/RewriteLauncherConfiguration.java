@@ -22,7 +22,7 @@ import org.springframework.rewrite.RewriteRecipeLauncher;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;
 import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 
 /**
  * @author Fabian Krüger

@@ -35,7 +35,6 @@ import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
 import org.springframework.rewrite.parser.maven.MavenProject;
 import org.springframework.rewrite.parser.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parser.maven.ProvenanceMarkerFactory;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 import org.springframework.rewrite.scopes.ScanScope;
 import org.springframework.util.StringUtils;
 
