@@ -15,7 +15,6 @@
  */
 package org.springframework.rewrite.parser.maven;
 
-import org.springframework.rewrite.parser.MavenProject;
 import org.springframework.rewrite.parser.ProjectId;
 import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 

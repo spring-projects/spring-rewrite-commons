@@ -15,8 +15,6 @@
  */
 package org.springframework.rewrite.parser.maven;
 
-import org.springframework.rewrite.parser.MavenProject;
-
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;

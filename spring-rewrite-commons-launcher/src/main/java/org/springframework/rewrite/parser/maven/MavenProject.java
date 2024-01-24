@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.parser;
+package org.springframework.rewrite.parser.maven;
 
 import org.apache.maven.model.*;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -25,7 +25,7 @@ import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.parser.maven.MavenRuntimeInformation;
+import org.springframework.rewrite.parser.ProjectId;
 import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
 

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parser.maven.MavenModuleParser;
+import org.springframework.rewrite.parser.maven.MavenProject;
 
 import java.nio.file.Path;
 import java.util.*;

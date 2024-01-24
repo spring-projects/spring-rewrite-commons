@@ -29,7 +29,6 @@ import org.openrewrite.marker.OperatingSystemProvenance;
 import org.openrewrite.marker.ci.BuildEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.rewrite.parser.MavenProject;
 
 import java.nio.file.Path;
 import java.util.List;

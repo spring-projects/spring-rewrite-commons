@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
 import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
+import org.springframework.rewrite.parser.maven.MavenProject;
 import org.springframework.rewrite.parser.maven.MavenProjectAnalyzer;
 import org.springframework.rewrite.parser.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;

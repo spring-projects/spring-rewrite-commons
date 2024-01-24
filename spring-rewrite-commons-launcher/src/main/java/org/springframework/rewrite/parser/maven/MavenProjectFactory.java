@@ -18,7 +18,6 @@ package org.springframework.rewrite.parser.maven;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.parser.MavenProject;
 
 import java.nio.file.Path;
 import java.util.List;

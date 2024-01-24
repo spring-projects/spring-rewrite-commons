@@ -17,6 +17,7 @@ package org.springframework.rewrite.parser;
 
 import org.openrewrite.xml.tree.Xml;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.parser.maven.MavenProject;
 import org.springframework.rewrite.utils.ResourceUtil;
 
 import java.nio.file.Path;

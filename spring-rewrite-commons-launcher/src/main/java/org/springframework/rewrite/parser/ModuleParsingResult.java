@@ -16,6 +16,7 @@
 package org.springframework.rewrite.parser;
 
 import org.openrewrite.SourceFile;
+import org.springframework.rewrite.parser.maven.MavenProject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
  * @author Fabian Krüger
  */
 public record ModuleParsingResult(MavenProject currentProject, SourceSetParsingResult mainSourcesParsingResult,
-		SourceSetParsingResult testSourcesParsingResult, List<SourceFile> resourceFilesList) {
+                                  SourceSetParsingResult testSourcesParsingResult, List<SourceFile> resourceFilesList) {
 	public List<? extends SourceFile> sourceFiles() {
 		List<SourceFile> allSourceFiles = new ArrayList<>();
 		allSourceFiles.addAll(mainSourcesParsingResult.sourceFiles());

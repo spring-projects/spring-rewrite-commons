@@ -25,7 +25,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.openrewrite.maven.cache.LocalMavenArtifactCache;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.parser.MavenProject;
 import org.springframework.rewrite.test.util.DummyResource;
 
 import java.nio.file.Path;

@@ -35,7 +35,6 @@ import org.openrewrite.shaded.jgit.api.Git;
 import org.openrewrite.shaded.jgit.lib.Repository;
 import org.openrewrite.shaded.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.parser.MavenProject;
 import org.springframework.rewrite.parser.ParserContext;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.test.util.DummyResource;
