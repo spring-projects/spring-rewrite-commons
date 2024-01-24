@@ -21,9 +21,8 @@ import org.springframework.rewrite.parsers.RewriteParserConfiguration;
 
 /**
  * Configuration for all components.
- * @deprecated
- * Use {@link RewriteLauncherConfiguration} instead
  *
+ * @deprecated Use {@link RewriteLauncherConfiguration} instead
  * @author Fabian Krüger
  */
 @Deprecated(forRemoval = true)
