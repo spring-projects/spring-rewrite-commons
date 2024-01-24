@@ -24,8 +24,8 @@ import org.openrewrite.config.RecipeDescriptor;
 import org.openrewrite.config.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.rewrite.parsers.SpringRewriteProperties;
-import org.springframework.rewrite.parsers.RecipeValidationErrorException;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
+import org.springframework.rewrite.parser.RecipeValidationErrorException;
 
 import java.util.*;
 import java.util.function.Predicate;

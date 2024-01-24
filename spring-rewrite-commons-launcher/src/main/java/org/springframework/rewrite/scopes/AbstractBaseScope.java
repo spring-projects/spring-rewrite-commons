@@ -21,7 +21,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.lang.Nullable;
-import org.springframework.rewrite.parsers.RewriteExecutionContextErrorHandler;
+import org.springframework.rewrite.parser.RewriteExecutionContextErrorHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

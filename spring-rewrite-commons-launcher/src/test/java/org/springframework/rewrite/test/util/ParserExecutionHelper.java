@@ -21,11 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
-import org.springframework.rewrite.parsers.SpringRewriteProperties;
-import org.springframework.rewrite.parsers.RewriteProjectParser;
-import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
-import org.springframework.rewrite.parsers.maven.ComparingParserFactory;
-import org.springframework.rewrite.parsers.maven.RewriteMavenProjectParser;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
+import org.springframework.rewrite.parser.RewriteProjectParser;
+import org.springframework.rewrite.parser.RewriteProjectParsingResult;
+import org.springframework.rewrite.parser.maven.ComparingParserFactory;
+import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 
 import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;

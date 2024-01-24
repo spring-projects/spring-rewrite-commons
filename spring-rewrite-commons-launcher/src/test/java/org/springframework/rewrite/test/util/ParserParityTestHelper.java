@@ -31,9 +31,9 @@ import org.openrewrite.maven.tree.MavenResolutionResult;
 import org.openrewrite.maven.tree.ResolvedDependency;
 import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.style.Style;
-import org.springframework.rewrite.parsers.SpringRewriteProperties;
-import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
-import org.springframework.rewrite.parsers.maven.ClasspathDependencies;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
+import org.springframework.rewrite.parser.RewriteProjectParsingResult;
+import org.springframework.rewrite.parser.maven.ClasspathDependencies;
 
 import java.io.File;
 import java.net.URI;
@@ -69,7 +69,7 @@ public class ParserParityTestHelper {
 
 	/**
 	 * Sequentially parse given project using tested parser and then comparing parser. The
-	 * parsers are executed in parallel by default.
+	 * parser are executed in parallel by default.
 	 */
 	public ParserParityTestHelper parseSequentially() {
 		this.isParallelParse = false;
