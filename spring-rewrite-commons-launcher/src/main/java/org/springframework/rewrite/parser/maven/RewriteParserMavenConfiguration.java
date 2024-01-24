@@ -41,7 +41,7 @@ public class RewriteParserMavenConfiguration {
 	}
 
 	@Bean
-    MavenBuildFileParser buildFileParser(MavenSettingsInitializer mavenSettingsInitializer) {
+	MavenBuildFileParser buildFileParser(MavenSettingsInitializer mavenSettingsInitializer) {
 		return new MavenBuildFileParser(mavenSettingsInitializer);
 	}
 

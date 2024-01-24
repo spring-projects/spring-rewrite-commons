@@ -23,19 +23,19 @@ import java.nio.file.Path;
  */
 public interface ProjectResource {
 
-    String print();
+	String print();
 
-    /**
-     * @return Path relative to module root.
-     */
-    Path getSourcePath();
+	/**
+	 * @return Path relative to module root.
+	 */
+	Path getSourcePath();
 
-    Path getAbsolutePath();
+	Path getAbsolutePath();
 
-    void delete();
+	void delete();
 
-    boolean isDeleted();
+	boolean isDeleted();
 
-    void moveTo(Path newPath);
+	void moveTo(Path newPath);
 
 }
