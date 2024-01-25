@@ -9,7 +9,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rewrite-gradle-model</artifactId>
+    <artifactId>spring-rewrite-commons-rewrite-gradle-model</artifactId>
     <name>Spring Rewrite Gradle Tooling Model</name>
 
     <properties>

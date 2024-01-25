@@ -9,7 +9,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rewrite-gradle-parser</artifactId>
+    <artifactId>spring-rewrite-commons-rewrite-gradle-parser</artifactId>
     <name>Spring Rewrite Gradle Project Parser</name>
 
     <properties>
@@ -21,10 +21,9 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.rewrite</groupId>
-            <artifactId>rewrite-gradle-model</artifactId>
+            <artifactId>spring-rewrite-commons-rewrite-gradle-model</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/dev.gradleplugins/gradle-api -->
         <dependency>
             <groupId>dev.gradleplugins</groupId>
             <artifactId>gradle-api</artifactId>

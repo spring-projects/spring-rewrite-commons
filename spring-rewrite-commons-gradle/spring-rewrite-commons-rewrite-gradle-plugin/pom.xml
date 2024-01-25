@@ -9,7 +9,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rewrite-gradle-plugin</artifactId>
+    <artifactId>spring-rewrite-commons-rewrite-gradle-plugin</artifactId>
     <name>Spring Rewrite Gradle Plugin</name>
 
     <properties>
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.rewrite</groupId>
-            <artifactId>rewrite-gradle-model</artifactId>
+            <artifactId>spring-rewrite-commons-rewrite-gradle-model</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
