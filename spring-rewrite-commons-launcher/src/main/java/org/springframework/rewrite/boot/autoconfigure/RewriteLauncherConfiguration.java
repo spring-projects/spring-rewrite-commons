@@ -32,7 +32,7 @@ import org.springframework.rewrite.RewriteRecipeDiscovery;
 public class RewriteLauncherConfiguration {
 
 	@Bean
-	RewriteRecipeLauncher rewriteRecipeLaucnher(RewriteProjectParser parser, RewriteRecipeDiscovery dicovery,
+	RewriteRecipeLauncher rewriteRecipeLauncher(RewriteProjectParser parser, RewriteRecipeDiscovery dicovery,
 			ProjectResourceSetFactory resourceSetFactory, ProjectResourceSetSerializer deserializer) {
 		return new RewriteRecipeLauncher(parser, dicovery, resourceSetFactory, deserializer);
 	}
