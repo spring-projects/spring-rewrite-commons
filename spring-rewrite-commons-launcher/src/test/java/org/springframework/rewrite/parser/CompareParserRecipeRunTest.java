@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CompareParserRecipeRunTest {
 
 	@Autowired
-    RewriteProjectParser sut;
+	RewriteProjectParser sut;
 
 	@Autowired
 	RewriteMavenProjectParser comparingParser;
