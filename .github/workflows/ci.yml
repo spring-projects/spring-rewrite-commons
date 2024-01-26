@@ -75,7 +75,7 @@ jobs:
           --server-id-deploy repo.spring.io \
           --repo-deploy-releases release \
           --repo-deploy-snapshots snapshot \
-          --exclude-patterns="*-example*.*,*-test-*.*,*-docs-*.*"
+          --exclude-patterns="*-example*.*,*-tests-*.*,*-docs-*.*"
           echo JFROG_CLI_BUILD_NAME=spring-rewrite-commons-main >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
