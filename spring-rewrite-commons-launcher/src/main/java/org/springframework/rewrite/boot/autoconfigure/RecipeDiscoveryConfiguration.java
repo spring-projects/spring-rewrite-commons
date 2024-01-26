@@ -19,9 +19,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.rewrite.parsers.SpringRewriteProperties;
-import org.springframework.rewrite.parsers.RewriteParserConfiguration;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.parser.RewriteParserConfiguration;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 
 /**
  * Configuration for {@link RewriteRecipeDiscovery}.

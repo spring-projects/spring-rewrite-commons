@@ -17,7 +17,7 @@ package org.springframework.rewrite.boot.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.rewrite.parsers.RewriteParserConfiguration;
+import org.springframework.rewrite.parser.RewriteParserConfiguration;
 
 /**
  * Configuration for all components.
