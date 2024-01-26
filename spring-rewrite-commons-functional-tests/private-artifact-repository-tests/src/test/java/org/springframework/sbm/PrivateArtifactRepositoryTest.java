@@ -30,8 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
 import org.springframework.rewrite.RewriteProjectParser;
+import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.parser.maven.SbmTestConfiguration;
 import org.springframework.util.FileSystemUtils;
@@ -87,7 +87,7 @@ import static org.assertj.core.api.Fail.fail;
  *
  * @author Fabian Krüger
  */
-@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, SpringRewriteCommonsConfiguration.class,
+@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, RewriteLauncherConfiguration.class,
 		SbmTestConfiguration.class })
 @Testcontainers
 public class PrivateArtifactRepositoryTest {
