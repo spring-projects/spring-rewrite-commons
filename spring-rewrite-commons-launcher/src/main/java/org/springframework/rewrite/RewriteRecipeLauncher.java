@@ -31,11 +31,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Helps to apply recipes.
+ *
  * @author Fabian Krüger
  */
 public class RewriteRecipeLauncher {
-
-	private static final Logger logger = LoggerFactory.getLogger(RewriteRecipeLauncher.class);
 
 	private final RewriteProjectParser parser;
 
@@ -45,6 +45,9 @@ public class RewriteRecipeLauncher {
 
 	private final ProjectResourceSetSerializer serializer;
 
+	/**
+	 * Listener API for progress events/messages
+	 */
 	public interface RewriteRecipeRunnerProgressListener {
 
 		void progress(String progressMessage);
@@ -59,21 +62,42 @@ public class RewriteRecipeLauncher {
 		this.serializer = serializer;
 	}
 
+	/**
+	 * Apply the recipe with {@code recipeName} to the project under {@code path}.
+	 * @throws IllegalStateException when the recipe couldn't be discovered
+	 */
 	public void run(String recipeName, String path) {
 		run(recipeName, path, __ -> {
 		});
 	}
 
+	/**
+	 * Apply the recipe with {@code recipeName} to the project under {@code path}.
+	 * @throws IllegalStateException when the recipe couldn't be discovered
+	 */
 	public void run(String recipeName, String path, RewriteRecipeRunnerProgressListener listener) {
+		Optional<Recipe> recipe = discoverRecipe(recipeName);
+		if (recipe.isEmpty()) {
+			throw new IllegalStateException("Could not find recipe " + recipeName + ".");
+		}
+		run(recipe.get(), path, listener);
+	}
+
+	/**
+	 * Apply the {@link Recipe} to the project under {@code path}.
+	 */
+	public void run(Recipe recipe, String path) {
+		run(recipe, path, __ -> {
+		});
+	}
+
+	/**
+	 * Apply the {@link Recipe} to the project under {@code path}.
+	 */
+	public void run(Recipe recipe, String path, RewriteRecipeRunnerProgressListener listener) {
 		Path baseDir = getBaseDir(path);
 		RewriteProjectParsingResult parsingResult = parseProject(baseDir, listener);
-		Optional<Recipe> recipe = discoverRecipe(recipeName);
-		if (recipe.isPresent()) {
-			applyRecipe(recipeName, baseDir, parsingResult, recipe, listener);
-		}
-		else {
-			logger.error("Could not find recipe " + recipeName + ".");
-		}
+		applyRecipe(baseDir, parsingResult, recipe, listener);
 	}
 
 	@NotNull
@@ -88,15 +112,16 @@ public class RewriteRecipeLauncher {
 		return parsingResult;
 	}
 
-	private void applyRecipe(String recipeName, Path baseDir, RewriteProjectParsingResult parsingResult,
-			Optional<Recipe> recipe, RewriteRecipeRunnerProgressListener listener) {
+	private void applyRecipe(Path baseDir, RewriteProjectParsingResult parsingResult, Recipe recipe,
+			RewriteRecipeRunnerProgressListener listener) {
+		Object recipeName = recipe.getName();
 		StopWatch stopWatch = new StopWatch("parse");
 		stopWatch.start();
 		// Use ProjectResourceSet abstraction
 		ProjectResourceSet projectResourceSet = resourceSetFactory.create(baseDir, parsingResult.sourceFiles());
 		// To apply recipes
 		listener.progress("Applying recipe %s, this may take a few minutes.".formatted(recipeName));
-		projectResourceSet.apply(recipe.get());
+		projectResourceSet.apply(recipe);
 		stopWatch.stop();
 		double recipeRunTime = stopWatch.getTotalTime(TimeUnit.MINUTES);
 		listener.progress("Applied recipe %s in %f min.".formatted(recipeName, recipeRunTime));
