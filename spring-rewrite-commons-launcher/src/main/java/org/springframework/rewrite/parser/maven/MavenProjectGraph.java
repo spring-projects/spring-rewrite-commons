@@ -78,8 +78,10 @@ public class MavenProjectGraph {
 	}
 
 	private void initGaToMavenProjectMap(List<MavenProject> allPomFiles) {
-		gaToMavenProjectMap = allPomFiles.stream()
-			.collect(Collectors.toMap(mp -> new ProjectId(mp.getGroupId(), mp.getArtifactId()), mp -> mp));
+		gaToMavenProjectMap = new HashMap<>();
+		allPomFiles.stream().forEach(mp -> {
+			gaToMavenProjectMap.putIfAbsent(new ProjectId(mp.getGroupId(), mp.getArtifactId()), mp);
+		});
 	}
 
 	private void buildDependencyGraph(MavenProject currentProject, List<MavenProject> reactorProjects,
