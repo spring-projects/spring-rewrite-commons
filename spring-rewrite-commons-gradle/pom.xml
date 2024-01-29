@@ -7,6 +7,7 @@
         <groupId>org.springframework.rewrite</groupId>
         <artifactId>spring-rewrite-commons</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-rewrite-commons-gradle</artifactId>
