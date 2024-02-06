@@ -18,11 +18,11 @@ package org.springframework.rewrite.boot.autoconfigure;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.rewrite.execution.RewriteRecipeLauncher;
-import org.springframework.rewrite.parsers.RewriteProjectParser;
-import org.springframework.rewrite.project.resource.ProjectResourceSetFactory;
-import org.springframework.rewrite.project.resource.ProjectResourceSetSerializer;
-import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
+import org.springframework.rewrite.RewriteRecipeLauncher;
+import org.springframework.rewrite.RewriteProjectParser;
+import org.springframework.rewrite.resource.ProjectResourceSetFactory;
+import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
+import org.springframework.rewrite.RewriteRecipeDiscovery;
 
 /**
  * @author Fabian Krüger
@@ -32,7 +32,7 @@ import org.springframework.rewrite.recipes.RewriteRecipeDiscovery;
 public class RewriteLauncherConfiguration {
 
 	@Bean
-	RewriteRecipeLauncher rewriteRecipeLaucnher(RewriteProjectParser parser, RewriteRecipeDiscovery dicovery,
+	RewriteRecipeLauncher rewriteRecipeLauncher(RewriteProjectParser parser, RewriteRecipeDiscovery dicovery,
 			ProjectResourceSetFactory resourceSetFactory, ProjectResourceSetSerializer deserializer) {
 		return new RewriteRecipeLauncher(parser, dicovery, resourceSetFactory, deserializer);
 	}

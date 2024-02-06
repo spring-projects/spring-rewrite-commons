@@ -15,7 +15,7 @@
  */
 package org.springframework.rewrite.test.util;
 
-import org.springframework.rewrite.parsers.RewriteProjectParsingResult;
+import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 
 /**
  * @author Fabian Krüger
