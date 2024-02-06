@@ -27,8 +27,8 @@ initscript{
     }
 
     dependencies{
-        classpath 'org.springframework.rewrite:rewrite-gradle-plugin:latest.integration'
-        classpath 'org.springframework.rewrite:rewrite-gradle-model:latest.integration'
+        classpath 'org.springframework.rewrite:spring-rewrite-commons-rewrite-gradle-plugin:latest.integration'
+        classpath 'org.springframework.rewrite:spring-rewrite-commons-rewrite-gradle-model:latest.integration'
     }
 }
 

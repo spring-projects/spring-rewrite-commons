@@ -16,13 +16,14 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gradle-tooling-model.version>1.1.2</gradle-tooling-model.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.openrewrite.gradle.tooling</groupId>
             <artifactId>model</artifactId>
-            <version>1.1.2</version>
+            <version>${gradle-tooling-model.version}</version>
         </dependency>
         <dependency>
             <groupId>org.gradle</groupId>
