@@ -20,3 +20,4 @@ pom.xml.versionsBackup
 **/src/generated/java/META-INF
 **.java-version
 **/.rewrite-cache
+internal/
