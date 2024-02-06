@@ -105,8 +105,8 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(countGetters(jv)).isEqualTo(7);
 				assertThat(jv.getCreatedBy()).isEqualTo(System.getProperty("java.specification.version"));
 				// assertThat(jv.getMajorVersion()).isEqualTo(Integer.parseInt(System.getProperty("java.specification.version")));
-				assertThat(jv.getMajorVersion()).isEqualTo(18);
-				assertThat(jv.getSourceCompatibility()).isEqualTo("18");
+				assertThat(jv.getMajorVersion()).isEqualTo(17);
+				assertThat(jv.getSourceCompatibility()).isEqualTo("17");
 				assertThat(jv.getTargetCompatibility()).isEqualTo("17");
 				assertThat(jv.getMajorReleaseVersion()).isEqualTo(17);
 				assertThat(jv.getVmVendor()).isEqualTo(System.getProperty("java.vm.vendor"));
