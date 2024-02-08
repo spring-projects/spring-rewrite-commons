@@ -22,9 +22,9 @@
     </properties>
 
     <modules>
-        <module>rewrite-gradle-model</module>
-        <module>rewrite-gradle-plugin</module>
-        <module>rewrite-gradle-parser</module>
+        <module>spring-rewrite-commons-rewrite-gradle-model</module>
+        <module>spring-rewrite-commons-rewrite-gradle-plugin</module>
+        <module>spring-rewrite-commons-rewrite-gradle-parser</module>
     </modules>
 
     <repositories>

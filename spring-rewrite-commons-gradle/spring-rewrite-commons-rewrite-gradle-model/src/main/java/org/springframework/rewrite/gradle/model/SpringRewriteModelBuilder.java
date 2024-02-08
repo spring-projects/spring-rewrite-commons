@@ -33,7 +33,7 @@ import java.util.List;
 public class SpringRewriteModelBuilder {
 
 	public static <T> T forProjectDirectory(Class<T> type, File projectDir, File buildFile) {
-		DefaultGradleConnector connector = (DefaultGradleConnector) GradleConnector.newConnector();
+		var connector = (DefaultGradleConnector) GradleConnector.newConnector();
 		if (Files.exists(projectDir.toPath().resolve("gradle/wrapper/gradle-wrapper.properties"))) {
 			connector.useBuildDistribution();
 		}
@@ -51,7 +51,7 @@ public class SpringRewriteModelBuilder {
 		arguments.add(init.toString());
 		try (ProjectConnection connection = connector.connect()) {
 			ModelBuilder<T> customModelBuilder = connection.model(type);
-			try (InputStream is = SpringRewriteModelBuilder.class.getResourceAsStream("/init-spring-rewrite.gradle")) {
+			try (var is = SpringRewriteModelBuilder.class.getResourceAsStream("/init-spring-rewrite.gradle")) {
 				if (is == null) {
 					throw new IllegalStateException("Expected to find init.gradle on the classpath");
 				}
