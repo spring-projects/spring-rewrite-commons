@@ -180,7 +180,7 @@ public class MavenCli {
 
     private static CliRequest createCliRequest(String[] args, ClassWorld classWorld) {
         try {
-            Constructor<CliRequest> constructor = CliRequest.class.getDeclaredConstructor(String[].class, classWorld.getClass());
+            Constructor<CliRequest> constructor = CliRequest.class.getDeclaredConstructor(String[].class, ClassWorld.class);
             constructor.setAccessible(true); // Make the constructor accessible
             CliRequest delegate = constructor.newInstance(args, classWorld);
             return delegate;
@@ -289,7 +289,7 @@ public class MavenCli {
             return 2;
         } catch (Exception e) {
             Boolean showErrors = getFieldValue(cliRequest, "showErrors", Boolean.class);
-            CLIReportingUtils.showError(slf4jLogger, "Error executing Maven.", e, showErrors);
+            CLIReportingUtils.showError(slf4jLogger, "Error executing Maven.", e, true);
 
             return 1;
         } finally {
@@ -560,8 +560,7 @@ public class MavenCli {
 
     PlexusContainer container(CliRequest cliRequest)
             throws Exception {
-        ClassWorld classWorld1 = getFieldValue(cliRequest, "classWorld", ClassWorld.class);
-        if (classWorld1 == null) {
+        if (getFieldValue(cliRequest, "classWorld", ClassWorld.class) == null) {
             setField(cliRequest, "classWorld", new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader()));
         }
 
