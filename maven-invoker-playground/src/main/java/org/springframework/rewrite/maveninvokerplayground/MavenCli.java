@@ -80,9 +80,12 @@ import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecUtil;
 import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -168,7 +171,7 @@ public class MavenCli {
 
         MessageUtils.systemInstall();
         MessageUtils.registerShutdownHook();
-        DelegatingCliRequest cliRequest = createCliRequest(args, classWorld);
+        CliRequest cliRequest = createCliRequest(args, classWorld);
         int result = cli.doMain(cliRequest);
         MessageUtils.systemUninstall();
 
@@ -192,10 +195,10 @@ public class MavenCli {
         }
     }
 
-    // TODO need to externalize DelegatingCliRequest
+    // TODO need to externalize CliRequest
     public static int doMain(String[] args, ClassWorld classWorld) {
         MavenCli cli = new MavenCli();
-        return cli.doMain(new DelegatingCliRequest(args, classWorld));
+        return cli.doMain(createCliRequest(args, classWorld));
     }
 
     /**
@@ -225,8 +228,8 @@ public class MavenCli {
                 System.setErr(stderr);
             }
 
-            DelegatingCliRequest cliRequest = new DelegatingCliRequest(args, classWorld);
-            cliRequest.workingDirectory = workingDirectory;
+            CliRequest cliRequest = createCliRequest(args, classWorld);
+            setField(cliRequest, "workingDirectory", workingDirectory);
 
             return doMain(cliRequest);
         } finally {
@@ -247,8 +250,18 @@ public class MavenCli {
         }
     }
 
-    // TODO need to externalize DelegatingCliRequest
-    public int doMain(DelegatingCliRequest cliRequest) {
+    private void setField(Object target, String fieldName, Object value) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            ReflectionUtils.makeAccessible(field);
+            ReflectionUtils.setField(field, target, value);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Field '%s' is not defined on type '%s'".formatted(fieldName, target.getClass()), e);
+        }
+    }
+
+    // TODO need to externalize CliRequest
+    public int doMain(CliRequest cliRequest) {
         PlexusContainer localContainer = null;
         try {
             initialize(cliRequest);
@@ -271,11 +284,12 @@ public class MavenCli {
             // pure user error, suppress stack trace
             return 1;
         } catch (BuildAbort e) {
-            CLIReportingUtils.showError(slf4jLogger, "ABORTED", e, cliRequest.showErrors);
+            CLIReportingUtils.showError(slf4jLogger, "ABORTED", e, getFieldValue(cliRequest, "showErrors", Boolean.class));
 
             return 2;
         } catch (Exception e) {
-            CLIReportingUtils.showError(slf4jLogger, "Error executing Maven.", e, cliRequest.showErrors);
+            Boolean showErrors = getFieldValue(cliRequest, "showErrors", Boolean.class);
+            CLIReportingUtils.showError(slf4jLogger, "Error executing Maven.", e, showErrors);
 
             return 1;
         } finally {
@@ -285,13 +299,32 @@ public class MavenCli {
         }
     }
 
-    void initialize(DelegatingCliRequest cliRequest)
+    private <T> T getFieldValue(CliRequest cliRequest, String showErrors, Class<T> expectedType) {
+        try {
+            Field field = cliRequest.getClass().getDeclaredField(showErrors);
+            ReflectionUtils.makeAccessible(field);
+            Object fieldValue = ReflectionUtils.getField(field, cliRequest);
+            if(fieldValue == null) {
+                return null;
+            }
+            if(!expectedType.isAssignableFrom(fieldValue.getClass())) {
+                throw new IllegalStateException("Field '%s' on given instance is not of type Boolean, was: %s".formatted(showErrors, cliRequest.getClass().getName()));
+            } else {
+                return expectedType.cast(fieldValue);
+            }
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    void initialize(CliRequest cliRequest)
             throws MavenCli.ExitException {
-        if (cliRequest.workingDirectory == null) {
-            cliRequest.workingDirectory = System.getProperty("user.dir");
+        if (getFieldValue(cliRequest, "workingDirectory", Object.class) == null) {
+            setField(cliRequest, "workingDirectory", System.getProperty("user.dir"));
         }
 
-        if (cliRequest.multiModuleProjectDirectory == null) {
+        File multiModuleProjectDirectory = getFieldValue(cliRequest, "multiModuleProjectDirectory", File.class);
+        if (multiModuleProjectDirectory == null) {
             String basedirProperty = System.getProperty(MULTIMODULE_PROJECT_DIRECTORY);
             if (basedirProperty == null) {
                 System.err.format(
@@ -300,9 +333,9 @@ public class MavenCli {
             }
             File basedir = basedirProperty != null ? new File(basedirProperty) : new File("");
             try {
-                cliRequest.multiModuleProjectDirectory = basedir.getCanonicalFile();
+                setField(cliRequest, "multiModuleProjectDirectory", basedir.getCanonicalFile());
             } catch (IOException e) {
-                cliRequest.multiModuleProjectDirectory = basedir.getAbsoluteFile();
+                setField(cliRequest, "multiModuleProjectDirectory", basedir.getAbsoluteFile());
             }
         }
 
@@ -317,7 +350,7 @@ public class MavenCli {
         }
     }
 
-    void cli(DelegatingCliRequest cliRequest)
+    void cli(CliRequest cliRequest)
             throws Exception {
         //
         // Parsing errors can happen during the processing of the arguments and we prefer not having to check if
@@ -330,7 +363,8 @@ public class MavenCli {
         List<String> args = new ArrayList<>();
         CommandLine mavenConfig = null;
         try {
-            File configFile = new File(cliRequest.multiModuleProjectDirectory, MVN_MAVEN_CONFIG);
+            File multiModuleProjectDirectory = getFieldValue(cliRequest,"multiModuleProjectDirectory", File.class);
+            File configFile = new File(multiModuleProjectDirectory, MVN_MAVEN_CONFIG);
 
             if (configFile.isFile()) {
                 for (String arg : new String(Files.readAllBytes(configFile.toPath())).split("\\s+")) {
@@ -353,9 +387,11 @@ public class MavenCli {
 
         try {
             if (mavenConfig == null) {
-                cliRequest.commandLine = cliManager.parse(cliRequest.args);
+                String[] args1 = getFieldValue(cliRequest, "args", String[].class);
+                setField(cliRequest, "commandLine", cliManager.parse(args1));
             } else {
-                cliRequest.commandLine = cliMerge(cliManager.parse(cliRequest.args), mavenConfig);
+                String[] args2 = getFieldValue(cliRequest, "args", String[].class);
+                setField(cliRequest, "commandLine", cliMerge(cliManager.parse(args2), mavenConfig));
             }
         } catch (ParseException e) {
             System.err.println("Unable to parse command line options: " + e.getMessage());
@@ -364,14 +400,15 @@ public class MavenCli {
         }
     }
 
-    private void informativeCommands(DelegatingCliRequest cliRequest) throws MavenCli.ExitException {
-        if (cliRequest.commandLine.hasOption(CLIManager.HELP)) {
+    private void informativeCommands(CliRequest cliRequest) throws MavenCli.ExitException {
+        CommandLine commandLine = getFieldValue(cliRequest, "commandLine", CommandLine.class);
+        if (commandLine.hasOption(CLIManager.HELP)) {
             cliManager.displayHelp(System.out);
             throw new MavenCli.ExitException(0);
         }
 
-        if (cliRequest.commandLine.hasOption(CLIManager.VERSION)) {
-            if (cliRequest.commandLine.hasOption(CLIManager.QUIET)) {
+        if (commandLine.hasOption(CLIManager.VERSION)) {
+            if (commandLine.hasOption(CLIManager.QUIET)) {
                 System.out.println(CLIReportingUtils.showVersionMinimal());
             } else {
                 System.out.println(CLIReportingUtils.showVersion());
@@ -413,20 +450,23 @@ public class MavenCli {
     /**
      * configure logging
      */
-    void logging(DelegatingCliRequest cliRequest) {
+    void logging(CliRequest cliRequest) {
         // LOG LEVEL
-        cliRequest.debug = cliRequest.commandLine.hasOption(CLIManager.DEBUG);
-        cliRequest.quiet = !cliRequest.debug && cliRequest.commandLine.hasOption(CLIManager.QUIET);
-        cliRequest.showErrors = cliRequest.debug || cliRequest.commandLine.hasOption(CLIManager.ERRORS);
+        CommandLine commandLine = getFieldValue(cliRequest, "commandLine", CommandLine.class);
+        setField(cliRequest, "debug", commandLine.hasOption(CLIManager.DEBUG));
+        boolean debug = getFieldValue(cliRequest, "debug", Boolean.class);
+        setField(cliRequest, "quiet", !debug && commandLine.hasOption(CLIManager.QUIET));
+        setField(cliRequest, "showErrors", debug || commandLine.hasOption(CLIManager.ERRORS));
 
         slf4jLoggerFactory = LoggerFactory.getILoggerFactory();
         Slf4jConfiguration slf4jConfiguration = Slf4jConfigurationFactory.getConfiguration(slf4jLoggerFactory);
 
-        if (cliRequest.debug) {
-            cliRequest.request.setLoggingLevel(MavenExecutionRequest.LOGGING_LEVEL_DEBUG);
+        MavenExecutionRequest request = getFieldValue(cliRequest, "request", MavenExecutionRequest.class);
+        if (debug) {
+            request.setLoggingLevel(MavenExecutionRequest.LOGGING_LEVEL_DEBUG);
             slf4jConfiguration.setRootLoggerLevel(Slf4jConfiguration.Level.DEBUG);
-        } else if (cliRequest.quiet) {
-            cliRequest.request.setLoggingLevel(MavenExecutionRequest.LOGGING_LEVEL_ERROR);
+        } else if (getFieldValue(cliRequest, "quiet", Boolean.class)) {
+            request.setLoggingLevel(MavenExecutionRequest.LOGGING_LEVEL_ERROR);
             slf4jConfiguration.setRootLoggerLevel(Slf4jConfiguration.Level.ERROR);
         }
         // else fall back to default log level specified in conf
@@ -434,7 +474,7 @@ public class MavenCli {
 
         // LOG COLOR
         String styleColor = cliRequest.getUserProperties().getProperty(STYLE_COLOR_PROPERTY, "auto");
-        styleColor = cliRequest.commandLine.getOptionValue(COLOR, styleColor);
+        styleColor = commandLine.getOptionValue(COLOR, styleColor);
         if ("always".equals(styleColor) || "yes".equals(styleColor) || "force".equals(styleColor)) {
             MessageUtils.setColorEnabled(true);
         } else if ("never".equals(styleColor) || "no".equals(styleColor) || "none".equals(styleColor)) {
@@ -442,15 +482,16 @@ public class MavenCli {
         } else if (!"auto".equals(styleColor) && !"tty".equals(styleColor) && !"if-tty".equals(styleColor)) {
             throw new IllegalArgumentException("Invalid color configuration value '" + styleColor
                     + "'. Supported are 'auto', 'always', 'never'.");
-        } else if (cliRequest.commandLine.hasOption(CLIManager.BATCH_MODE)
-                || cliRequest.commandLine.hasOption(CLIManager.LOG_FILE)) {
+        } else if (commandLine.hasOption(CLIManager.BATCH_MODE)
+                || commandLine.hasOption(CLIManager.LOG_FILE)) {
             MessageUtils.setColorEnabled(false);
         }
 
         // LOG STREAMS
-        if (cliRequest.commandLine.hasOption(CLIManager.LOG_FILE)) {
-            File logFile = new File(cliRequest.commandLine.getOptionValue(CLIManager.LOG_FILE));
-            logFile = resolveFile(logFile, cliRequest.workingDirectory);
+        if (commandLine.hasOption(CLIManager.LOG_FILE)) {
+            File logFile = new File(commandLine.getOptionValue(CLIManager.LOG_FILE));
+            String workingDirectory = getFieldValue(cliRequest, "workingDirectory", String.class);
+            logFile = resolveFile(logFile, workingDirectory);
 
             // redirect stdout and stderr to file
             try {
@@ -470,20 +511,23 @@ public class MavenCli {
         slf4jLogger = slf4jLoggerFactory.getLogger(this.getClass().getName());
     }
 
-    private void version(DelegatingCliRequest cliRequest) {
-        if (cliRequest.debug || cliRequest.commandLine.hasOption(CLIManager.SHOW_VERSION)) {
+    private void version(CliRequest cliRequest) {
+        boolean debug = getFieldValue(cliRequest, "debug", Boolean.class);
+        CommandLine commandLine = getFieldValue(cliRequest, "commandLine", CommandLine.class);
+        if (debug || commandLine.hasOption(CLIManager.SHOW_VERSION)) {
             System.out.println(CLIReportingUtils.showVersion());
         }
     }
 
-    private void commands(DelegatingCliRequest cliRequest) {
-        if (cliRequest.showErrors) {
+    private void commands(CliRequest cliRequest) {
+        if (getFieldValue(cliRequest, "showErrors", Boolean.class)) {
             slf4jLogger.info("Error stacktraces are turned on.");
         }
 
-        if (MavenExecutionRequest.CHECKSUM_POLICY_WARN.equals(cliRequest.request.getGlobalChecksumPolicy())) {
+        MavenExecutionRequest request = getFieldValue(cliRequest, "request", MavenExecutionRequest.class);
+        if (MavenExecutionRequest.CHECKSUM_POLICY_WARN.equals(request.getGlobalChecksumPolicy())) {
             slf4jLogger.info("Disabling strict checksum verification on all artifact downloads.");
-        } else if (MavenExecutionRequest.CHECKSUM_POLICY_FAIL.equals(cliRequest.request.getGlobalChecksumPolicy())) {
+        } else if (MavenExecutionRequest.CHECKSUM_POLICY_FAIL.equals(request.getGlobalChecksumPolicy())) {
             slf4jLogger.info("Enabling strict checksum verification on all artifact downloads.");
         }
 
@@ -507,21 +551,23 @@ public class MavenCli {
         }
     }
 
-    //Needed to make this method package visible to make writing a unit test possible
-    //Maybe it's better to move some of those methods to separate class (SoC).
-    void properties(DelegatingCliRequest cliRequest) {
-        populateProperties(cliRequest.commandLine, cliRequest.systemProperties, cliRequest.userProperties);
+    void properties(CliRequest cliRequest) {
+        CommandLine commandLine = getFieldValue(cliRequest, "commandLine", CommandLine.class);
+        Properties systemProperties = getFieldValue(cliRequest, "systemProperties", Properties.class);
+        Properties userProperties = getFieldValue(cliRequest, "userProperties", Properties.class);
+        populateProperties(commandLine, systemProperties, userProperties);
     }
 
-    PlexusContainer container(DelegatingCliRequest cliRequest)
+    PlexusContainer container(CliRequest cliRequest)
             throws Exception {
-        if (cliRequest.classWorld == null) {
-            cliRequest.classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
+        ClassWorld classWorld1 = getFieldValue(cliRequest, "classWorld", ClassWorld.class);
+        if (classWorld1 == null) {
+            setField(cliRequest, "classWorld", new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader()));
         }
 
-        ClassRealm coreRealm = cliRequest.classWorld.getClassRealm("plexus.core");
+        ClassRealm coreRealm = getFieldValue(cliRequest, "classWorld", ClassWorld.class).getClassRealm("plexus.core");
         if (coreRealm == null) {
-            coreRealm = cliRequest.classWorld.getRealms().iterator().next();
+            coreRealm = getFieldValue(cliRequest, "classWorld", ClassWorld.class).getRealms().iterator().next();
         }
 
         List<File> extClassPath = parseExtClasspath(cliRequest);
@@ -530,9 +576,10 @@ public class MavenCli {
         List<CoreExtensionEntry> extensions =
                 loadCoreExtensions(cliRequest, coreRealm, coreEntry.getExportedArtifacts());
 
-        ClassRealm containerRealm = setupContainerRealm(cliRequest.classWorld, coreRealm, extClassPath, extensions);
+        ClassRealm containerRealm = setupContainerRealm(getFieldValue(cliRequest, "classWorld", ClassWorld.class), coreRealm, extClassPath, extensions);
 
-        ContainerConfiguration cc = new DefaultContainerConfiguration().setClassWorld(cliRequest.classWorld)
+        ClassWorld classWorld3 = getFieldValue(cliRequest, "classWorld", ClassWorld.class);
+        ContainerConfiguration cc = new DefaultContainerConfiguration().setClassWorld(classWorld3)
                 .setRealm(containerRealm).setClassPathScanning(PlexusConstants.SCANNING_INDEX).setAutoWiring(true)
                 .setJSR250Lifecycle(true).setName("maven");
 
@@ -566,16 +613,17 @@ public class MavenCli {
 
         customizeContainer(container);
 
-        container.getLoggerManager().setThresholds(cliRequest.request.getLoggingLevel());
+        MavenExecutionRequest request = getFieldValue(cliRequest, "request", MavenExecutionRequest.class);
+        container.getLoggerManager().setThresholds(request.getLoggingLevel());
 
         eventSpyDispatcher = container.lookup(EventSpyDispatcher.class);
 
         DefaultEventSpyContext eventSpyContext = new DefaultEventSpyContext();
         Map<String, Object> data = eventSpyContext.getData();
         data.put("plexus", container);
-        data.put("workingDirectory", cliRequest.workingDirectory);
-        data.put("systemProperties", cliRequest.systemProperties);
-        data.put("userProperties", cliRequest.userProperties);
+        data.put("workingDirectory", getFieldValue(cliRequest, "workingDirectory", String.class));
+        data.put("systemProperties", getFieldValue(cliRequest, "systemProperties", Properties.class));
+        data.put("userProperties", getFieldValue(cliRequest, "userProperties", Properties.class));
         data.put("versionProperties", CLIReportingUtils_getBuildProperties());
         eventSpyDispatcher.init(eventSpyContext);
 
@@ -617,13 +665,14 @@ public class MavenCli {
             return properties;
     }
 
-    private List<CoreExtensionEntry> loadCoreExtensions(DelegatingCliRequest cliRequest, ClassRealm containerRealm,
+    private List<CoreExtensionEntry> loadCoreExtensions(CliRequest cliRequest, ClassRealm containerRealm,
                                                         Set<String> providedArtifacts) {
-        if (cliRequest.multiModuleProjectDirectory == null) {
+        File multiModuleProjectDirectory = getFieldValue(cliRequest, "multiModuleProjectDirectory", File.class);
+        if (multiModuleProjectDirectory == null) {
             return Collections.emptyList();
         }
 
-        File extensionsFile = new File(cliRequest.multiModuleProjectDirectory, EXTENSIONS_FILENAME);
+        File extensionsFile = new File(multiModuleProjectDirectory, EXTENSIONS_FILENAME);
         if (!extensionsFile.isFile()) {
             return Collections.emptyList();
         }
@@ -635,7 +684,7 @@ public class MavenCli {
             }
 
             ContainerConfiguration cc = new DefaultContainerConfiguration() //
-                    .setClassWorld(cliRequest.classWorld) //
+                    .setClassWorld(getFieldValue(cliRequest, "classWorld", ClassWorld.class)) //
                     .setRealm(containerRealm) //
                     .setClassPathScanning(PlexusConstants.SCANNING_INDEX) //
                     .setAutoWiring(true) //
@@ -654,7 +703,8 @@ public class MavenCli {
 
                 container.setLoggerManager(plexusLoggerManager);
 
-                container.getLoggerManager().setThresholds(cliRequest.request.getLoggingLevel());
+                MavenExecutionRequest request = getFieldValue(cliRequest, "request", MavenExecutionRequest.class);
+                container.getLoggerManager().setThresholds(request.getLoggingLevel());
 
                 Thread.currentThread().setContextClassLoader(container.getContainerRealm());
 
@@ -664,7 +714,8 @@ public class MavenCli {
 
                 configure(cliRequest);
 
-                MavenExecutionRequest request = DefaultMavenExecutionRequest.copy(cliRequest.request);
+                request = getFieldValue(cliRequest, "request", MavenExecutionRequest.class);
+                request = DefaultMavenExecutionRequest.copy(request);
 
                 request = populateRequest(cliRequest, request);
 
@@ -739,17 +790,20 @@ public class MavenCli {
         return copy;
     }
 
-    private List<File> parseExtClasspath(DelegatingCliRequest cliRequest) {
-        String extClassPath = cliRequest.userProperties.getProperty(EXT_CLASS_PATH);
+    private List<File> parseExtClasspath(CliRequest cliRequest) {
+        Properties userProperties = getFieldValue(cliRequest, "userProperties", Properties.class);
+        String extClassPath = userProperties.getProperty(EXT_CLASS_PATH);
         if (extClassPath == null) {
-            extClassPath = cliRequest.systemProperties.getProperty(EXT_CLASS_PATH);
+            Properties systemProperties = getFieldValue(cliRequest, "systemProperties", Properties.class);
+            extClassPath = systemProperties.getProperty(EXT_CLASS_PATH);
         }
 
         List<File> jars = new ArrayList<>();
 
         if (StringUtils.isNotEmpty(extClassPath)) {
             for (String jar : StringUtils.split(extClassPath, File.pathSeparator)) {
-                File file = resolveFile(new File(jar), cliRequest.workingDirectory);
+                String workingDirectory = getFieldValue(cliRequest, "workingDirectory", String.class);
+                File file = resolveFile(new File(jar), workingDirectory);
 
                 slf4jLogger.debug("  Included {}", file);
 
@@ -763,10 +817,10 @@ public class MavenCli {
     //
     // This should probably be a separate tool and not be baked into Maven.
     //
-    private void encryption(DelegatingCliRequest cliRequest)
+    private void encryption(CliRequest cliRequest)
             throws Exception {
-        if (cliRequest.commandLine.hasOption(CLIManager.ENCRYPT_MASTER_PASSWORD)) {
-            String passwd = cliRequest.commandLine.getOptionValue(CLIManager.ENCRYPT_MASTER_PASSWORD);
+        if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.ENCRYPT_MASTER_PASSWORD)) {
+            String passwd = getFieldValue(cliRequest, "commandLine", CommandLine.class).getOptionValue(CLIManager.ENCRYPT_MASTER_PASSWORD);
 
             if (passwd == null) {
                 Console cons = System.console();
@@ -786,8 +840,8 @@ public class MavenCli {
                     cipher.encryptAndDecorate(passwd, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION));
 
             throw new MavenCli.ExitException(0);
-        } else if (cliRequest.commandLine.hasOption(CLIManager.ENCRYPT_PASSWORD)) {
-            String passwd = cliRequest.commandLine.getOptionValue(CLIManager.ENCRYPT_PASSWORD);
+        } else if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.ENCRYPT_PASSWORD)) {
+            String passwd = getFieldValue(cliRequest, "commandLine", CommandLine.class).getOptionValue(CLIManager.ENCRYPT_PASSWORD);
 
             if (passwd == null) {
                 Console cons = System.console();
@@ -828,17 +882,17 @@ public class MavenCli {
         }
     }
 
-    private void repository(DelegatingCliRequest cliRequest)
+    private void repository(CliRequest cliRequest)
             throws Exception {
-        if (cliRequest.commandLine.hasOption(CLIManager.LEGACY_LOCAL_REPOSITORY) || Boolean.getBoolean(
+        if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.LEGACY_LOCAL_REPOSITORY) || Boolean.getBoolean(
                 "maven.legacyLocalRepo")) {
-            cliRequest.request.setUseLegacyLocalRepository(true);
+            getFieldValue(cliRequest, "request", MavenExecutionRequest.class).setUseLegacyLocalRepository(true);
         }
     }
 
-    private int execute(DelegatingCliRequest cliRequest)
+    private int execute(CliRequest cliRequest)
             throws MavenExecutionRequestPopulationException {
-        MavenExecutionRequest request = executionRequestPopulator.populateDefaults(cliRequest.request);
+        MavenExecutionRequest request = executionRequestPopulator.populateDefaults(getFieldValue(cliRequest, "request", MavenExecutionRequest.class));
 
         eventSpyDispatcher.onEvent(request);
 
@@ -858,7 +912,7 @@ public class MavenCli {
             for (Throwable exception : result.getExceptions()) {
                 ExceptionSummary summary = handler.handleException(exception);
 
-                logSummary(summary, references, "", cliRequest.showErrors);
+                logSummary(summary, references, "", getFieldValue(cliRequest, "showErrors", Boolean.class));
 
                 if (project == null && exception instanceof LifecycleExecutionException) {
                     project = ((LifecycleExecutionException) exception).getProject();
@@ -867,7 +921,7 @@ public class MavenCli {
 
             slf4jLogger.error("");
 
-            if (!cliRequest.showErrors) {
+            if (!getFieldValue(cliRequest, "showErrors", Boolean.class)) {
                 slf4jLogger.error("To see the full stack trace of the errors, re-run Maven with the {} switch.",
                         buffer().strong("-e"));
             }
@@ -893,7 +947,7 @@ public class MavenCli {
                         + getResumeFrom(result.getTopologicallySortedProjects(), project)).toString());
             }
 
-            if (MavenExecutionRequest.REACTOR_FAIL_NEVER.equals(cliRequest.request.getReactorFailureBehavior())) {
+            if (MavenExecutionRequest.REACTOR_FAIL_NEVER.equals(getFieldValue(cliRequest, "request", MavenExecutionRequest.class).getReactorFailureBehavior())) {
                 slf4jLogger.info("Build failures were ignored.");
 
                 return 0;
@@ -995,15 +1049,15 @@ public class MavenCli {
 
     private static final String ANSI_RESET = "\u001B\u005Bm";
 
-    private void configure(DelegatingCliRequest cliRequest)
+    private void configure(CliRequest cliRequest)
             throws Exception {
         //
         // This is not ideal but there are events specifically for configuration from the CLI which I don't
         // believe are really valid but there are ITs which assert the right events are published so this
-        // needs to be supported so the EventSpyDispatcher needs to be put in the DelegatingCliRequest so that
+        // needs to be supported so the EventSpyDispatcher needs to be put in the CliRequest so that
         // it can be accessed by configuration processors.
         //
-        cliRequest.request.setEventSpyDispatcher(eventSpyDispatcher);
+        getFieldValue(cliRequest, "request", MavenExecutionRequest.class).setEventSpyDispatcher(eventSpyDispatcher);
 
         //
         // We expect at most 2 implementations to be available. The SettingsXmlConfigurationProcessor implementation
@@ -1050,14 +1104,14 @@ public class MavenCli {
         }
     }
 
-    void toolchains(DelegatingCliRequest cliRequest)
+    void toolchains(CliRequest cliRequest)
             throws Exception {
         File userToolchainsFile;
 
-        if (cliRequest.commandLine.hasOption(CLIManager.ALTERNATE_USER_TOOLCHAINS)) {
+        if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.ALTERNATE_USER_TOOLCHAINS)) {
             userToolchainsFile =
-                    new File(cliRequest.commandLine.getOptionValue(CLIManager.ALTERNATE_USER_TOOLCHAINS));
-            userToolchainsFile = resolveFile(userToolchainsFile, cliRequest.workingDirectory);
+                    new File(getFieldValue(cliRequest, "commandLine", CommandLine.class).getOptionValue(CLIManager.ALTERNATE_USER_TOOLCHAINS));
+            userToolchainsFile = resolveFile(userToolchainsFile, getFieldValue(cliRequest, "workingDirectory",String.class));
 
             if (!userToolchainsFile.isFile()) {
                 throw new FileNotFoundException(
@@ -1069,10 +1123,10 @@ public class MavenCli {
 
         File globalToolchainsFile;
 
-        if (cliRequest.commandLine.hasOption(CLIManager.ALTERNATE_GLOBAL_TOOLCHAINS)) {
+        if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.ALTERNATE_GLOBAL_TOOLCHAINS)) {
             globalToolchainsFile =
-                    new File(cliRequest.commandLine.getOptionValue(CLIManager.ALTERNATE_GLOBAL_TOOLCHAINS));
-            globalToolchainsFile = resolveFile(globalToolchainsFile, cliRequest.workingDirectory);
+                    new File(getFieldValue(cliRequest, "commandLine", CommandLine.class).getOptionValue(CLIManager.ALTERNATE_GLOBAL_TOOLCHAINS));
+            globalToolchainsFile = resolveFile(globalToolchainsFile, getFieldValue(cliRequest, "workingDirectory",String.class));
 
             if (!globalToolchainsFile.isFile()) {
                 throw new FileNotFoundException(
@@ -1082,8 +1136,8 @@ public class MavenCli {
             globalToolchainsFile = DEFAULT_GLOBAL_TOOLCHAINS_FILE;
         }
 
-        cliRequest.request.setGlobalToolchainsFile(globalToolchainsFile);
-        cliRequest.request.setUserToolchainsFile(userToolchainsFile);
+        getFieldValue(cliRequest, "request", MavenExecutionRequest.class).setGlobalToolchainsFile(globalToolchainsFile);
+        getFieldValue(cliRequest, "request", MavenExecutionRequest.class).setUserToolchainsFile(userToolchainsFile);
 
         DefaultToolchainsBuildingRequest toolchainsRequest = new DefaultToolchainsBuildingRequest();
         if (globalToolchainsFile.isFile()) {
@@ -1104,7 +1158,7 @@ public class MavenCli {
 
         eventSpyDispatcher.onEvent(toolchainsResult);
 
-        executionRequestPopulator.populateFromToolchains(cliRequest.request,
+        executionRequestPopulator.populateFromToolchains(getFieldValue(cliRequest, "request",MavenExecutionRequest.class),
                 toolchainsResult.getEffectiveToolchains());
 
         if (!toolchainsResult.getProblems().isEmpty() && slf4jLogger.isWarnEnabled()) {
@@ -1126,16 +1180,16 @@ public class MavenCli {
         return defaultLocation;
     }
 
-    private MavenExecutionRequest populateRequest(DelegatingCliRequest cliRequest) {
-        return populateRequest(cliRequest, cliRequest.request);
+    private MavenExecutionRequest populateRequest(CliRequest cliRequest) {
+        return populateRequest(cliRequest, getFieldValue(cliRequest, "request",MavenExecutionRequest.class));
     }
 
     @SuppressWarnings("checkstyle:methodlength")
-    private MavenExecutionRequest populateRequest(DelegatingCliRequest cliRequest, MavenExecutionRequest request) {
-        CommandLine commandLine = cliRequest.commandLine;
-        String workingDirectory = cliRequest.workingDirectory;
-        boolean quiet = cliRequest.quiet;
-        boolean showErrors = cliRequest.showErrors;
+    private MavenExecutionRequest populateRequest(CliRequest cliRequest, MavenExecutionRequest request) {
+        CommandLine commandLine = getFieldValue(cliRequest, "commandLine",CommandLine.class);
+        String workingDirectory = getFieldValue(cliRequest, "workingDirectory",String.class);
+        boolean quiet = getFieldValue(cliRequest, "quiet",Boolean.class);
+        boolean showErrors = getFieldValue(cliRequest, "showErrors", Boolean.class);
 
         String[] deprecatedOptions = {"up", "npu", "cpu", "npr"};
         for (String deprecatedOption : deprecatedOptions) {
@@ -1233,14 +1287,14 @@ public class MavenCli {
 
         TransferListener transferListener;
 
-        if (quiet || cliRequest.commandLine.hasOption(CLIManager.NO_TRANSFER_PROGRESS)) {
+        if (quiet || getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.NO_TRANSFER_PROGRESS)) {
             transferListener = new QuietMavenTransferListener();
-        } else if (request.isInteractiveMode() && !cliRequest.commandLine.hasOption(CLIManager.LOG_FILE)) {
+        } else if (request.isInteractiveMode() && !getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.LOG_FILE)) {
             //
             // If we're logging to a file then we don't want the console transfer listener as it will spew
             // download progress all over the place
             //
-            transferListener = getConsoleTransferListener(cliRequest.commandLine.hasOption(CLIManager.DEBUG));
+            transferListener = getConsoleTransferListener(getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.DEBUG));
         } else {
             transferListener = getBatchTransferListener();
         }
@@ -1256,7 +1310,7 @@ public class MavenCli {
         }
 
         request.setBaseDirectory(baseDirectory).setGoals(goals).setSystemProperties(
-                        cliRequest.systemProperties).setUserProperties(cliRequest.userProperties).setReactorFailureBehavior(
+                        getFieldValue(cliRequest, "systemProperties",Properties.class)).setUserProperties(getFieldValue(cliRequest, "userProperties",Properties.class)).setReactorFailureBehavior(
                         reactorFailureBehaviour) // default: fail fast
                 .setRecursive(recursive) // default: true
                 .setShowErrors(showErrors) // default: false
@@ -1267,7 +1321,7 @@ public class MavenCli {
                 .setUpdateSnapshots(updateSnapshots) // default: false
                 .setNoSnapshotUpdates(noSnapshotUpdates) // default: false
                 .setGlobalChecksumPolicy(globalChecksumPolicy) // default: warn
-                .setMultiModuleProjectDirectory(cliRequest.multiModuleProjectDirectory);
+                .setMultiModuleProjectDirectory(getFieldValue(cliRequest, "multiModuleProjectDirectory",File.class));
 
         if (alternatePomFile != null) {
             File pom = resolveFile(new File(alternatePomFile), workingDirectory);
@@ -1495,6 +1549,10 @@ public class MavenCli {
         // ----------------------------------------------------------------------
 
         System.setProperty(name, value);
+    }
+
+    public void setLogger(Logger logger) {
+        this.slf4jLogger = logger;
     }
 
     static class ExitException
