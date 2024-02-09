@@ -47,6 +47,10 @@
             <artifactId>rewrite-maven-plugin</artifactId>
             <version>5.3.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>

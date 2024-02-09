@@ -193,8 +193,8 @@ public class MavenExecutor {
     }
 
 
-    public int execute(String[] strings, String string, PrintStream out, PrintStream err) {
-        return doMain(strings, string, out, err);
+    public int execute(String[] goals, String workingDirectory, PrintStream out, PrintStream err) {
+        return doMain(goals, workingDirectory, out, err);
     }
 
     /**
