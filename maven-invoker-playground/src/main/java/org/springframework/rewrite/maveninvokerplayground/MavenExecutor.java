@@ -80,7 +80,6 @@ import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 import org.sonatype.plexus.components.sec.dispatcher.SecUtil;
 import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.*;
@@ -98,14 +97,14 @@ import static org.apache.maven.cli.ResolveFile.resolveFile;
 import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
 
 /**
- * Starts a Maven build in the same process.
- * Using {@link MavenCli} does not provide a way to register execution listeners.
- * A {@link org.apache.maven.execution.ExecutionListener} is required to access the {@link MavenSession}.
- * The {@link MavenSession} provides access to teh gathered build information required in the subsequent parsing.
+ * Starts a Maven build in the same process and provides API to register a listen for {@link ExecutionEvent}s.
+ * This is a shamelessly modified copy of {@link org.apache.maven.cli.MavenCli} which does not provide a way to register execution listeners.
+ * But, an {@link ExecutionListener} is required to access the {@link MavenSession}.
+ * The {@link ExecutionListener} methods contains a {@link MavenSession} which provides access to the required (internal) build information.
  *
  * @author Fabian Krüger
  */
-public class MavenCli {
+public class MavenExecutor {
     public static final String LOCAL_REPO_PROPERTY = "maven.repo.local";
 
     public static final String MULTIMODULE_PROJECT_DIRECTORY = "maven.multiModuleProjectDirectory";
@@ -150,33 +149,29 @@ public class MavenCli {
     private Map<String, ConfigurationProcessor> configurationProcessors;
 
     private CLIManager cliManager;
+    private final ExecutionListener listener;
 
-    public MavenCli() {
-        this(null);
+
+    /**
+     * Create a new instance that will publish Maven {@link ExecutionEvent}s to the {@code listener}.
+     */
+    public MavenExecutor(ExecutionListener listener, Logger logger) {
+        this.listener = listener;
+        this.slf4jLogger = logger;
     }
 
-    // This supports painless invocation by the Verifier during embedded execution of the core ITs
-    public MavenCli(ClassWorld classWorld) {
-        this.classWorld = classWorld;
-    }
-
-    public static void main(String[] args) {
-        int result = main(args, null);
-
-        System.exit(result);
-    }
-
-    public static int main(String[] args, ClassWorld classWorld) {
-        MavenCli cli = new MavenCli();
-
-        MessageUtils.systemInstall();
-        MessageUtils.registerShutdownHook();
-        CliRequest cliRequest = createCliRequest(args, classWorld);
-        int result = cli.doMain(cliRequest);
-        MessageUtils.systemUninstall();
-
-        return result;
-    }
+//    @Deprecated(forRemoval = true)
+//    public static int main(String[] args, ClassWorld classWorld) {
+//        MavenExecutor cli = new MavenExecutor(new CustomExecutionListener(e -> System.out.println(e)));
+//
+//        MessageUtils.systemInstall();
+//        MessageUtils.registerShutdownHook();
+//        CliRequest cliRequest = createCliRequest(args, classWorld);
+//        int result = cli.doMain(cliRequest);
+//        MessageUtils.systemUninstall();
+//
+//        return result;
+//    }
 
     private static CliRequest createCliRequest(String[] args, ClassWorld classWorld) {
         try {
@@ -195,16 +190,8 @@ public class MavenCli {
         }
     }
 
-    // TODO need to externalize CliRequest
-    public static int doMain(String[] args, ClassWorld classWorld) {
-        MavenCli cli = new MavenCli();
-        return cli.doMain(createCliRequest(args, classWorld));
-    }
 
-    ExecutionListener listener;
-
-    public int customMain(String[] strings, String string, PrintStream out, PrintStream err, ExecutionListener listener) {
-        this.listener = listener;
+    public int execute(String[] strings, String string, PrintStream out, PrintStream err) {
         return doMain(strings, string, out, err);
     }
 
@@ -285,7 +272,7 @@ public class MavenCli {
             encryption(cliRequest);
             repository(cliRequest);
             return execute(cliRequest);
-        } catch (MavenCli.ExitException e) {
+        } catch (MavenExecutor.ExitException e) {
             return e.exitCode;
         } catch (UnrecognizedOptionException e) {
             // pure user error, suppress stack trace
@@ -325,7 +312,7 @@ public class MavenCli {
     }
 
     void initialize(CliRequest cliRequest)
-            throws MavenCli.ExitException {
+            throws MavenExecutor.ExitException {
         if (getFieldValue(cliRequest, "workingDirectory", Object.class) == null) {
             setField(cliRequest, "workingDirectory", System.getProperty("user.dir"));
         }
@@ -336,7 +323,7 @@ public class MavenCli {
             if (basedirProperty == null) {
                 System.err.format(
                         "-D%s system property is not set.", MULTIMODULE_PROJECT_DIRECTORY);
-                throw new MavenCli.ExitException(1);
+                throw new MavenExecutor.ExitException(1);
             }
             File basedir = basedirProperty != null ? new File(basedirProperty) : new File("");
             try {
@@ -407,11 +394,11 @@ public class MavenCli {
         }
     }
 
-    private void informativeCommands(CliRequest cliRequest) throws MavenCli.ExitException {
+    private void informativeCommands(CliRequest cliRequest) throws MavenExecutor.ExitException {
         CommandLine commandLine = getFieldValue(cliRequest, "commandLine", CommandLine.class);
         if (commandLine.hasOption(CLIManager.HELP)) {
             cliManager.displayHelp(System.out);
-            throw new MavenCli.ExitException(0);
+            throw new MavenExecutor.ExitException(0);
         }
 
         if (commandLine.hasOption(CLIManager.VERSION)) {
@@ -420,7 +407,7 @@ public class MavenCli {
             } else {
                 System.out.println(CLIReportingUtils.showVersion());
             }
-            throw new MavenCli.ExitException(0);
+            throw new MavenExecutor.ExitException(0);
         }
     }
 
@@ -845,7 +832,7 @@ public class MavenCli {
             System.out.println(
                     cipher.encryptAndDecorate(passwd, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION));
 
-            throw new MavenCli.ExitException(0);
+            throw new MavenExecutor.ExitException(0);
         } else if (getFieldValue(cliRequest, "commandLine", CommandLine.class).hasOption(CLIManager.ENCRYPT_PASSWORD)) {
             String passwd = getFieldValue(cliRequest, "commandLine", CommandLine.class).getOptionValue(CLIManager.ENCRYPT_PASSWORD);
 
@@ -884,7 +871,7 @@ public class MavenCli {
             String masterPasswd = cipher.decryptDecorated(master, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION);
             System.out.println(cipher.encryptAndDecorate(passwd, masterPasswd));
 
-            throw new MavenCli.ExitException(0);
+            throw new MavenExecutor.ExitException(0);
         }
     }
 
@@ -1394,10 +1381,10 @@ public class MavenCli {
             request.setMakeBehavior(MavenExecutionRequest.REACTOR_MAKE_BOTH);
         }
 
-        String localRepoProperty = request.getUserProperties().getProperty(MavenCli.LOCAL_REPO_PROPERTY);
+        String localRepoProperty = request.getUserProperties().getProperty(MavenExecutor.LOCAL_REPO_PROPERTY);
 
         if (localRepoProperty == null) {
-            localRepoProperty = request.getSystemProperties().getProperty(MavenCli.LOCAL_REPO_PROPERTY);
+            localRepoProperty = request.getSystemProperties().getProperty(MavenExecutor.LOCAL_REPO_PROPERTY);
         }
 
         if (localRepoProperty != null) {
@@ -1559,11 +1546,6 @@ public class MavenCli {
 
         System.setProperty(name, value);
     }
-
-    public void setLogger(Logger logger) {
-        this.slf4jLogger = logger;
-    }
-
     static class ExitException
             extends Exception {
         int exitCode;
