@@ -102,6 +102,8 @@ import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
  * But, an {@link ExecutionListener} is required to access the {@link MavenSession}.
  * The {@link ExecutionListener} methods contains a {@link MavenSession} which provides access to the required (internal) build information.
  *
+ * This class is mainly a copy of {@link org.apache.maven.cli.MavenCli} to open up access to the {@link MavenSession}.
+ *
  * @author Fabian Krüger
  */
 public class MavenExecutor {
