@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//@SpringBootTest
 class MavenInvokerPlaygroundApplicationTests {
 
     Logger logger = LoggerFactory.getLogger(MavenInvokerPlaygroundApplicationTests.class);
@@ -58,7 +57,6 @@ class MavenInvokerPlaygroundApplicationTests {
         MavenExecutor mavenExecutor = new MavenExecutor(new AbstractExecutionListener() {
             @Override
             public void projectSucceeded(ExecutionEvent executionEvent) {
-                // The list of projects building the reactor
                 MavenSession mavenSession = executionEvent.getSession();
                 sessionHolder.set(mavenSession);
                 PlexusContainer plexusContainer = mavenSession.getContainer();
