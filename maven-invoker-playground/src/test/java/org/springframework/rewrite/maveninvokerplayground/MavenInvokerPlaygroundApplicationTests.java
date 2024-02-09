@@ -16,26 +16,13 @@
 package org.springframework.rewrite.maveninvokerplayground;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.MavenArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.cli.CliRequest;
-import org.apache.maven.cli.MavenCli;
 import org.apache.maven.execution.ExecutionEvent;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
-import org.apache.maven.shared.invoker.*;
-import org.codehaus.plexus.*;
-import org.codehaus.plexus.classworlds.ClassWorld;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.jboss.shrinkwrap.resolver.api.maven.embedded.BuiltProject;
-import org.jboss.shrinkwrap.resolver.api.maven.embedded.EmbeddedMaven;
-import org.jboss.shrinkwrap.resolver.api.maven.embedded.invoker.equipped.MavenInvokerEquippedEmbeddedMaven;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.internal.lang.Nullable;
@@ -43,14 +30,13 @@ import org.openrewrite.maven.MavenMojoProjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.apache.maven.artifact.ArtifactScopeEnum.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 //@SpringBootTest
@@ -59,7 +45,6 @@ class MavenInvokerPlaygroundApplicationTests {
     Logger logger = LoggerFactory.getLogger(MavenInvokerPlaygroundApplicationTests.class);
 
     private Path projectDir = Path.of("./../spring-rewrite-commons-launcher/testcode/maven-projects/simple-spring-boot").toAbsolutePath().normalize();
-    private Path pomPath = projectDir.resolve("pom.xml");
 
     @Test
     @DisplayName("custom MavenExecutor")
