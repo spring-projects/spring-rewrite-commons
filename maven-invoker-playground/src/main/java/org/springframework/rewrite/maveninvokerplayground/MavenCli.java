@@ -201,6 +201,13 @@ public class MavenCli {
         return cli.doMain(createCliRequest(args, classWorld));
     }
 
+    ExecutionListener listener;
+
+    public int customMain(String[] strings, String string, PrintStream out, PrintStream err, ExecutionListener listener) {
+        this.listener = listener;
+        return doMain(strings, string, out, err);
+    }
+
     /**
      * This supports painless invocation by the Verifier during embedded execution of the core ITs.
      * See <a href="http://maven.apache.org/shared/maven-verifier/xref/org/apache/maven/it/Embedded3xLauncher.html">
@@ -230,7 +237,7 @@ public class MavenCli {
 
             CliRequest cliRequest = createCliRequest(args, classWorld);
             setField(cliRequest, "workingDirectory", workingDirectory);
-
+            cliRequest.getRequest().setExecutionListener(listener);
             return doMain(cliRequest);
         } finally {
             if (classWorld != null) {
@@ -892,6 +899,9 @@ public class MavenCli {
     private int execute(CliRequest cliRequest)
             throws MavenExecutionRequestPopulationException {
         MavenExecutionRequest request = executionRequestPopulator.populateDefaults(getFieldValue(cliRequest, "request", MavenExecutionRequest.class));
+        request.setExecutionListener(listener);
+
+        request.getEventSpyDispatcher().chainListener(listener);
 
         eventSpyDispatcher.onEvent(request);
 
