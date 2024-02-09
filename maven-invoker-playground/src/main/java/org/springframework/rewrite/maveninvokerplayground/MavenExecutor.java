@@ -97,7 +97,7 @@ import static org.apache.maven.cli.ResolveFile.resolveFile;
 import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
 
 /**
- * Starts a Maven build in the same process and provides API to register a listen for {@link ExecutionEvent}s.
+ * Starts a Maven build in the same process and provides API to register a listener for {@link ExecutionEvent}s.
  * This is a shamelessly modified copy of {@link org.apache.maven.cli.MavenCli} which does not provide a way to register execution listeners.
  * But, an {@link ExecutionListener} is required to access the {@link MavenSession}.
  * The {@link ExecutionListener} methods contains a {@link MavenSession} which provides access to the required (internal) build information.
