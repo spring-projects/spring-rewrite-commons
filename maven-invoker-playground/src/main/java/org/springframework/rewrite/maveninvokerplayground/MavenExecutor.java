@@ -1457,53 +1457,6 @@ public class MavenExecutor {
         systemProperties.setProperty("maven.build.version", mavenBuildVersion);
     }
 
-
-    public static final String BUILD_VERSION_PROPERTY = "version";
-    /**
-     * Create a human readable string containing the Maven version, buildnumber, and time of build
-     *
-     * @param buildProperties The build properties
-     * @return Readable build info
-     */
-    private static String CLIReportingUtils_createMavenVersionString(Properties buildProperties) {
-
-
-            String timestamp = CLIReportingUtils_reduce( buildProperties.getProperty( "timestamp" ) );
-            String version = CLIReportingUtils_reduce( buildProperties.getProperty( BUILD_VERSION_PROPERTY ) );
-            String rev = CLIReportingUtils_reduce( buildProperties.getProperty( "buildNumber" ) );
-            String distributionName = CLIReportingUtils_reduce( buildProperties.getProperty( "distributionName" ) );
-
-            String msg = distributionName + " ";
-            msg += ( version != null ? version : "<version unknown>" );
-            if ( rev != null || timestamp != null )
-            {
-                msg += " (";
-                msg += ( rev != null ? rev : "" );
-                if ( org.apache.commons.lang3.StringUtils.isNotBlank( timestamp ) )
-                {
-                    String ts = CLIReportingUtils_formatTimestamp( Long.parseLong( timestamp ) );
-                    msg += ( rev != null ? "; " : "" ) + ts;
-                }
-                msg += ")";
-            }
-            return msg;
-
-
-    }
-
-    public static String CLIReportingUtils_formatTimestamp(long timestamp )
-    {
-        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssXXX" );
-        return sdf.format( new Date( timestamp ) );
-    }
-
-
-    private static String CLIReportingUtils_reduce(String s )
-    {
-        return ( s != null ? ( s.startsWith( "${" ) && s.endsWith( "}" ) ? null : s ) : null );
-    }
-
-
     private static void setCliProperty(String property, Properties properties) {
         String name;
 
@@ -1557,5 +1510,51 @@ public class MavenExecutor {
     protected ModelProcessor createModelProcessor(PlexusContainer container)
             throws ComponentLookupException {
         return container.lookup(ModelProcessor.class);
+    }
+
+    /**
+     * Code from {@link CLIReportingUtils}ma
+     */
+    public static final String BUILD_VERSION_PROPERTY = "version";
+    /**
+     * Copy of {@link CLIReportingUtils#createMavenVersionString(Properties)}.
+     *
+     * Create a human readable string containing the Maven version, buildnumber, and time of build
+     *
+     * @param buildProperties The build properties
+     * @return Readable build info
+     */
+    private static String CLIReportingUtils_createMavenVersionString(Properties buildProperties) {
+
+
+        String timestamp = CLIReportingUtils_reduce( buildProperties.getProperty( "timestamp" ) );
+        String version = CLIReportingUtils_reduce( buildProperties.getProperty( BUILD_VERSION_PROPERTY ) );
+        String rev = CLIReportingUtils_reduce( buildProperties.getProperty( "buildNumber" ) );
+        String distributionName = CLIReportingUtils_reduce( buildProperties.getProperty( "distributionName" ) );
+
+        String msg = distributionName + " ";
+        msg += ( version != null ? version : "<version unknown>" );
+        if ( rev != null || timestamp != null )
+        {
+            msg += " (";
+            msg += ( rev != null ? rev : "" );
+            if ( org.apache.commons.lang3.StringUtils.isNotBlank( timestamp ) )
+            {
+                String ts = CLIReportingUtils.formatTimestamp( Long.parseLong( timestamp ) );
+                msg += ( rev != null ? "; " : "" ) + ts;
+            }
+            msg += ")";
+        }
+        return msg;
+
+
+    }
+
+    /**
+     * Copy of {@link CLIReportingUtils#reduce(String)}.
+     */
+    private static String CLIReportingUtils_reduce(String s )
+    {
+        return ( s != null ? ( s.startsWith( "${" ) && s.endsWith( "}" ) ? null : s ) : null );
     }
 }
