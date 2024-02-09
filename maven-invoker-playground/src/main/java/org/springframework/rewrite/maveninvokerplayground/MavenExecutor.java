@@ -151,18 +151,19 @@ public class MavenExecutor {
     private CLIManager cliManager;
     private final ExecutionListener listener;
 
-
     /**
      * Create a new instance that will publish Maven {@link ExecutionEvent}s to the {@code listener}.
      */
     public MavenExecutor(ExecutionListener listener, Logger logger) {
         this.listener = listener;
         this.slf4jLogger = logger;
+        this.classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
+
     }
 
 //    @Deprecated(forRemoval = true)
 //    public static int main(String[] args, ClassWorld classWorld) {
-//        MavenExecutor cli = new MavenExecutor(new CustomExecutionListener(e -> System.out.println(e)));
+//        MavenExecutor cli = new MavenExecutor(new AbstractExecutionListener(e -> System.out.println(e)));
 //
 //        MessageUtils.systemInstall();
 //        MessageUtils.registerShutdownHook();

@@ -42,7 +42,11 @@
             <artifactId>maven-resolver-util</artifactId>
             <version>1.9.18</version> <!-- Please check for the latest version available -->
         </dependency>
-
+        <dependency>
+            <groupId>org.openrewrite.maven</groupId>
+            <artifactId>rewrite-maven-plugin</artifactId>
+            <version>5.3.2</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.shrinkwrap.resolver</groupId>
