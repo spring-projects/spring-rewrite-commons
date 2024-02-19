@@ -28,10 +28,10 @@ import static org.springframework.rewrite.maveninvokerplayground.MavenExecutor.M
 
 @Slf4j
 @SpringBootApplication
-public class MavenInvokerPlaygroundApplication implements ApplicationRunner {
+public class MavenInvokerTest implements ApplicationRunner {
 
     public static void main(String[] args) {
-        SpringApplication.run(MavenInvokerPlaygroundApplication.class, args);
+        SpringApplication.run(MavenInvokerTest.class, args);
     }
 
     @Override

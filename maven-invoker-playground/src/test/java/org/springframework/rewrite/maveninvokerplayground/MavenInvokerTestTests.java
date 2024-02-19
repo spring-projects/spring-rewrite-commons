@@ -39,11 +39,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MavenInvokerPlaygroundApplicationTests {
+class MavenInvokerTestTests {
 
-    Logger logger = LoggerFactory.getLogger(MavenInvokerPlaygroundApplicationTests.class);
+    Logger logger = LoggerFactory.getLogger(MavenInvokerTestTests.class);
 
-    private Path projectDir = Path.of("./../spring-rewrite-commons-launcher/testcode/maven-projects/simple-spring-boot").toAbsolutePath().normalize();
+    private Path projectDir = Path.of("./testcode/maven-projects/simple-spring-boot").toAbsolutePath().normalize();
 
     @Test
     @DisplayName("custom MavenExecutor")
