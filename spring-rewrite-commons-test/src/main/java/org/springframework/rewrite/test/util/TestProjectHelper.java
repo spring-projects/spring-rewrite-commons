@@ -118,11 +118,10 @@ public class TestProjectHelper {
 
 				if (gitTag != null) {
 					git.checkout().setName("refs/tags/" + gitTag).setCreateBranch(false).call();
-				} /*
-					 * else if(gitHash != null) { //
-					 * git.checkout().setAllPaths(true).setStartPoint(gitHash).call();
-					 * git.checkout().setOrphan(true).setStartPoint(gitHash).call(); }
-					 */
+				} /*else if(gitHash != null) {
+//					git.checkout().setAllPaths(true).setStartPoint(gitHash).call();
+					git.checkout().setOrphan(true).setStartPoint(gitHash).call();
+				}*/
 			}
 			catch (GitAPIException e) {
 				throw new RuntimeException(e);
@@ -136,5 +135,4 @@ public class TestProjectHelper {
 		this.resources.add(dummyResource);
 		return this;
 	}
-
 }

@@ -87,8 +87,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,10 +100,10 @@ import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
 
 /**
  * Starts a Maven build in the same process and provides API to register a listener for {@link ExecutionEvent}s.
- * The {@link ExecutionListener} methods contains a {@link MavenSession} which provides access to the required (internal) build information.
+ * The {@link ExecutionListener} has access to the {@link MavenSession} which provides access to the required (internal) build information.
  * Access to these Maven internals is required to gather the parameters required for {@link org.openrewrite.maven.MavenMojoProjectParser}.
  *
- * This class is mainly a copy of {@link org.apache.maven.cli.MavenCli} to open up access to the {@link MavenSession}.
+ * This class is mainly a copy of {@link org.apache.maven.cli.MavenCli} opening up access to the {@link MavenSession}.
  *
  * @author Fabian Krüger
  */
@@ -152,14 +154,46 @@ public class MavenExecutor {
     private CLIManager cliManager;
     private final ExecutionListener listener;
 
+    public MavenExecutor(Logger logger, Consumer<ExecutionEvent> onSuccess) {
+        this.listener = new AbstractExecutionListener() {
+
+            @Override
+            public void mojoSucceeded(ExecutionEvent executionEvent) {
+            }
+
+            @Override
+            public void forkedProjectSucceeded(ExecutionEvent executionEvent) {
+                System.out.println("Forked Project Succeeded ++++++++++++++++++++++ " + executionEvent.getMojoExecution().getExecutionId());
+            }
+
+            @Override
+            public void projectSucceeded(ExecutionEvent executionEvent) {
+                onSuccess.accept(executionEvent);
+            }
+
+            @Override
+            public void projectFailed(ExecutionEvent executionEvent) {
+                logger.error("PROJECT FAILED---- !!!");
+            }
+
+
+            @Override
+            public void sessionEnded(ExecutionEvent executionEvent) {
+                logger.debug("Session ended...");
+            }
+
+        };
+        this.slf4jLogger = logger;
+        this.classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
+    }
+
     /**
      * Create a new instance that will publish Maven {@link ExecutionEvent}s to the {@code listener}.
      */
-    public MavenExecutor(ExecutionListener listener, Logger logger) {
+    public MavenExecutor(Logger logger, ExecutionListener listener) {
         this.listener = listener;
         this.slf4jLogger = logger;
         this.classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
-
     }
 
 //    @Deprecated(forRemoval = true)
@@ -193,8 +227,13 @@ public class MavenExecutor {
     }
 
 
-    public int execute(String[] goals, String workingDirectory, PrintStream out, PrintStream err) {
-        return doMain(goals, workingDirectory, out, err);
+    public int execute(List<String> goals, Path baseDir) {
+        return execute(goals, baseDir.toString(), System.out, System.err);
+    }
+
+    public int execute(List<String> goals, String workingDirectory, PrintStream out, PrintStream err) {
+        System.setProperty("maven.multiModuleProjectDirectory", workingDirectory);
+        return doMain(goals.toArray(new String[]{}), workingDirectory, out, err);
     }
 
     /**
@@ -202,7 +241,7 @@ public class MavenExecutor {
      * See <a href="http://maven.apache.org/shared/maven-verifier/xref/org/apache/maven/it/Embedded3xLauncher.html">
      * <code>Embedded3xLauncher</code> in <code>maven-verifier</code></a>
      */
-    public int doMain(String[] args, String workingDirectory, PrintStream stdout, PrintStream stderr) {
+    int doMain(String[] args, String workingDirectory, PrintStream stdout, PrintStream stderr) {
         PrintStream oldout = System.out;
         PrintStream olderr = System.err;
 
@@ -255,8 +294,8 @@ public class MavenExecutor {
             throw new RuntimeException("Field '%s' is not defined on type '%s'".formatted(fieldName, target.getClass()), e);
         }
     }
-
     // TODO need to externalize CliRequest
+
     public int doMain(CliRequest cliRequest) {
         PlexusContainer localContainer = null;
         try {
@@ -334,8 +373,6 @@ public class MavenExecutor {
         // Parsing errors can happen during the processing of the arguments and we prefer not having to check if
         // the logger is null and construct this so we can use an SLF4J logger everywhere.
         //
-        slf4jLogger = new Slf4jStdoutLogger();
-
         cliManager = new CLIManager();
 
         List<String> args = new ArrayList<>();
@@ -644,7 +681,7 @@ public class MavenExecutor {
 
     private List<CoreExtensionEntry> loadCoreExtensions(CliRequest cliRequest, ClassRealm containerRealm,
                                                         Set<String> providedArtifacts) {
-        
+
         File multiModuleProjectDirectory = cliRequest.getMultiModuleProjectDirectory();
         if (multiModuleProjectDirectory == null) {
             return Collections.emptyList();
@@ -791,10 +828,10 @@ public class MavenExecutor {
 
         return jars;
     }
-
     //
     // This should probably be a separate tool and not be baked into Maven.
     //
+
     private void encryption(CliRequest cliRequest)
             throws Exception {
         if (cliRequest.getCommandLine().hasOption(CLIManager.ENCRYPT_MASTER_PASSWORD)) {
@@ -1418,9 +1455,9 @@ public class MavenExecutor {
         int procs = Runtime.getRuntime().availableProcessors();
         return (int) (Float.parseFloat(threadConfiguration.replace("C", "")) * procs);
     }
-
     // ----------------------------------------------------------------------
     // System properties handling
+
     // ----------------------------------------------------------------------
 
     static void populateProperties(CommandLine commandLine, Properties systemProperties, Properties userProperties) {
@@ -1484,6 +1521,7 @@ public class MavenExecutor {
 
         System.setProperty(name, value);
     }
+
     static class ExitException
             extends Exception {
         int exitCode;

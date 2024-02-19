@@ -19,6 +19,7 @@
         <module>spring-rewrite-commons-gradle</module>
         <module>spring-rewrite-commons-plugin-invoker</module>
         <module>spring-rewrite-commons-test</module>
+        <module>spring-rewrite-commons-utils</module>
     </modules>
 
     <organization>
@@ -47,6 +48,7 @@
         <maven-resolver.version>1.9.13</maven-resolver.version>
         <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
         <plexus-cypher.version>1.8</plexus-cypher.version>
+        <maven-invoker.version>3.2.0</maven-invoker.version>
         <junit-pioneer.version>2.1.0</junit-pioneer.version>
 
         <!-- documentation dependencies -->

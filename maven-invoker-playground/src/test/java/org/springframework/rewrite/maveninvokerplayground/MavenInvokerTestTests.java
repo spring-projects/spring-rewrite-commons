@@ -15,7 +15,12 @@
  */
 package org.springframework.rewrite.maveninvokerplayground;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.ConsoleAppender;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.cli.logging.Slf4jStdoutLogger;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
@@ -25,16 +30,20 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.maven.MavenMojoProjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.rewrite.test.util.TestProjectHelper;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +55,62 @@ class MavenInvokerTestTests {
     private Path projectDir = Path.of("./testcode/maven-projects/simple-spring-boot").toAbsolutePath().normalize();
 
     @Test
+    @DisplayName("simple project")
+    void simpleProject() {
+        Path baseDir = TestProjectHelper.getMavenProject("simple-maven-project");
+        new MavenExecutor(logger, successEvent -> {
+            System.out.println("Success!");
+        })
+        .execute(List.of("clean", "package"), baseDir);
+    }
+    
+    @Test
+    @DisplayName("Spring Cloud Data Flow")
+    void springCloudDataFlow(@TempDir Path tempDir) throws InterruptedException {
+        String githubUrl = "https://github.com/spring-cloud/spring-cloud-dataflow.git";
+        String gitTag = "v2.10.2";
+        TestProjectHelper.createTestProject(tempDir)
+                .deleteDirIfExists()
+                .cloneGitProject(githubUrl)
+                .checkoutTag(gitTag)
+                .writeToFilesystem();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        new MavenExecutor(createLogger(), successEvent -> {
+            System.out.println("Success!");
+            latch.countDown();
+        })
+        .execute(List.of("clean", "package", "-DskipTests"), tempDir);
+        latch.await(3, TimeUnit.MINUTES);
+        assertThat(latch.getCount()).isEqualTo(0);
+    }
+
+    private Logger createLogger() {
+//        new Slf4jStdoutLogger()
+
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        ConsoleAppender consoleAppender = new ConsoleAppender();
+        consoleAppender.setContext(context);
+
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+        encoder.setContext(context);
+        encoder.setPattern("%msg%n");
+        encoder.start();
+
+        consoleAppender.setEncoder(encoder);
+        consoleAppender.start();
+
+        ch.qos.logback.classic.Logger logger = context.getLogger("IsolatedLogger");
+        logger.setLevel(Level.DEBUG); // Ensure the logger level is set to capture your messages
+        logger.addAppender(consoleAppender);
+        logger.setAdditive(false); // Prevent logger from inheriting root logger appenders
+
+        return logger;
+    }
+
+
+    @Test
     @DisplayName("custom MavenExecutor")
     void customMavenCli() {
 
@@ -54,7 +119,7 @@ class MavenInvokerTestTests {
         AtomicReference<MavenSession> sessionHolder = new AtomicReference<>();
         AtomicReference<RuntimeInformation> runtimeInformationHolder = new AtomicReference<>();
 
-        MavenExecutor mavenExecutor = new MavenExecutor(new AbstractExecutionListener() {
+        MavenExecutor mavenExecutor = new MavenExecutor(logger, new AbstractExecutionListener() {
             @Override
             public void projectSucceeded(ExecutionEvent executionEvent) {
                 MavenSession mavenSession = executionEvent.getSession();
@@ -75,13 +140,12 @@ class MavenInvokerTestTests {
                     throw new RuntimeException(e);
                 }
             }
-        }, logger);
+        });
 
 
 
         // TODO: remove requirement to set path through properties
-        System.setProperty("maven.multiModuleProjectDirectory", projectDir.toString());
-        int result = mavenExecutor.execute(new String[]{"clean", "install"}, projectDir.toString(), System.out, System.err);
+        int result = mavenExecutor.execute(List.of("clean", "install"), projectDir.toString(), System.out, System.err);
 
         boolean pomCacheEnabled = true;
         @Nullable String pomCacheDirectory = Path.of(System.getProperty("user.home")).resolve(".rewrite/cache").toString();

@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.rewrite</groupId>
+            <artifactId>maven-invoker-playground</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.rewrite</groupId>
             <artifactId>spring-rewrite-commons-launcher</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>

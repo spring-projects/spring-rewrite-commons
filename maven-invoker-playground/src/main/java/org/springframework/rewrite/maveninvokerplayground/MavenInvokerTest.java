@@ -23,6 +23,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.springframework.rewrite.maveninvokerplayground.MavenExecutor.MULTIMODULE_PROJECT_DIRECTORY;
 
@@ -41,13 +42,13 @@ public class MavenInvokerTest implements ApplicationRunner {
 
         System.setProperty(MULTIMODULE_PROJECT_DIRECTORY, projectDir.toString());
 
-        MavenExecutor mavenExecutor = new MavenExecutor(new AbstractExecutionListener() {
+        MavenExecutor mavenExecutor = new MavenExecutor(log, new AbstractExecutionListener() {
             @Override
             public void projectSucceeded(ExecutionEvent executionEvent) {
                 System.out.println("Project succeeded");
             }
-        }, log);
+        });
 
-        mavenExecutor.execute(new String[]{"clean", "install"}, projectDir.toString(), System.out, System.err);
+        mavenExecutor.execute(List.of("clean", "install"), projectDir.toString(), System.out, System.err);
     }
 }

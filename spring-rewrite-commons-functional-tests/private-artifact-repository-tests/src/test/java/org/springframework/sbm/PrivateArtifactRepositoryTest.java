@@ -15,6 +15,7 @@
  */
 package org.springframework.sbm;
 
+import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
@@ -47,6 +48,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
@@ -88,6 +91,7 @@ import static org.assertj.core.api.Fail.fail;
  */
 @SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, RewriteLauncherConfiguration.class })
 @Testcontainers
+@Slf4j
 public class PrivateArtifactRepositoryTest {
 
 	// All test resources live here
@@ -170,7 +174,7 @@ public class PrivateArtifactRepositoryTest {
 		Integer port = reposilite.getMappedPort(8080);
 		System.out.println("Reposilite: http://localhost:" + port + " login with user:secret");
 		TestHelper.renderTemplates(port);
-		TestHelper.clearDependencyFromLocalMavenRepo();
+		TestHelper.clearLocalMavenRepo();
 	}
 
 	@AfterAll
@@ -183,11 +187,26 @@ public class PrivateArtifactRepositoryTest {
 
 	@Test
 	@DisplayName("Maven settings should be read from secured private repo")
-	void mavenSettingsShouldBeReadFromSecuredPrivateRepo() {
+	void mavenSettingsShouldBeReadFromSecuredPrivateRepo() throws InterruptedException {
 		verifyDependencyDoesNotExistInLocalMavenRepo();
 		RewriteProjectParsingResult parsingResult = parseDependentProject();
 		verifyDependencyExistsInLocalMavenRepo();
 		verifyTypesFromDependencyWereResolved(parsingResult);
+	}
+
+	@Test
+	@DisplayName("MavenExecutor should read settings")
+	void mavenExecutorShouldReadSettings() throws InterruptedException {
+		verifyDependencyDoesNotExistInLocalMavenRepo();
+
+		Path baseDir = Path.of(TESTCODE_DIR + "/dependent-project");
+		CountDownLatch latch = new CountDownLatch(1);
+		new org.springframework.rewrite.maveninvokerplayground.MavenExecutor(log, successEvent -> {
+			latch.countDown();
+		})
+		.execute(List.of("clean", "install"), baseDir);
+		latch.await(10, TimeUnit.MINUTES);
+		verifyDependencyExistsInLocalMavenRepo();
 	}
 
 	private static void verifyTypesFromDependencyWereResolved(RewriteProjectParsingResult parsingResult) {
@@ -228,8 +247,9 @@ public class PrivateArtifactRepositoryTest {
 	private static void verifyDependencyExistsInLocalMavenRepo() {
 		Path snapshotDir = DEPENDENCY_PATH_IN_LOCAL_MAVEN_REPO.resolve("1.0-SNAPSHOT").toAbsolutePath().normalize();
 		assertThat(snapshotDir).isDirectory();
-		assertThat(Arrays.stream(snapshotDir.toFile().listFiles()).map(f -> f.getName()).findFirst().get())
-			.matches("dependency-project-1.0-.*\\.jar");
+		assertThat(Arrays.stream(snapshotDir.toFile().listFiles())
+				.map(f -> f.getName())
+				.anyMatch(s -> s.matches("dependency-project-1.0-.*\\.jar"))).isTrue();
 	}
 
 	private RewriteProjectParsingResult parseDependentProject() {
@@ -285,14 +305,14 @@ public class PrivateArtifactRepositoryTest {
 			return Files.writeString(pomXmlPath, replaced);
 		}
 
-		static void clearDependencyFromLocalMavenRepo() {
-			try {
-				FileSystemUtils.deleteRecursively(DEPENDENCY_PATH_IN_LOCAL_MAVEN_REPO);
-			}
-			catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		static void clearLocalMavenRepo() {
+			FileSystemUtils.deleteRecursively(LOCAL_MAVEN_REPOSITORY);
+            try {
+                Files.createDirectories(LOCAL_MAVEN_REPOSITORY.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
 		void deployDependency(Path pomXmlPath) throws MavenInvocationException {
 			InvocationRequest request = new DefaultInvocationRequest();
