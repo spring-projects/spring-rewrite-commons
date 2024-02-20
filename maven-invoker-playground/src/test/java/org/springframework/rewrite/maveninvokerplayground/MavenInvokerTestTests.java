@@ -20,6 +20,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.ConsoleAppender;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.cli.MavenCli;
 import org.apache.maven.cli.logging.Slf4jStdoutLogger;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.MavenSession;
@@ -27,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,7 +63,36 @@ class MavenInvokerTestTests {
         new MavenExecutor(logger, successEvent -> {
             System.out.println("Success!");
         })
-        .execute(List.of("clean", "package"), baseDir);
+                .execute(List.of("clean", "package"), baseDir);
+    }
+
+    @Test
+    @DisplayName("SCDF")
+    void scdf() {
+        Path baseDir = TestProjectHelper.getMavenProject("scdf").resolve("spring-cloud-dataflow-single-step-batch-job");
+
+        MavenCli cli = new MavenCli();
+        System.setProperty("maven.multiModuleProjectDirectory", baseDir.toString());
+        int i = cli.doMain(List.of("org.springframework.cloud:spring-cloud-dataflow-apps-metadata-plugin:aggregate-metadata", "-DskipTests", "-e").toArray(new String[]{}), baseDir.toString(), System.out, System.err);
+        System.out.println(i);
+    }
+
+    @Test
+    @DisplayName("MvnCli test")
+    void mvnCliTest(@TempDir Path tempDir) {
+            String githubUrl = "https://github.com/spring-cloud/spring-cloud-dataflow.git";
+            String gitTag = "v2.10.2";
+            TestProjectHelper.createTestProject(tempDir)
+                    .deleteDirIfExists()
+                    .cloneGitProject(githubUrl)
+                    .checkoutTag(gitTag)
+                    .writeToFilesystem();
+
+
+            MavenCli cli = new MavenCli();
+            System.setProperty("maven.multiModuleProjectDirectory", tempDir.toString());
+            int i = cli.doMain(List.of("clean", "install", "-DskipTests").toArray(new String[]{}), tempDir.toString(), System.out, System.err);
+            System.out.println(i);
     }
     
     @Test
