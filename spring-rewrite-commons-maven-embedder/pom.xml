@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.springframework.rewrite</groupId>
-    <artifactId>maven-invoker-playground</artifactId>
+    <artifactId>spring-rewrite-commons-maven-embedder</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>maven-invoker-playground</name>
     <description>maven-invoker-playground</description>
