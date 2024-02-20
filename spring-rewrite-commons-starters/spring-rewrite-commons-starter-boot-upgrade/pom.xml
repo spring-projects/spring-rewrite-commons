@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>spring-rewrite-commons-starter-boot-upgrade</artifactId>
+    <name>Spring Rewrite Boot Upgrade Starter</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
