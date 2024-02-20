@@ -19,4 +19,5 @@ package org.springframework.rewrite.maveninvokerplayground;
  * @author Fabian Krüger
  */
 public class MavenExecutionResult {
+
 }

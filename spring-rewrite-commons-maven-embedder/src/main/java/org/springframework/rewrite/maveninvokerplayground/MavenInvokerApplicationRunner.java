@@ -31,24 +31,25 @@ import static org.springframework.rewrite.maveninvokerplayground.MavenExecutor.M
 @SpringBootApplication
 public class MavenInvokerApplicationRunner implements ApplicationRunner {
 
-    public static void main(String[] args) {
-        SpringApplication.run(MavenInvokerApplicationRunner.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(MavenInvokerApplicationRunner.class, args);
+	}
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
 
-        Path projectDir = Path.of(args.getNonOptionArgs().get(0));
+		Path projectDir = Path.of(args.getNonOptionArgs().get(0));
 
-        System.setProperty(MULTIMODULE_PROJECT_DIRECTORY, projectDir.toString());
+		System.setProperty(MULTIMODULE_PROJECT_DIRECTORY, projectDir.toString());
 
-        MavenExecutor mavenExecutor = new MavenExecutor(log, new AbstractExecutionListener() {
-            @Override
-            public void projectSucceeded(ExecutionEvent executionEvent) {
-                System.out.println("Project succeeded");
-            }
-        });
+		MavenExecutor mavenExecutor = new MavenExecutor(log, new AbstractExecutionListener() {
+			@Override
+			public void projectSucceeded(ExecutionEvent executionEvent) {
+				System.out.println("Project succeeded");
+			}
+		});
 
-        mavenExecutor.execute(List.of("clean", "install"), projectDir.toString(), System.out, System.err);
-    }
+		mavenExecutor.execute(List.of("clean", "install"), projectDir.toString(), System.out, System.err);
+	}
+
 }
