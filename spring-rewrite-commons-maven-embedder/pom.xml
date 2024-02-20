@@ -3,16 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <groupId>org.springframework.rewrite</groupId>
+        <artifactId>spring-rewrite-commons</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>org.springframework.rewrite</groupId>
     <artifactId>spring-rewrite-commons-maven-embedder</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>maven-invoker-playground</name>
-    <description>maven-invoker-playground</description>
+    <name>Spring Rewrite Maven Embedder</name>
+    <description>Maven Embedder with access to Maven lifecycle events</description>
     <properties>
         <java.version>17</java.version>
         <shrinkwrap-resolvers.version>3.3.0</shrinkwrap-resolvers.version>

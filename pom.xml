@@ -20,6 +20,7 @@
         <module>spring-rewrite-commons-plugin-invoker</module>
         <module>spring-rewrite-commons-test</module>
         <module>spring-rewrite-commons-utils</module>
+        <module>spring-rewrite-commons-maven-embedder</module>
     </modules>
 
     <organization>
