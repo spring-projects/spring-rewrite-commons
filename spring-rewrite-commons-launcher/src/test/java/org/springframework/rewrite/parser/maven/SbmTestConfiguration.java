@@ -72,8 +72,8 @@ public class SbmTestConfiguration {
 			ParsingEventListener parsingEventListenerAdapter, MavenExecutorOutdated mavenExecutor,
 			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
-		return new RewriteMavenProjectParser(plexusContainer, parsingEventListenerAdapter, mavenExecutor,
-				mavenMojoProjectParserFactory, scanScope, beanFactory, executionContext);
+		return new RewriteMavenProjectParser(parsingEventListenerAdapter, mavenExecutor, mavenMojoProjectParserFactory,
+				scanScope, beanFactory, executionContext);
 	}
 
 }
