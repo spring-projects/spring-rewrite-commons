@@ -238,7 +238,7 @@ public class ParserParityTestHelper {
 			Markers expectedMarkers = curExpectedSourceFile.getMarkers();
 			List<Marker> expectedMarkersList = expectedMarkers.getMarkers();
 
-			// Remove custom marker that only exists here
+			// Remove custom marker that were added by us
 			Markers givenMarkers = curGivenSourceFile.getMarkers().removeByType(ClasspathDependencies.class);
 			List<Marker> actualMarkersList = givenMarkers.getMarkers();
 
@@ -317,7 +317,8 @@ public class ParserParityTestHelper {
 
 		static void compareMavenResolutionResultMarker(SoftAssertions softAssertions, MavenResolutionResult expected,
 				MavenResolutionResult actual) {
-			softAssertions.assertThat(actual)
+//			softAssertions.
+			assertThat(actual)
 				.usingRecursiveComparison()
 				.withEqualsForFieldsMatchingRegexes(customRepositoryEquals("mavenSettings.localRepository"),
 						"mavenSettings.localRepository", ".*\\.repository", "mavenSettings.mavenLocal.uri")
@@ -432,7 +433,8 @@ public class ParserParityTestHelper {
 		}
 
 		static void compareMarker(SoftAssertions softAssertions, Marker expectedMarker, Marker actualMarker) {
-			softAssertions.assertThat(actualMarker)
+//			softAssertions.
+					assertThat(actualMarker)
 				.usingRecursiveComparison()
 				.withStrictTypeChecking()
 				.ignoringCollectionOrder()
