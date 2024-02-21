@@ -43,15 +43,7 @@ All examples can be found file://spring-rewrite-commons-examples[here].
 == Limitations
 The project has currently some limitations.
 
-. Only JDK 17 supported and required
-. No Gradle support. +
-  OpenRewrite provides a build tool plugin for Gradle projects.
-  This project currently only parses Maven projects.
-. No Kotlin support. +
-OpenRewrite can parse other languages than Java, especially Kotlin. This is not yet supported.
-. Inherited version will just be read from direct parent. Meaning a version from a parent with distance > 1 will be empty (`null`)
-. Maven profiles are currently ignored and 'default' profile is used
-. Styles are not supported +
-OpenRewrite styles are currently not supported.
-. Migrating projects for Maven plugins might fail +
-Maven plugin projects (modules) are currently ignored when building the reactor order.
+. JDK 17 is a requirement
+. Kotlin is not supported.
+. Styles are not supported
+. Migrating projects for Maven plugins might fail
