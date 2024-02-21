@@ -43,7 +43,6 @@ public class ComparingParserFactory {
 		RewriteParsingEventListenerAdapter parsingListener = new RewriteParsingEventListenerAdapter(eventPublisher);
 		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
 		RewriteMavenProjectParser mavenProjectParser1 = new RewriteMavenProjectParser(parsingListener,
-				new MavenExecutorOutdated(requestFactory, plexusContainer),
 				new MavenMojoProjectParserFactory(springRewriteProperties), scanScope, beanFactory,
 				new InMemoryExecutionContext(t -> {
 					throw new RuntimeException(t);

@@ -35,6 +35,7 @@ import org.openrewrite.shaded.jgit.api.Git;
 import org.openrewrite.shaded.jgit.lib.Repository;
 import org.openrewrite.shaded.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
 import org.springframework.rewrite.parser.ParserContext;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.test.util.DummyResource;
@@ -81,12 +82,7 @@ class ProvenanceMarkerFactoryTest {
 			MavenMojoProjectParser sut = mavenMojoProjectParserFactory.create(baseDir, runtimeInformation,
 					settingsDecrypter);
 
-			// the sut requires a MavenProject, let's retrieve it from Maven
-			MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(
-					new MavenExecutionRequestFactory(new MavenConfigFileParser()), new MavenPlexusContainer());
-
-			// doing a 'mvn clean install'
-			mavenExecutor.onProjectSucceededEvent(baseDir, List.of("clean", "package"), event -> {
+			new MavenExecutor(event -> {
 
 				// and then use the MavenProject from the MavenSession
 				org.apache.maven.project.MavenProject mavenModel = event.getSession().getCurrentProject();
@@ -131,7 +127,7 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(countGetters(gitProvenance)).isEqualTo(10);
 				assertThat(gitProvenance.getId()).isInstanceOf(UUID.class);
 				if (!isGithubAction() || "main".equals(branch)) { // failed in GH build
-																	// when not on main
+					// when not on main
 					assertThat(gitProvenance.getBranch()).isEqualTo(branch);
 				}
 				assertThat(gitProvenance.getEol()).isEqualTo(GitProvenance.EOL.Native);
@@ -158,7 +154,8 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(buildTool.getVersion()).isEqualTo(mavenVersion);
 				assertThat(buildTool.getType()).isEqualTo(BuildTool.Type.Maven);
 
-			});
+			})
+			.execute(List.of("clean", "package"), baseDir);
 		}
 
 		private static boolean isGithubAction() {

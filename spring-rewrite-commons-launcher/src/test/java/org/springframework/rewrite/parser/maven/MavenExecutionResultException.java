@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Exception thrown if {@link MavenExecutorOutdated} had errors during execution.
- *
  * @author Fabian Krüger
  */
 public class MavenExecutionResultException extends RuntimeException {

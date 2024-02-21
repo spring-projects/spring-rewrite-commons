@@ -21,6 +21,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,10 +102,7 @@ class MavenProjectResolutionTest {
 		Path pomFile = tempDir.resolve("pom.xml");
 		Files.writeString(pomFile, pomXml);
 
-		MavenPlexusContainer plexusContainerFactory = new MavenPlexusContainer();
-		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
-		MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(requestFactory, plexusContainerFactory);
-		mavenExecutor.onProjectSucceededEvent(tempDir, List.of("dependency:resolve"), event -> {
+		new MavenExecutor( event -> {
 			MavenProject mavenProject = event.getSession().getCurrentProject();
 			assertThat(mavenProject.getName()).isEqualTo("the-name");
 			assertThat(mavenProject.getArtifactId()).isEqualTo("the-example");
@@ -131,18 +129,18 @@ class MavenProjectResolutionTest {
 					dep("org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar"));
 			try {
 				assertThat(mavenProject.getCompileClasspathElements())
-					.containsExactlyInAnyOrder(mainDeps.toArray(new String[] {}));
+						.containsExactlyInAnyOrder(mainDeps.toArray(new String[] {}));
 				List<String> testDeps = new ArrayList<>();
 				testDeps.addAll(mainDeps);
 				testDeps.add(tempDir.resolve("target/test-classes").toString());
 				testDeps.add(dep("javax/validation/validation-api/2.0.1.Final/validation-api-2.0.1.Final.jar"));
 				assertThat(mavenProject.getTestClasspathElements())
-					.containsExactlyInAnyOrder(testDeps.toArray(new String[] {}));
+						.containsExactlyInAnyOrder(testDeps.toArray(new String[] {}));
 			}
 			catch (DependencyResolutionRequiredException e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}).execute(List.of("dependency:resolve"), tempDir);
 	}
 
 	private String dep(String s) {

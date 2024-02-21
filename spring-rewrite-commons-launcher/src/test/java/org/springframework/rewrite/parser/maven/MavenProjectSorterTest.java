@@ -26,6 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
 import org.springframework.rewrite.test.util.DummyResource;
 import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;
@@ -731,12 +732,15 @@ class MavenProjectSorterTest {
 		}
 
 		private MavenSession startMavenSession(Path baseDir) {
-			List<String> goals = List.of("clean", "package");
-			MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(
-					new MavenExecutionRequestFactory(new MavenConfigFileParser()), new MavenPlexusContainer());
-			AtomicReference<MavenSession> mavenSession = new AtomicReference<>();
-			mavenExecutor.onProjectSucceededEvent(baseDir, goals, event -> mavenSession.set(event.getSession()));
-			return mavenSession.get();
+			AtomicReference<MavenSession> mavenSessionRef = new AtomicReference<>();
+
+			new MavenExecutor(event -> {
+				MavenSession mavenSession = event.getSession();
+				mavenSessionRef.set(mavenSession);
+			})
+			.execute(List.of("clean", "package"), baseDir);
+
+			return mavenSessionRef.get();
 		}
 
 	}

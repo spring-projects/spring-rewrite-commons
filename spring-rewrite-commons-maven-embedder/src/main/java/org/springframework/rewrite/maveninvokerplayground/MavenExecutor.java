@@ -159,6 +159,10 @@ public class MavenExecutor {
 
 	private final ExecutionListener listener;
 
+	public MavenExecutor(Consumer<ExecutionEvent> onSuccess) {
+		this(LoggerFactory.getLogger("MavenBuildLogger"), onSuccess);
+	}
+
 	public MavenExecutor(Logger logger, Consumer<ExecutionEvent> onSuccess) {
 		this.listener = new AbstractExecutionListener() {
 
