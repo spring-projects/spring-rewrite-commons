@@ -36,12 +36,10 @@ public class ComparingParserFactory {
 	}
 
 	public RewriteMavenProjectParser createComparingParser(SpringRewriteProperties springRewriteProperties) {
-		MavenPlexusContainer plexusContainer = new MavenPlexusContainer();
 		ConfigurableListableBeanFactory beanFactory = mock(ConfigurableListableBeanFactory.class);
 		ScanScope scanScope = mock(ScanScope.class);
 		ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
 		RewriteParsingEventListenerAdapter parsingListener = new RewriteParsingEventListenerAdapter(eventPublisher);
-		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
 		RewriteMavenProjectParser mavenProjectParser1 = new RewriteMavenProjectParser(parsingListener,
 				new MavenMojoProjectParserFactory(springRewriteProperties), scanScope, beanFactory,
 				new InMemoryExecutionContext(t -> {

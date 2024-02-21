@@ -47,18 +47,12 @@ public class SbmTestConfiguration {
 	}
 
 	@Bean
-	MavenPlexusContainer plexusContainer() {
-		return new MavenPlexusContainer();
-	}
-
-	@Bean
 	MavenModelReader modelReader() {
 		return new MavenModelReader();
 	}
 
 	@Bean
-	RewriteMavenProjectParser rewriteMavenProjectParser(MavenPlexusContainer plexusContainer,
-			ParsingEventListener parsingEventListenerAdapter,
+	RewriteMavenProjectParser rewriteMavenProjectParser(ParsingEventListener parsingEventListenerAdapter,
 			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
 		return new RewriteMavenProjectParser(parsingEventListenerAdapter, mavenMojoProjectParserFactory,
