@@ -317,8 +317,7 @@ public class ParserParityTestHelper {
 
 		static void compareMavenResolutionResultMarker(SoftAssertions softAssertions, MavenResolutionResult expected,
 				MavenResolutionResult actual) {
-			// softAssertions.
-			assertThat(actual).usingRecursiveComparison()
+			 softAssertions.assertThat(actual).usingRecursiveComparison()
 				.withEqualsForFieldsMatchingRegexes(customRepositoryEquals("mavenSettings.localRepository"),
 						"mavenSettings.localRepository", ".*\\.repository", "mavenSettings.mavenLocal.uri")
 				.ignoringFields("modules", // checked further down
