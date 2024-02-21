@@ -53,8 +53,7 @@ public class ParserContext {
 	}
 
 	public List<String> getActiveProfiles() {
-		// FIXME: Add support for Maven profiles
-		return List.of("default");
+		return List.of();
 	}
 
 	public Resource getMatchingBuildFileResource(MavenProject pom) {
