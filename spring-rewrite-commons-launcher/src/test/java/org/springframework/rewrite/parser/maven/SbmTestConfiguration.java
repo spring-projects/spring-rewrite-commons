@@ -55,8 +55,8 @@ public class SbmTestConfiguration {
 	RewriteMavenProjectParser rewriteMavenProjectParser(ParsingEventListener parsingEventListenerAdapter,
 			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
-		return new RewriteMavenProjectParser(parsingEventListenerAdapter, mavenMojoProjectParserFactory,
-				scanScope, beanFactory, executionContext);
+		return new RewriteMavenProjectParser(parsingEventListenerAdapter, mavenMojoProjectParserFactory, scanScope,
+				beanFactory, executionContext);
 	}
 
 }

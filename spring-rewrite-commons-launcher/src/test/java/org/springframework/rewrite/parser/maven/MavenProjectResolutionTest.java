@@ -102,7 +102,7 @@ class MavenProjectResolutionTest {
 		Path pomFile = tempDir.resolve("pom.xml");
 		Files.writeString(pomFile, pomXml);
 
-		new MavenExecutor( event -> {
+		new MavenExecutor(event -> {
 			MavenProject mavenProject = event.getSession().getCurrentProject();
 			assertThat(mavenProject.getName()).isEqualTo("the-name");
 			assertThat(mavenProject.getArtifactId()).isEqualTo("the-example");
@@ -129,13 +129,13 @@ class MavenProjectResolutionTest {
 					dep("org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar"));
 			try {
 				assertThat(mavenProject.getCompileClasspathElements())
-						.containsExactlyInAnyOrder(mainDeps.toArray(new String[] {}));
+					.containsExactlyInAnyOrder(mainDeps.toArray(new String[] {}));
 				List<String> testDeps = new ArrayList<>();
 				testDeps.addAll(mainDeps);
 				testDeps.add(tempDir.resolve("target/test-classes").toString());
 				testDeps.add(dep("javax/validation/validation-api/2.0.1.Final/validation-api-2.0.1.Final.jar"));
 				assertThat(mavenProject.getTestClasspathElements())
-						.containsExactlyInAnyOrder(testDeps.toArray(new String[] {}));
+					.containsExactlyInAnyOrder(testDeps.toArray(new String[] {}));
 			}
 			catch (DependencyResolutionRequiredException e) {
 				throw new RuntimeException(e);

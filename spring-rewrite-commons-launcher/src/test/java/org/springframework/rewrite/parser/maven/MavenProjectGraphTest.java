@@ -300,12 +300,10 @@ class MavenProjectGraphTest {
 			MavenProject moduleProject = findMavenProject(pomContent);
 			this.assertedProjects.add(moduleProject);
 			List<MavenProject> dependantProjects = getDependantProjects(dependantPomContents);
-			// softAssertions.
-			assertThat(dependencyGraph).containsKey(moduleProject);
+			softAssertions.assertThat(dependencyGraph).containsKey(moduleProject);
 			MavenProject[] dependantProjectsArray = dependantProjects.toArray(MavenProject[]::new);
 			Set<MavenProject> actualDependantProjects = dependencyGraph.get(moduleProject);
-			// softAssertions.
-			assertThat(actualDependantProjects).containsExactlyInAnyOrder(dependantProjectsArray);
+			softAssertions.assertThat(actualDependantProjects).containsExactlyInAnyOrder(dependantProjectsArray);
 			return this;
 		}
 

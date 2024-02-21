@@ -737,8 +737,7 @@ class MavenProjectSorterTest {
 			new MavenExecutor(event -> {
 				MavenSession mavenSession = event.getSession();
 				mavenSessionRef.set(mavenSession);
-			})
-			.execute(List.of("clean", "package"), baseDir);
+			}).execute(List.of("clean", "package"), baseDir);
 
 			return mavenSessionRef.get();
 		}

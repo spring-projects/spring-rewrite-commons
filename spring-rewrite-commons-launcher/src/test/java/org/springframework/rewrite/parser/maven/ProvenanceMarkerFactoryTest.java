@@ -154,8 +154,7 @@ class ProvenanceMarkerFactoryTest {
 				assertThat(buildTool.getVersion()).isEqualTo(mavenVersion);
 				assertThat(buildTool.getType()).isEqualTo(BuildTool.Type.Maven);
 
-			})
-			.execute(List.of("clean", "package"), baseDir);
+			}).execute(List.of("clean", "package"), baseDir);
 		}
 
 		private static boolean isGithubAction() {
