@@ -2,5 +2,4 @@ org.springframework.rewrite.boot.autoconfigure.ScopeConfiguration
 org.springframework.rewrite.parser.RewriteParserConfiguration
 org.springframework.rewrite.boot.autoconfigure.RecipeDiscoveryConfiguration
 org.springframework.rewrite.boot.autoconfigure.ProjectResourceSetConfiguration
-org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration
 org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration

@@ -172,8 +172,6 @@ public class MavenExecutor {
 
 			@Override
 			public void forkedProjectSucceeded(ExecutionEvent executionEvent) {
-				System.out.println("Forked Project Succeeded ++++++++++++++++++++++ "
-						+ executionEvent.getMojoExecution().getExecutionId());
 			}
 
 			@Override
@@ -183,12 +181,11 @@ public class MavenExecutor {
 
 			@Override
 			public void projectFailed(ExecutionEvent executionEvent) {
-				logger.error("PROJECT FAILED---- !!!");
+				// TODO: Throw exception... ?
 			}
 
 			@Override
 			public void sessionEnded(ExecutionEvent executionEvent) {
-				logger.debug("Session ended...");
 			}
 
 		};

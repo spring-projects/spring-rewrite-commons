@@ -29,7 +29,7 @@ import org.openrewrite.marker.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.rewrite.RewriteProjectParser;
-import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
+import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.parser.maven.SbmTestConfiguration;
 import org.springframework.rewrite.test.util.ParallelParsingResult;
@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Fabian Krüger
  */
-@SpringBootTest(classes = { SpringRewriteCommonsConfiguration.class, SbmTestConfiguration.class })
+@SpringBootTest(classes = { RewriteLauncherConfiguration.class, SbmTestConfiguration.class })
 public class CompareParserRecipeRunTest {
 
 	@Autowired
