@@ -33,7 +33,7 @@ class MavenExecutorTest {
 	void verifyMavenSessionWhenRunningInMaven() {
 		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
 		MavenPlexusContainer containerFactory = new MavenPlexusContainer();
-		MavenExecutor sut = new MavenExecutor(requestFactory, containerFactory);
+		MavenExecutorOutdated sut = new MavenExecutorOutdated(requestFactory, containerFactory);
 		Path baseDir = Path.of("./testcode/maven-projects/maven-config");
 		List<String> goals = List.of("clean", "install");
 		sut.onProjectSucceededEvent(baseDir, goals, event -> {

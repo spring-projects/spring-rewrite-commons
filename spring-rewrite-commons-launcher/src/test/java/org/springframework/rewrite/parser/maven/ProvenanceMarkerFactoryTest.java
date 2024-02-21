@@ -82,7 +82,7 @@ class ProvenanceMarkerFactoryTest {
 					settingsDecrypter);
 
 			// the sut requires a MavenProject, let's retrieve it from Maven
-			MavenExecutor mavenExecutor = new MavenExecutor(
+			MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(
 					new MavenExecutionRequestFactory(new MavenConfigFileParser()), new MavenPlexusContainer());
 
 			// doing a 'mvn clean install'

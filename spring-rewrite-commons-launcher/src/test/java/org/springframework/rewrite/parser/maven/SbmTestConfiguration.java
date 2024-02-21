@@ -47,8 +47,9 @@ public class SbmTestConfiguration {
 	}
 
 	@Bean
-	MavenExecutor mavenExecutor(MavenExecutionRequestFactory requestFactory, MavenPlexusContainer plexusContainer) {
-		return new MavenExecutor(requestFactory, plexusContainer);
+	MavenExecutorOutdated mavenExecutor(MavenExecutionRequestFactory requestFactory,
+			MavenPlexusContainer plexusContainer) {
+		return new MavenExecutorOutdated(requestFactory, plexusContainer);
 	}
 
 	@Bean
@@ -68,7 +69,7 @@ public class SbmTestConfiguration {
 
 	@Bean
 	RewriteMavenProjectParser rewriteMavenProjectParser(MavenPlexusContainer plexusContainer,
-			ParsingEventListener parsingEventListenerAdapter, MavenExecutor mavenExecutor,
+			ParsingEventListener parsingEventListenerAdapter, MavenExecutorOutdated mavenExecutor,
 			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
 		return new RewriteMavenProjectParser(plexusContainer, parsingEventListenerAdapter, mavenExecutor,

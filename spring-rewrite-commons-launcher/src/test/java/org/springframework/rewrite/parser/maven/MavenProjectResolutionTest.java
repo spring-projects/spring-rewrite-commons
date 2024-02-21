@@ -103,7 +103,7 @@ class MavenProjectResolutionTest {
 
 		MavenPlexusContainer plexusContainerFactory = new MavenPlexusContainer();
 		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
-		MavenExecutor mavenExecutor = new MavenExecutor(requestFactory, plexusContainerFactory);
+		MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(requestFactory, plexusContainerFactory);
 		mavenExecutor.onProjectSucceededEvent(tempDir, List.of("dependency:resolve"), event -> {
 			MavenProject mavenProject = event.getSession().getCurrentProject();
 			assertThat(mavenProject.getName()).isEqualTo("the-name");

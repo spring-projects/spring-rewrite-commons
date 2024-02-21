@@ -32,15 +32,16 @@ import java.util.function.Consumer;
  *
  * @author Fabian Krüger
  */
-class MavenExecutor {
+class MavenExecutorOutdated {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MavenExecutor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MavenExecutorOutdated.class);
 
 	private final MavenExecutionRequestFactory requestFactory;
 
 	private final MavenPlexusContainer mavenPlexusContainer;
 
-	public MavenExecutor(MavenExecutionRequestFactory requestFactory, MavenPlexusContainer mavenPlexusContainer) {
+	public MavenExecutorOutdated(MavenExecutionRequestFactory requestFactory,
+			MavenPlexusContainer mavenPlexusContainer) {
 		this.requestFactory = requestFactory;
 		this.mavenPlexusContainer = mavenPlexusContainer;
 	}

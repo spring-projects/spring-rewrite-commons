@@ -732,7 +732,7 @@ class MavenProjectSorterTest {
 
 		private MavenSession startMavenSession(Path baseDir) {
 			List<String> goals = List.of("clean", "package");
-			MavenExecutor mavenExecutor = new MavenExecutor(
+			MavenExecutorOutdated mavenExecutor = new MavenExecutorOutdated(
 					new MavenExecutionRequestFactory(new MavenConfigFileParser()), new MavenPlexusContainer());
 			AtomicReference<MavenSession> mavenSession = new AtomicReference<>();
 			mavenExecutor.onProjectSucceededEvent(baseDir, goals, event -> mavenSession.set(event.getSession()));
