@@ -41,7 +41,8 @@ public class RewriteLauncherConfiguration {
 	}
 
 	@Bean
-	OpenRewriteProjectParser openRewriteProjectParser(SpringRewriteProperties properties, ExecutionContext executionContext) {
+	OpenRewriteProjectParser openRewriteProjectParser(SpringRewriteProperties properties,
+			ExecutionContext executionContext) {
 		return new OpenRewriteProjectParser(properties, executionContext);
 	}
 

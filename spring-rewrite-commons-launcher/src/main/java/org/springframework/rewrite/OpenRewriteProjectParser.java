@@ -50,131 +50,148 @@ import java.util.stream.Stream;
  */
 public class OpenRewriteProjectParser {
 
-    private final SpringRewriteProperties properties;
-    private final ExecutionContext executionContext;
+	private final SpringRewriteProperties properties;
 
-    public OpenRewriteProjectParser(SpringRewriteProperties properties, ExecutionContext executionContext) {
-        this.properties = properties;
-        this.executionContext = executionContext;
-    }
+	private final ExecutionContext executionContext;
 
-    public RewriteProjectParsingResult parse(Path givenBaseDir) {
+	public OpenRewriteProjectParser(SpringRewriteProperties properties, ExecutionContext executionContext) {
+		this.properties = properties;
+		this.executionContext = executionContext;
+	}
 
-        AtomicReference<List<SourceFile>> mavenSessionRef = new AtomicReference<>();
-        new MavenExecutor(executionEvent -> {
-            MavenSession mavenSession = executionEvent.getSession();
-            Log logger = new Slf4jToMavenLoggerAdapter(LoggerFactory.getLogger("OpenRewriteProjectParser"));
-            boolean pomCacheEnabled = properties.isPomCacheEnabled();
-            @Nullable String pomCacheDirectory = properties.getPomCacheDirectory();
-            Class<RuntimeInformation> aClass = RuntimeInformation.class;
-            RuntimeInformation runtimeInformation = lookup(mavenSession.getContainer(), aClass);
-            boolean skipMavenParsing = properties.isSkipMavenParsing();
-            Collection<String> exclusions = properties.getIgnoredPathPatterns();
-            Collection<String> plainTextMasks = properties.getPlainTextMasks();
-            int sizeThresholdMb = properties.getSizeThresholdMb();
-            SettingsDecrypter settingsDecrypter = lookup(mavenSession.getContainer(), SettingsDecrypter.class);
-            boolean runPerSubmodule = properties.isRunPerSubmodule();
-            boolean parseAdditionalResources = properties.isParseAdditionalResources();
+	public RewriteProjectParsingResult parse(Path givenBaseDir) {
 
-            MavenMojoProjectParser mojoProjectParser = new MavenMojoProjectParser(logger, givenBaseDir, pomCacheEnabled, pomCacheDirectory, runtimeInformation, skipMavenParsing, exclusions, plainTextMasks, sizeThresholdMb, mavenSession, settingsDecrypter, runPerSubmodule, parseAdditionalResources);
-            FakedRewriteRunMojo fakedRewriteRunMojo = FakedRewriteRunMojo.from(mavenSession);
-            Environment env = Environment.builder().build();
-            try {
-                // LargeSoruceSet hides access to source files
-//                LargeSourceSet largeSourceSet = fakedRewriteRunMojo.loadSourceSet(givenBaseDir, env, executionContext);
-                List<SourceFile> sourceFiles = fakedRewriteRunMojo.loadSources(givenBaseDir, env, executionContext);
-                mavenSessionRef.set(sourceFiles);
-            } catch (DependencyResolutionRequiredException e) {
-                throw new RuntimeException(e);
-            } catch (MojoExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }).execute(List.of("clean", "package", "--fail-at-end"), givenBaseDir);
+		AtomicReference<List<SourceFile>> mavenSessionRef = new AtomicReference<>();
+		new MavenExecutor(executionEvent -> {
+			MavenSession mavenSession = executionEvent.getSession();
+			Log logger = new Slf4jToMavenLoggerAdapter(LoggerFactory.getLogger("OpenRewriteProjectParser"));
+			boolean pomCacheEnabled = properties.isPomCacheEnabled();
+			@Nullable
+			String pomCacheDirectory = properties.getPomCacheDirectory();
+			Class<RuntimeInformation> aClass = RuntimeInformation.class;
+			RuntimeInformation runtimeInformation = lookup(mavenSession.getContainer(), aClass);
+			boolean skipMavenParsing = properties.isSkipMavenParsing();
+			Collection<String> exclusions = properties.getIgnoredPathPatterns();
+			Collection<String> plainTextMasks = properties.getPlainTextMasks();
+			int sizeThresholdMb = properties.getSizeThresholdMb();
+			SettingsDecrypter settingsDecrypter = lookup(mavenSession.getContainer(), SettingsDecrypter.class);
+			boolean runPerSubmodule = properties.isRunPerSubmodule();
+			boolean parseAdditionalResources = properties.isParseAdditionalResources();
 
-        RewriteProjectParsingResult parsingResult = new RewriteProjectParsingResult(mavenSessionRef.get(), executionContext);
+			MavenMojoProjectParser mojoProjectParser = new MavenMojoProjectParser(logger, givenBaseDir, pomCacheEnabled,
+					pomCacheDirectory, runtimeInformation, skipMavenParsing, exclusions, plainTextMasks,
+					sizeThresholdMb, mavenSession, settingsDecrypter, runPerSubmodule, parseAdditionalResources);
+			FakedRewriteRunMojo fakedRewriteRunMojo = FakedRewriteRunMojo.from(mavenSession);
+			Environment env = Environment.builder().build();
+			try {
+				// LargeSoruceSet hides access to source files
+				// LargeSourceSet largeSourceSet =
+				// fakedRewriteRunMojo.loadSourceSet(givenBaseDir, env, executionContext);
+				List<SourceFile> sourceFiles = fakedRewriteRunMojo.loadSources(givenBaseDir, env, executionContext);
+				mavenSessionRef.set(sourceFiles);
+			}
+			catch (DependencyResolutionRequiredException e) {
+				throw new RuntimeException(e);
+			}
+			catch (MojoExecutionException e) {
+				throw new RuntimeException(e);
+			}
+		}).execute(List.of("clean", "package", "--fail-at-end"), givenBaseDir);
 
-        return parsingResult;
-    }
+		RewriteProjectParsingResult parsingResult = new RewriteProjectParsingResult(mavenSessionRef.get(),
+				executionContext);
 
-    private  static <T> T lookup(PlexusContainer plexusContainer, Class<T> aClass) {
-        try {
-            return plexusContainer.lookup(aClass);
-        } catch (ComponentLookupException e) {
-            throw new RuntimeException(e);
-        }
-    }
+		return parsingResult;
+	}
 
-    private static class FakedRewriteRunMojo extends AbstractRewriteDryRunMojo {
-        private final MavenSession mavenSession1;
+	private static <T> T lookup(PlexusContainer plexusContainer, Class<T> aClass) {
+		try {
+			return plexusContainer.lookup(aClass);
+		}
+		catch (ComponentLookupException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-        public FakedRewriteRunMojo(MavenSession mavenSession) {
-            mavenSession1 = mavenSession;
-        }
+	private static class FakedRewriteRunMojo extends AbstractRewriteDryRunMojo {
 
-        public static FakedRewriteRunMojo from(MavenSession mavenSession) {
-            FakedRewriteRunMojo fakedRewriteRunMojo = new FakedRewriteRunMojo(mavenSession);
-            // project
-            setField(fakedRewriteRunMojo, "project", mavenSession.getCurrentProject());
-            // runtime
-            PlexusContainer plexusContainer = mavenSession.getContainer();
-            RuntimeInformation runtimeInformation = lookup(plexusContainer, RuntimeInformation.class);
-            setField(fakedRewriteRunMojo, "runtime", runtimeInformation);
-            setField(fakedRewriteRunMojo, "mavenSession", mavenSession);
-            setField(fakedRewriteRunMojo, "settingsDecrypter", lookup(plexusContainer, SettingsDecrypter.class));
-            return fakedRewriteRunMojo;
-        }
+		private final MavenSession mavenSession1;
 
-        private static void setField(FakedRewriteRunMojo fakedRewriteRunMojo, String fieldName, Object value) {
-            Field project = ReflectionUtils.findField(FakedRewriteRunMojo.class, fieldName);
-            ReflectionUtils.makeAccessible(project);
-            ReflectionUtils.setField(project, fakedRewriteRunMojo, value);
-        }
+		public FakedRewriteRunMojo(MavenSession mavenSession) {
+			mavenSession1 = mavenSession;
+		}
 
-        @Override
-        public ResultsContainer listResults(ExecutionContext ctx) {
-            try {
-                super.project = mavenSession.getCurrentProject();
-                return super.listResults(ctx);
-            } catch (MojoExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }
+		public static FakedRewriteRunMojo from(MavenSession mavenSession) {
+			FakedRewriteRunMojo fakedRewriteRunMojo = new FakedRewriteRunMojo(mavenSession);
+			// project
+			setField(fakedRewriteRunMojo, "project", mavenSession.getCurrentProject());
+			// runtime
+			PlexusContainer plexusContainer = mavenSession.getContainer();
+			RuntimeInformation runtimeInformation = lookup(plexusContainer, RuntimeInformation.class);
+			setField(fakedRewriteRunMojo, "runtime", runtimeInformation);
+			setField(fakedRewriteRunMojo, "mavenSession", mavenSession);
+			setField(fakedRewriteRunMojo, "settingsDecrypter", lookup(plexusContainer, SettingsDecrypter.class));
+			return fakedRewriteRunMojo;
+		}
 
-        public List<SourceFile> loadSources(Path repositoryRoot, Environment env, ExecutionContext ctx) throws DependencyResolutionRequiredException, MojoExecutionException {
-            List<NamedStyles> styles = loadStyles(project, env);
+		private static void setField(FakedRewriteRunMojo fakedRewriteRunMojo, String fieldName, Object value) {
+			Field project = ReflectionUtils.findField(FakedRewriteRunMojo.class, fieldName);
+			ReflectionUtils.makeAccessible(project);
+			ReflectionUtils.setField(project, fakedRewriteRunMojo, value);
+		}
 
-            //Parse and collect source files from each project in the maven session.
-            MavenMojoProjectParser projectParser = new MavenMojoProjectParser(getLog(), repositoryRoot, pomCacheEnabled, pomCacheDirectory, runtime, skipMavenParsing, getExclusions(), getPlainTextMasks(), sizeThresholdMb, mavenSession, settingsDecrypter, runPerSubmodule, true);
+		@Override
+		public ResultsContainer listResults(ExecutionContext ctx) {
+			try {
+				super.project = mavenSession.getCurrentProject();
+				return super.listResults(ctx);
+			}
+			catch (MojoExecutionException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
-            Stream<SourceFile> sourceFiles = projectParser.listSourceFiles(project, styles, ctx);
-            Method m = ReflectionUtils.findMethod(AbstractRewriteMojo.class, "sourcesWithAutoDetectedStyles", Stream.class);
-            ReflectionUtils.makeAccessible(m);
-            List<SourceFile> sourceFileList = (List<SourceFile>) ReflectionUtils.invokeMethod(m, this, sourceFiles);
-            return sourceFileList;
-        }
-    }
+		public List<SourceFile> loadSources(Path repositoryRoot, Environment env, ExecutionContext ctx)
+				throws DependencyResolutionRequiredException, MojoExecutionException {
+			List<NamedStyles> styles = loadStyles(project, env);
 
-    /**
-     * Container for gathered Maven runtime information required for parsing.
-     */
-    private record MavenRuntimeInformation(RuntimeInformation runtimeInformation) {
+			// Parse and collect source files from each project in the maven session.
+			MavenMojoProjectParser projectParser = new MavenMojoProjectParser(getLog(), repositoryRoot, pomCacheEnabled,
+					pomCacheDirectory, runtime, skipMavenParsing, getExclusions(), getPlainTextMasks(), sizeThresholdMb,
+					mavenSession, settingsDecrypter, runPerSubmodule, true);
 
-        public static MavenRuntimeInformation gathering(MavenSession mavenSession) {
+			Stream<SourceFile> sourceFiles = projectParser.listSourceFiles(project, styles, ctx);
+			Method m = ReflectionUtils.findMethod(AbstractRewriteMojo.class, "sourcesWithAutoDetectedStyles",
+					Stream.class);
+			ReflectionUtils.makeAccessible(m);
+			List<SourceFile> sourceFileList = (List<SourceFile>) ReflectionUtils.invokeMethod(m, this, sourceFiles);
+			return sourceFileList;
+		}
 
-            RuntimeInformation runtimeInformation = lookup(mavenSession.getContainer(), RuntimeInformation.class);
+	}
 
+	/**
+	 * Container for gathered Maven runtime information required for parsing.
+	 */
+	private record MavenRuntimeInformation(RuntimeInformation runtimeInformation) {
 
-            MavenRuntimeInformation mavenRuntimeInformation = new MavenRuntimeInformation(runtimeInformation);
-            return mavenRuntimeInformation;
-        }
+		public static MavenRuntimeInformation gathering(MavenSession mavenSession) {
 
-        private  static <T> T lookup(PlexusContainer plexusContainer, Class<T> aClass) {
-            try {
-                return plexusContainer.lookup(aClass);
-            } catch (ComponentLookupException e) {
-                throw new RuntimeException(e);
-            }
-        }
+			RuntimeInformation runtimeInformation = lookup(mavenSession.getContainer(), RuntimeInformation.class);
 
-    }
+			MavenRuntimeInformation mavenRuntimeInformation = new MavenRuntimeInformation(runtimeInformation);
+			return mavenRuntimeInformation;
+		}
+
+		private static <T> T lookup(PlexusContainer plexusContainer, Class<T> aClass) {
+			try {
+				return plexusContainer.lookup(aClass);
+			}
+			catch (ComponentLookupException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+	}
+
 }
