@@ -15,20 +15,14 @@
  */
 package org.springframework.rewrite.embedder;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.core.ConsoleAppender;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.cli.MavenCli;
-import org.apache.maven.cli.logging.Slf4jStdoutLogger;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -59,11 +53,14 @@ class MavenInvokerTestTests {
 
 	@Test
 	@DisplayName("simple project")
-	void simpleProject() {
+	void simpleProject() throws InterruptedException {
 		Path baseDir = TestProjectHelper.getMavenProject("simple-maven-project");
+		CountDownLatch latch = new CountDownLatch(1);
 		new MavenExecutor(logger, successEvent -> {
-			System.out.println("Success!");
+			latch.countDown();
 		}).execute(List.of("clean", "package"), baseDir);
+		latch.await(10, TimeUnit.SECONDS);
+		assertThat(latch.getCount()).isEqualTo(0);
 	}
 
 	@Test
