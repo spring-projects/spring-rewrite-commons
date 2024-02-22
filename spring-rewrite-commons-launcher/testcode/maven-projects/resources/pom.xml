@@ -7,6 +7,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>application</module>
-        <module>component</module>
+<!--        <module>component</module>-->
     </modules>
 </project>

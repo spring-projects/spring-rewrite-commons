@@ -159,14 +159,13 @@ public class RewriteProjectParser {
 
 	private List<SourceFile> runInMavenSession(ExecutionEvent onSuccess, Path baseDir, List<Resource> resources) {
 		List<NamedStyles> styles = List.of();
-		onSuccess.getSession()
-			.getProjectDependencyGraph()
-			.getSortedProjects()
-			.stream()
-			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
-			.toList();
+		List<MavenProject> sortedProjects = onSuccess.getSession()
+				.getProjectDependencyGraph()
+				.getSortedProjects()
+				.stream()
+				.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
+				.toList();
 
-		List<MavenProject> sortedProjects = mavenProjectAnalyzer.getBuildProjects(baseDir, resources);
 		ParserContext parserContext = new ParserContext(baseDir, resources, sortedProjects);
 
 		// generate provenance
@@ -203,8 +202,7 @@ public class RewriteProjectParser {
 		Path baseDir = mavenProject.getBasedir().toPath();
 		File file = mavenProject.getExecutionProject().getFile();
 		Resource rootPom = new FileSystemResource(file);
-		new MavenProject(baseDir, rootPom, artifactDownloader, resources);
-		return null;
+		return new MavenProject(baseDir, rootPom, artifactDownloader, resources);
 	}
 
 	@NotNull

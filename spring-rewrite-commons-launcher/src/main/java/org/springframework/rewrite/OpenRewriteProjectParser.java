@@ -143,7 +143,7 @@ public class OpenRewriteProjectParser {
 		@Override
 		public ResultsContainer listResults(ExecutionContext ctx) {
 			try {
-				super.project = mavenSession.getCurrentProject();
+				super.project = mavenSession.getTopLevelProject();
 				return super.listResults(ctx);
 			}
 			catch (MojoExecutionException e) {
