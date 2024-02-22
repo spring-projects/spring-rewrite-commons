@@ -45,9 +45,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MavenInvokerTestTests {
+class MavenExecutorTests {
 
-	Logger logger = LoggerFactory.getLogger(MavenInvokerTestTests.class);
+	Logger logger = LoggerFactory.getLogger(MavenExecutorTests.class);
 
 	private Path projectDir = Path.of("./testcode/maven-projects/simple-spring-boot").toAbsolutePath().normalize();
 
