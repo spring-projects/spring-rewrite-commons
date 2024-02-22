@@ -103,10 +103,10 @@ public class CalculateClasspathTest {
 
 		Path baseDir = LinuxWindowsPathUnifier.unifiedPath(tmpDir.resolve("example-1").toAbsolutePath().normalize());
 		TestProjectHelper.createTestProject(baseDir)
-				.addResource("pom.xml", pom)
-				.addResource("src/main/java/com/example/MainClass.java", mainClass)
-				.addResource("src/test/java/com/example/TestClass.java", testClass)
-				.writeToFilesystem();
+			.addResource("pom.xml", pom)
+			.addResource("src/main/java/com/example/MainClass.java", mainClass)
+			.addResource("src/test/java/com/example/TestClass.java", testClass)
+			.writeToFilesystem();
 
 		RewriteProjectParsingResult parsingResult = parser.parse(baseDir);
 

@@ -178,7 +178,7 @@ public class MavenExecutor {
 			public void projectSucceeded(ExecutionEvent executionEvent) {
 				MavenProject currentProject = executionEvent.getSession().getCurrentProject();
 				MavenProject topLevelProject = executionEvent.getSession().getTopLevelProject();
-				if(currentProject == topLevelProject) {
+				if (currentProject == topLevelProject) {
 					onSuccess.accept(executionEvent);
 				}
 			}

@@ -64,7 +64,8 @@ public class CompareParserRecipeRunTest {
 		ParserExecutionHelper helper = new ParserExecutionHelper();
 		SpringRewriteProperties properties = new SpringRewriteProperties();
 		RewriteProjectParsingResult sutResult = helper.parseWithRewriteProjectParser(baseDir, properties);
-		RewriteProjectParsingResult comparingResult = helper.parseWithComparingParser(baseDir, properties, executionContext);
+		RewriteProjectParsingResult comparingResult = helper.parseWithComparingParser(baseDir, properties,
+				executionContext);
 
 		AtomicInteger counter = new AtomicInteger(0);
 
@@ -107,8 +108,7 @@ public class CompareParserRecipeRunTest {
 
 		// Run Parser independent from Maven
 		counter.setRelease(0);
-		RecipeRun sutRecipeRun = recipe.run(new InMemoryLargeSourceSet(sutResult.sourceFiles()),
-				executionContext);
+		RecipeRun sutRecipeRun = recipe.run(new InMemoryLargeSourceSet(sutResult.sourceFiles()), executionContext);
 		assertThat(counter.get()).isEqualTo(1);
 		assertThat(sutRecipeRun.getChangeset().getAllResults()).hasSize(1); // is 0
 	}

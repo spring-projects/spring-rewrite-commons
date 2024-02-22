@@ -55,23 +55,25 @@ public class RewriteProjectParserIntegrationTest {
 	@DisplayName("testFailingProject")
 	void testFailingProject() {
 		Path baseDir = Path.of("./testcode/maven-projects/failing");
-		ParserParityTestHelper.scanProjectDir(baseDir).parseSequentially().verifyParity((comparingParsingResult, testedParsingResult) -> {
-			assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
-			J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
-			assertThat(cu.getTypesInUse()
-				.getTypesInUse()
-				.stream()
-				.map(t -> t.toString())
-				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+		ParserParityTestHelper.scanProjectDir(baseDir)
+			.parseSequentially()
+			.verifyParity((comparingParsingResult, testedParsingResult) -> {
+				assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+				J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
+				assertThat(cu.getTypesInUse()
+					.getTypesInUse()
+					.stream()
+					.map(t -> t.toString())
+					.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
 
-			assertThat(testedParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
-			J.CompilationUnit cu2 = (J.CompilationUnit) testedParsingResult.sourceFiles().get(1);
-			assertThat(cu2.getTypesInUse()
-				.getTypesInUse()
-				.stream()
-				.map(t -> t.toString())
-				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
-		});
+				assertThat(testedParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+				J.CompilationUnit cu2 = (J.CompilationUnit) testedParsingResult.sourceFiles().get(1);
+				assertThat(cu2.getTypesInUse()
+					.getTypesInUse()
+					.stream()
+					.map(t -> t.toString())
+					.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+			});
 	}
 
 	@Test
