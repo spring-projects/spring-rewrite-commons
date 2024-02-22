@@ -55,7 +55,7 @@ public class RewriteProjectParserIntegrationTest {
 	@DisplayName("testFailingProject")
 	void testFailingProject() {
 		Path baseDir = Path.of("./testcode/maven-projects/failing");
-		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
+		ParserParityTestHelper.scanProjectDir(baseDir).parseSequentially().verifyParity((comparingParsingResult, testedParsingResult) -> {
 			assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
 			J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
 			assertThat(cu.getTypesInUse()
