@@ -61,9 +61,10 @@ public class CompareParserRecipeRunTest {
 	@DisplayName("Running a recipe with RewriteMavenParser should yield the same result as with RewriteProjectParser")
 	void runningARecipeWithRewriteMavenParserYieldsTheSameResultAsWithRewriteProjectParser() {
 		Path baseDir = TestProjectHelper.getMavenProject("parser-recipe-run");
-		ParallelParsingResult parallelParsingResult = new ParserExecutionHelper().parseParallel(baseDir);
-		RewriteProjectParsingResult sutParsingResult = parallelParsingResult.actualParsingResult();
-		RewriteProjectParsingResult compParsingResult = parallelParsingResult.expectedParsingResult();
+		ParserExecutionHelper helper = new ParserExecutionHelper();
+		SpringRewriteProperties properties = new SpringRewriteProperties();
+		RewriteProjectParsingResult sutResult = helper.parseWithRewriteProjectParser(baseDir, properties);
+		RewriteProjectParsingResult comparingResult = helper.parseWithComparingParser(baseDir, properties, executionContext);
 
 		AtomicInteger counter = new AtomicInteger(0);
 
@@ -99,14 +100,14 @@ public class CompareParserRecipeRunTest {
 			}
 		};
 		// Run the Comparing Parser reusing OpenRewrite code
-		RecipeRun compRecipeRun = recipe.run(new InMemoryLargeSourceSet(compParsingResult.sourceFiles()),
+		RecipeRun compRecipeRun = recipe.run(new InMemoryLargeSourceSet(comparingResult.sourceFiles()),
 				executionContext);
 		assertThat(counter.get()).isEqualTo(1);
 		assertThat(compRecipeRun.getChangeset().getAllResults()).hasSize(1);
 
 		// Run Parser independent from Maven
 		counter.setRelease(0);
-		RecipeRun sutRecipeRun = recipe.run(new InMemoryLargeSourceSet(sutParsingResult.sourceFiles()),
+		RecipeRun sutRecipeRun = recipe.run(new InMemoryLargeSourceSet(sutResult.sourceFiles()),
 				executionContext);
 		assertThat(counter.get()).isEqualTo(1);
 		assertThat(sutRecipeRun.getChangeset().getAllResults()).hasSize(1); // is 0

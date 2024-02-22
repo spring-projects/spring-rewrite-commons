@@ -85,7 +85,7 @@ public class CalculateClasspathTest {
 				import javax.validation.constraints.Min;
 
 				public class MainClass {
-				    @Min("10")
+				    @Min(10)
 				    private int value;
 				}
 				""";
@@ -102,11 +102,13 @@ public class CalculateClasspathTest {
 				""";
 
 		Path baseDir = LinuxWindowsPathUnifier.unifiedPath(tmpDir.resolve("example-1").toAbsolutePath().normalize());
-		List<Resource> resources = List.of(new DummyResource(baseDir.resolve("pom.xml"), pom),
-				new DummyResource(baseDir.resolve("src/main/java/com/example/MainClass.java"), mainClass),
-				new DummyResource(baseDir.resolve("src/test/java/com/example/TestClass.java"), testClass));
+		TestProjectHelper.createTestProject(baseDir)
+				.addResource("pom.xml", pom)
+				.addResource("src/main/java/com/example/MainClass.java", mainClass)
+				.addResource("src/test/java/com/example/TestClass.java", testClass)
+				.writeToFilesystem();
 
-		RewriteProjectParsingResult parsingResult = parser.parse(baseDir, resources);
+		RewriteProjectParsingResult parsingResult = parser.parse(baseDir);
 
 		// verify types in use
 		SourceFile mainSourceFile = parsingResult.sourceFiles().get(1);
@@ -116,7 +118,7 @@ public class CalculateClasspathTest {
 		// Having Min annotation resolved proves type resolution is working for main
 		// resources
 		assertThat(mainCu.getTypesInUse().getTypesInUse().stream().map(t -> t.toString()))
-			.containsExactlyInAnyOrder("int", "String", "javax.validation.constraints.Min");
+			.containsExactlyInAnyOrder("int", "javax.validation.constraints.Min");
 
 		SourceFile testSourceFile = parsingResult.sourceFiles().get(2);
 		assertThat(testSourceFile).isInstanceOf(J.CompilationUnit.class);

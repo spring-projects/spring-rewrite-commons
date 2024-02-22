@@ -65,7 +65,6 @@ public class ParserExecutionHelper {
 
 		Future<?> customParserResult = threadPool.submit(() -> {
 			RewriteProjectParsingResult parsingResult = parseWithRewriteProjectParser(baseDir, springRewriteProperties);
-			;
 			actualParsingResultRef.set(parsingResult);
 			latch.countDown();
 		});
