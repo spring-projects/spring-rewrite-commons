@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.maveninvokerplayground;
+package org.springframework.rewrite.embedder;
 
 import com.google.inject.AbstractModule;
 import org.apache.commons.cli.CommandLine;
@@ -39,7 +39,6 @@ import org.apache.maven.cli.internal.extension.model.io.xpp3.CoreExtensionsXpp3R
 import org.apache.maven.cli.logging.Slf4jConfiguration;
 import org.apache.maven.cli.logging.Slf4jConfigurationFactory;
 import org.apache.maven.cli.logging.Slf4jLoggerManager;
-import org.apache.maven.cli.logging.Slf4jStdoutLogger;
 import org.apache.maven.cli.transfer.ConsoleMavenTransferListener;
 import org.apache.maven.cli.transfer.QuietMavenTransferListener;
 import org.apache.maven.cli.transfer.Slf4jMavenTransferListener;
@@ -88,7 +87,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;

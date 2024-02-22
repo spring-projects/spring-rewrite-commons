@@ -26,12 +26,11 @@ import org.junit.jupiter.api.condition.OS;
 import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.java.marker.JavaSourceSet;
 import org.openrewrite.java.tree.J;
-import org.openrewrite.java.tree.JavaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
-import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.parser.maven.SbmTestConfiguration;
 import org.springframework.rewrite.test.util.ParserExecutionHelper;
@@ -41,7 +40,6 @@ import org.springframework.rewrite.test.util.TestProjectHelper;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

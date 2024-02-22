@@ -21,7 +21,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
+import org.springframework.rewrite.embedder.MavenExecutor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

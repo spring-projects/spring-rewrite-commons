@@ -26,7 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.test.util.DummyResource;
 import org.springframework.rewrite.utils.LinuxWindowsPathUnifier;
 import org.springframework.rewrite.utils.ResourceUtil;

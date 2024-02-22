@@ -34,7 +34,7 @@ import org.openrewrite.xml.tree.Xml;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.scopes.ScanScope;
 

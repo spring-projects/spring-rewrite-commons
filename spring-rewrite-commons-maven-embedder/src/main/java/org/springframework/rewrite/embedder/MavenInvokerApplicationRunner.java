@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.rewrite.maveninvokerplayground;
+package org.springframework.rewrite.embedder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.execution.ExecutionEvent;
@@ -24,8 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Path;
 import java.util.List;
-
-import static org.springframework.rewrite.maveninvokerplayground.MavenExecutor.MULTIMODULE_PROJECT_DIRECTORY;
 
 @Slf4j
 @SpringBootApplication
@@ -40,7 +38,7 @@ public class MavenInvokerApplicationRunner implements ApplicationRunner {
 
 		Path projectDir = Path.of(args.getNonOptionArgs().get(0));
 
-		System.setProperty(MULTIMODULE_PROJECT_DIRECTORY, projectDir.toString());
+		System.setProperty(MavenExecutor.MULTIMODULE_PROJECT_DIRECTORY, projectDir.toString());
 
 		MavenExecutor mavenExecutor = new MavenExecutor(log, new AbstractExecutionListener() {
 			@Override

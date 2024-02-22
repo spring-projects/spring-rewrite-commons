@@ -31,7 +31,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.rewrite.maveninvokerplayground.MavenExecutor;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.*;
 import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
