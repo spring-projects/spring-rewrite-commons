@@ -432,8 +432,7 @@ public class ParserParityTestHelper {
 		}
 
 		static void compareMarker(SoftAssertions softAssertions, Marker expectedMarker, Marker actualMarker) {
-			// softAssertions.
-			assertThat(actualMarker).usingRecursiveComparison()
+			softAssertions.assertThat(actualMarker).usingRecursiveComparison()
 				.withStrictTypeChecking()
 				.ignoringCollectionOrder()
 				.withEqualsForFields(equalsClasspath(), "classpath")
