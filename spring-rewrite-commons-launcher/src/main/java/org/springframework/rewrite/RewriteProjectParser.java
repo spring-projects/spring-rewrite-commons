@@ -100,13 +100,14 @@ public class RewriteProjectParser {
 
 	private final MavenProjectAnalyzer mavenProjectAnalyzer;
 
-	private MavenArtifactDownloader artifactDownloader;
+	private final MavenArtifactDownloader artifactDownloader;
 
 	public RewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory, MavenBuildFileParser buildFileParser,
 			SourceFileParser sourceFileParser, StyleDetector styleDetector,
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, ScanScope scanScope, ConfigurableListableBeanFactory beanFactory,
-			ProjectScanner scanner, ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer) {
+			ProjectScanner scanner, ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer,
+			MavenArtifactDownloader artifactDownloader) {
 		this.provenanceMarkerFactory = provenanceMarkerFactory;
 		this.buildFileParser = buildFileParser;
 		this.sourceFileParser = sourceFileParser;
@@ -119,6 +120,7 @@ public class RewriteProjectParser {
 		this.scanner = scanner;
 		this.executionContext = executionContext;
 		this.mavenProjectAnalyzer = mavenProjectAnalyzer;
+		this.artifactDownloader = artifactDownloader;
 	}
 
 	/**
@@ -161,7 +163,7 @@ public class RewriteProjectParser {
 			.getProjectDependencyGraph()
 			.getSortedProjects()
 			.stream()
-			.map(p -> this.mavenProjectToMavenProject(p, resources))
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
 			.toList();
 
 		List<MavenProject> sortedProjects = mavenProjectAnalyzer.getBuildProjects(baseDir, resources);

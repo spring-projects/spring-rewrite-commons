@@ -115,10 +115,11 @@ public class RewriteParserConfiguration {
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, org.springframework.rewrite.scopes.ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ProjectScanner projectScanner,
-			ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer) {
+			ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer,
+			MavenArtifactDownloader artifactDownloader) {
 		return new RewriteProjectParser(provenanceMarkerFactory, buildFileParser, sourceFileParser, styleDetector,
 				springRewriteProperties, parsingEventListener, eventPublisher, scanScope, beanFactory, projectScanner,
-				executionContext, mavenProjectAnalyzer);
+				executionContext, mavenProjectAnalyzer, artifactDownloader);
 	}
 
 	@Bean
