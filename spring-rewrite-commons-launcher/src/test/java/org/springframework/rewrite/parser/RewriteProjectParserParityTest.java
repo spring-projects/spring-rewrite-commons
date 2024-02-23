@@ -31,6 +31,7 @@ import org.openrewrite.SourceFile;
 import org.openrewrite.shaded.jgit.api.errors.GitAPIException;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
+import org.springframework.rewrite.OpenRewriteProjectParser;
 import org.springframework.rewrite.parser.maven.ComparingParserFactory;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.test.util.DummyResource;
@@ -151,9 +152,8 @@ class RewriteProjectParserParityTest {
 		Path baseDir = Path.of("./testcode/maven-projects/maven-config").toAbsolutePath().normalize();
 		SpringRewriteProperties springRewriteProperties = new SpringRewriteProperties();
 		springRewriteProperties.setIgnoredPathPatterns(Set.of(".mvn"));
-		RewriteMavenProjectParser mavenProjectParser = new ComparingParserFactory().createComparingParser();
-		RewriteProjectParsingResult parsingResult = mavenProjectParser.parse(baseDir,
-				new InMemoryExecutionContext(t -> fail(t.getMessage())));
+		OpenRewriteProjectParser mavenProjectParser = new ComparingParserFactory().createComparingParser();
+		RewriteProjectParsingResult parsingResult = mavenProjectParser.parse(baseDir);
 		assertThat(parsingResult.sourceFiles()).hasSize(2);
 	}
 

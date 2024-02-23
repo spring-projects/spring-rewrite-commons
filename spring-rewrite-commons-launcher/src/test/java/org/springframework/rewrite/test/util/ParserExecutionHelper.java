@@ -20,6 +20,7 @@ import org.openrewrite.InMemoryExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.rewrite.OpenRewriteProjectParser;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
@@ -93,7 +94,7 @@ public class ParserExecutionHelper {
 
 	public RewriteProjectParsingResult parseWithComparingParser(Path baseDir,
 			SpringRewriteProperties springRewriteProperties, ExecutionContext executionContext) {
-		RewriteMavenProjectParser comparingParser = new ComparingParserFactory()
+		OpenRewriteProjectParser comparingParser = new ComparingParserFactory()
 			.createComparingParser(springRewriteProperties);
 		try {
 			if (executionContext != null) {
