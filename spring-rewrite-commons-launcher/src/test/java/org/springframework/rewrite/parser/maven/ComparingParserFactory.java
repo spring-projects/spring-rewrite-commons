@@ -38,7 +38,8 @@ public class ComparingParserFactory {
 	}
 
 	public OpenRewriteProjectParser createComparingParser(SpringRewriteProperties springRewriteProperties) {
-		OpenRewriteProjectParser mavenProjectParser1 = new OpenRewriteProjectParser(springRewriteProperties, new RewriteExecutionContext());
+		OpenRewriteProjectParser mavenProjectParser1 = new OpenRewriteProjectParser(springRewriteProperties,
+				new RewriteExecutionContext());
 		return mavenProjectParser1;
 	}
 

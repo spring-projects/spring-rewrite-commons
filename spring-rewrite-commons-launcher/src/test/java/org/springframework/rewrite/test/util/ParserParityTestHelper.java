@@ -432,7 +432,8 @@ public class ParserParityTestHelper {
 		}
 
 		static void compareMarker(SoftAssertions softAssertions, Marker expectedMarker, Marker actualMarker) {
-			softAssertions.assertThat(actualMarker).usingRecursiveComparison()
+			softAssertions.assertThat(actualMarker)
+				.usingRecursiveComparison()
 				.withStrictTypeChecking()
 				.ignoringCollectionOrder()
 				.withEqualsForFields(equalsClasspath(), "classpath")
@@ -458,7 +459,7 @@ public class ParserParityTestHelper {
 					.sorted()
 					.toList();
 				boolean equals = c1Sorted.equals(c2Sorted);
-				if(!equals) {
+				if (!equals) {
 					List<String> differences = new ArrayList<>(c1Sorted);
 					differences.removeAll(c2Sorted);
 					String diff = differences.stream().collect(Collectors.joining("\n"));

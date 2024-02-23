@@ -105,8 +105,8 @@ public class RewriteMavenProjectParser {
 			MavenMojoProjectParser rewriteProjectParser = mavenMojoProjectParserFactory.create(baseDir, mavenProjects,
 					plexusContainer, session);
 			List<NamedStyles> styles = List.of();
-			List<SourceFile> sourceFiles = parseSourceFiles(session.getTopLevelProject(), rewriteProjectParser, mavenProjects, styles,
-					executionContext);
+			List<SourceFile> sourceFiles = parseSourceFiles(session.getTopLevelProject(), rewriteProjectParser,
+					mavenProjects, styles, executionContext);
 			parsingResult.set(new RewriteProjectParsingResult(sourceFiles, executionContext));
 		}).execute(List.of("clean", "package", "--fail-at-end"), baseDir);
 
@@ -117,11 +117,11 @@ public class RewriteMavenProjectParser {
 		scanScope.clear(beanFactory);
 	}
 
-	private List<SourceFile> parseSourceFiles(MavenProject rootMavenProject, MavenMojoProjectParser rewriteProjectParser,
-											  List<MavenProject> mavenProjects, List<NamedStyles> styles, ExecutionContext executionContext) {
+	private List<SourceFile> parseSourceFiles(MavenProject rootMavenProject,
+			MavenMojoProjectParser rewriteProjectParser, List<MavenProject> mavenProjects, List<NamedStyles> styles,
+			ExecutionContext executionContext) {
 		try {
-			Stream<SourceFile> sourceFileStream = rewriteProjectParser.listSourceFiles(
-					rootMavenProject,
+			Stream<SourceFile> sourceFileStream = rewriteProjectParser.listSourceFiles(rootMavenProject,
 					// access to root
 					// module
 					styles, executionContext);

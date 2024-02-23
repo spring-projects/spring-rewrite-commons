@@ -160,11 +160,11 @@ public class RewriteProjectParser {
 	private List<SourceFile> runInMavenSession(ExecutionEvent onSuccess, Path baseDir, List<Resource> resources) {
 		List<NamedStyles> styles = List.of();
 		List<MavenProject> sortedProjects = onSuccess.getSession()
-				.getProjectDependencyGraph()
-				.getSortedProjects()
-				.stream()
-				.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
-				.toList();
+			.getProjectDependencyGraph()
+			.getSortedProjects()
+			.stream()
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
+			.toList();
 
 		ParserContext parserContext = new ParserContext(baseDir, resources, sortedProjects);
 
@@ -203,7 +203,10 @@ public class RewriteProjectParser {
 		File file = mavenProject.getExecutionProject().getFile();
 		Resource rootPom = new FileSystemResource(file);
 		MavenProject newMavenProject = new MavenProject(baseDir, rootPom, artifactDownloader, resources);
-		List<MavenProject> mavenProjects = mavenProject.getCollectedProjects().stream().map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources)).toList();
+		List<MavenProject> mavenProjects = mavenProject.getCollectedProjects()
+			.stream()
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
+			.toList();
 		newMavenProject.setReactorProjects(mavenProjects);
 		return newMavenProject;
 	}
