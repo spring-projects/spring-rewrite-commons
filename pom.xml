@@ -111,14 +111,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.openrewrite</groupId>
-                <artifactId>rewrite-bom</artifactId>
-                <version>${rewrite.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
@@ -148,6 +140,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-bom</artifactId>
+            <version>${rewrite.version}</version>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -256,6 +257,7 @@ limitations under the License.
                                 <!-- @formatter:on -->
                             </inlineHeader>
                             <excludes>
+                                <exclude>**/CLIReportingUtils.java</exclude>
                                 <exclude>**/internal/**</exclude>
                                 <exclude>**/demo/**</exclude>
                                 <exclude>**/.sdkmanrc</exclude>
@@ -304,6 +306,26 @@ limitations under the License.
                                 <dependencyConvergence>
                                     <excludes>
                                         <exclude>org.jetbrains:annotations</exclude>
+                                        <exclude>org.ow2.asm:asm</exclude> <!-- through org.openrewrite.maven:rewrite-maven-plugin:jar:5.20.0:compile -->
+                                        <!--
+                                        [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-maven-embedder:jar:0.1.0-SNAPSHOT
+                                        [ERROR]   +-org.apache.maven:maven-embedder:jar:3.9.3:compile
+                                        [ERROR]     +-javax.annotation:javax.annotation-api:jar:1.3.2:compile
+                                        [ERROR] and
+                                        [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-maven-embedder:jar:0.1.0-SNAPSHOT
+                                        [ERROR]   +-org.apache.maven:maven-embedder:jar:3.9.3:compile
+                                        [ERROR]     +-org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.5:compile
+                                        [ERROR]       +-javax.annotation:javax.annotation-api:jar:1.2:compile
+                                        -->
+                                        <exclude>javax.annotation:javax.annotation-api</exclude>
+                                        <!--
+
+                                        -->
+                                        <exclude>org.codehaus.plexus:plexus-utils</exclude>
+                                        <exclude>org.codehaus.plexus:plexus-classworlds</exclude>
+                                        <exclude>com.google.guava:guava</exclude> <!-- from org.apache.maven:maven-embedder -->
+                                        <exclude>org.xerial.snappy:snappy-java</exclude> <!-- from org.openrewrite.maven:rewrite-maven-plugin -->
+                                        <exclude>org.ow2.asm:asm-util</exclude> <!-- from org.openrewrite:rewrite-java -->
                                     </excludes>
                                 </dependencyConvergence>
                             </rules>
