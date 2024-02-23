@@ -202,7 +202,10 @@ public class RewriteProjectParser {
 		Path baseDir = mavenProject.getBasedir().toPath();
 		File file = mavenProject.getExecutionProject().getFile();
 		Resource rootPom = new FileSystemResource(file);
-		return new MavenProject(baseDir, rootPom, artifactDownloader, resources);
+		MavenProject newMavenProject = new MavenProject(baseDir, rootPom, artifactDownloader, resources);
+		List<MavenProject> mavenProjects = mavenProject.getCollectedProjects().stream().map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources)).toList();
+		newMavenProject.setReactorProjects(mavenProjects);
+		return newMavenProject;
 	}
 
 	@NotNull
