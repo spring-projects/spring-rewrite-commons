@@ -116,6 +116,7 @@ import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
  * This class is mainly a copy of {@link org.apache.maven.cli.MavenCli} opening up access
  * to the {@link MavenSession}.
  *
+ * Author: Jason van Zyl
  * @author Fabian Krüger
  */
 public class MavenExecutor {
