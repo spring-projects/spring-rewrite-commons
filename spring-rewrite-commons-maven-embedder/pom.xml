@@ -6,19 +6,13 @@
         <groupId>org.springframework.rewrite</groupId>
         <artifactId>spring-rewrite-commons</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>spring-rewrite-commons-maven-embedder</artifactId>
     <name>Spring Rewrite Maven Embedder</name>
     <description>Maven Embedder with access to Maven lifecycle events</description>
     <properties>
         <java.version>17</java.version>
-        <maven.version>3.9.3</maven.version>
-        <maven-resolver.version>1.9.13</maven-resolver.version>
-        <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
-        <plexus-cypher.version>1.8</plexus-cypher.version>
-        <maven-invoker.version>3.2.0</maven-invoker.version>
-        <maven-embedder.version>3.9.3</maven-embedder.version>
     </properties>
     <dependencies>
         <dependency>
@@ -28,18 +22,16 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-embedder</artifactId>
-            <version>${maven-embedder.version}</version> <!-- Use the latest version available -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.plexus</groupId>
-                    <artifactId>plexus-component-annotations</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-shared-utils</artifactId>
+            <version>3.4.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-invoker</artifactId>
-            <version>${maven-invoker.version}</version> <!-- Make sure to use the latest version -->
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
@@ -62,28 +54,25 @@
             <version>${maven-resolver.version}</version> <!-- Check for the latest version -->
         </dependency>
         <dependency>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-http</artifactId>
-            <version>${maven-wagon-http.version}</version>
-
+            <groupId>org.apache.maven.resolver</groupId>
+            <artifactId>maven-resolver-impl</artifactId>
+            <version>${maven-resolver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-transport-wagon</artifactId>
             <version>${maven-resolver.version}</version>
-
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
             <artifactId>maven-resolver-connector-basic</artifactId>
             <version>${maven-resolver.version}</version>
-
         </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-impl</artifactId>
-            <version>${maven-resolver.version}</version>
 
+        <dependency>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-http</artifactId>
+            <version>${maven-wagon-http.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -95,11 +84,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
             <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-invoker</artifactId>
-            <version>${maven-invoker.version}</version>
         </dependency>
 
         <dependency>
@@ -114,14 +98,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

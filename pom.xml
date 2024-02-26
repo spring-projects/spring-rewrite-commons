@@ -36,20 +36,20 @@
         <!-- prod dependencies -->
         <spring-boot.version>3.2.1</spring-boot.version>
         <rewrite.version>8.13.4</rewrite.version>
-        <rewrite-kotlin.version>1.8.4</rewrite-kotlin.version>
-        <rewrite-polyglot.version>1.8.11</rewrite-polyglot.version>
+        <rewrite-kotlin.version>1.10.0</rewrite-kotlin.version>
+        <rewrite-polyglot.version>1.9.2</rewrite-polyglot.version>
         <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <gradle-tooling-api.version>8.4</gradle-tooling-api.version>
-        <maven.version>3.9.1</maven.version>
+        <maven.version>3.9.6</maven.version>
         <maven-invoker.version>3.2.0</maven-invoker.version>
         <maven-shared-utils.version>3.4.2</maven-shared-utils.version>
 
         <!-- testing dependencies -->
-        <maven-resolver.version>1.9.13</maven-resolver.version>
+        <maven-resolver.version>1.9.18</maven-resolver.version>
+        <maven-embedder.version>3.9.6</maven-embedder.version>
         <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
-        <plexus-cypher.version>1.8</plexus-cypher.version>
-        <maven-invoker.version>3.2.0</maven-invoker.version>
+        <plexus-cypher.version>2.0</plexus-cypher.version>
         <junit-pioneer.version>2.1.0</junit-pioneer.version>
 
         <!-- documentation dependencies -->
@@ -137,6 +137,37 @@
                 <groupId>org.springframework.rewrite</groupId>
                 <artifactId>spring-rewrite-commons-test</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-embedder</artifactId>
+                <version>${maven-embedder.version}</version> <!-- Use the latest version available -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.plexus</groupId>
+                        <artifactId>plexus-component-annotations</artifactId>
+                    </exclusion>
+                    <!-- org.apache.maven:maven-embedder:jar:3.9.6 brings maven-shared-utils:3.3.4 while 3.4.2 is right -->
+                    <exclusion>
+                        <groupId>org.apache.maven.shared</groupId>
+                        <artifactId>maven-shared-utils</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.sonatype.plexus</groupId>
+                        <artifactId>plexus-cipher</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-invoker</artifactId>
+                <version>${maven-invoker.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.maven.shared</groupId>
+                        <artifactId>maven-shared-utils</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -326,6 +357,24 @@ limitations under the License.
                                         <exclude>com.google.guava:guava</exclude> <!-- from org.apache.maven:maven-embedder -->
                                         <exclude>org.xerial.snappy:snappy-java</exclude> <!-- from org.openrewrite.maven:rewrite-maven-plugin -->
                                         <exclude>org.ow2.asm:asm-util</exclude> <!-- from org.openrewrite:rewrite-java -->
+                                        <!--
+                                        [ERROR] Dependency convergence error for commons-io:commons-io:jar:2.11.0 paths to dependency are:
+                                        [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                                        [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-launcher:jar:0.1.0-SNAPSHOT:compile
+                                        [ERROR]     +-org.springframework.rewrite:spring-rewrite-commons-test:jar:0.1.0-SNAPSHOT:compile
+                                        [ERROR]       +-commons-io:commons-io:jar:2.11.0:compile
+                                        [ERROR] and
+                                        [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                                        [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-launcher:jar:0.1.0-SNAPSHOT:compile
+                                        [ERROR]     +-org.openrewrite.maven:rewrite-maven-plugin:jar:5.20.0:compile
+                                        [ERROR]       +-org.apache.maven.shared:maven-filtering:jar:3.3.1:compile
+                                        [ERROR]         +-commons-io:commons-io:jar:2.11.0:compile
+                                        [ERROR] and
+                                        [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                                        [ERROR]   +-org.openrewrite.recipe:rewrite-migrate-java:jar:2.7.1:compile
+                                        [ERROR]     +-commons-io:commons-io:jar:2.15.1:compile
+                                        -->
+                                        <exclude>commons-io:commons-io</exclude>
                                     </excludes>
                                 </dependencyConvergence>
                             </rules>
