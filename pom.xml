@@ -17,6 +17,7 @@
         <module>spring-rewrite-commons-examples</module>
         <module>spring-rewrite-commons-starters</module>
         <module>spring-rewrite-commons-gradle</module>
+        <module>spring-rewrite-commons-maven-invoker</module>
     </modules>
 
     <organization>
@@ -109,6 +110,12 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit-pioneer</groupId>
+                <artifactId>junit-pioneer</artifactId>
+                <version>${junit-pioneer.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
