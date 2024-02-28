@@ -30,6 +30,28 @@ ____
 compile 'org.springframework.rewrite:spring-rewrite-commons-launcher:{projectVersion}'
 ----
 
+=== Select Parser
+Currently, different ways to parse projects and execute recipes exist.
+They all fulfill specific needs or fill gaps of other implementations.
+
+==== `RewriteProjectParser`
+WARNING: This implementation is affected by <ADD ISSUE HERE>.
+
+Use MavenCli to parse a Maven project and a customized parser to create the OpenRewrite LST.
+This implementation allows for customizations and provides access to OpenRewrite LST.
+
+==== `OpenRewriteProjectParser`
+WARNING: This implementation is affected by <ADD ISSUE HERE> and <ADD ISSUE HERE>.
+
+Use MavenCli to parse Maven projects and instantiate OpenRewrite's `MAvenMojoProjectParser`.
+The parser provides access to OpenRewrite's LST.
+This implementation uses as much code as possible from OpenRewrite and Maven being the closest to the execution of OpenRewrite recipes inside OR's Maven plugin.
+
+
+
+==== `OpenRewriteRecipeLauncher`
+Use Maven Invoker to run OpenRewrite recipes in a separate process like from command line but started from inside a Java application.
+It
 
 === Implement a Recipe Launcher
 

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.rewrite.test.util.TestProjectHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -72,8 +73,7 @@ class MavenExecutorTests {
 
 		MavenCli cli = new MavenCli();
 		System.setProperty("maven.multiModuleProjectDirectory", baseDir.toString());
-		int i = cli
-			.doMain(List.of("org.springframework.cloud:spring-cloud-dataflow-apps-metadata-plugin:aggregate-metadata",
+		int i = cli.doMain(List.of("org.springframework.cloud:spring-cloud-dataflow-apps-metadata-plugin:aggregate-metadata",
 					"-DskipTests", "-e")
 				.toArray(new String[] {}), baseDir.toString(), System.out, System.err);
 		System.out.println(i);
@@ -188,14 +188,23 @@ class MavenExecutorTests {
 		request.addShellEnvironment("MAVEN_OPTS",
 				"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
 		request.setMavenHome(new File(System.getenv("MAVEN_HOME")));
+		request.setShowErrors(true);
+		request.setBatchMode(true);
+		request.setDebug(true);
+		request.setErrorHandler(new InvocationOutputHandler() {
+			@Override
+			public void consumeLine(String s) throws IOException {
+				System.out.println(s);
+			}
+		});
 		request.setPomFile(new File(
 				"/Users/fkrueger/projects/forks/spring-rewrite-commons-fork/spring-rewrite-commons-launcher/testcode/maven-projects/resources/pom.xml"));
 		// org.openrewrite.maven:rewrite-maven-plugin:5.20.0:run
 		// -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-migrate-java:LATEST,org.openrewrite.recipe:rewrite-hibernate:LATEST,org.openrewrite.recipe:rewrite-java-dependencies:LATEST,org.openrewrite.recipe:rewrite-testing-frameworks:LATEST,org.openrewrite.recipe:rewrite-static-analysis:LATEST,org.openrewrite.recipe:rewrite-spring:LATEST
 		// -Drewrite.activeRecipes=org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_7
 		request.setGoals(List.of("clean", "package", "-U", "-B", "--fail-at-end",
-				"org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.openrewrite.java.RemoveUnusedImports",
-				"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"));
+				"org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.openrewrite.java.RemoveUnusedImports"
+		));
 
 		Invoker invoker = new DefaultInvoker();
 		InvocationResult result = invoker.execute(request);

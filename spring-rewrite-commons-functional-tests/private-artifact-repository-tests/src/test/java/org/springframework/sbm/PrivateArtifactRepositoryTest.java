@@ -15,7 +15,7 @@
  */
 package org.springframework.sbm;
 
-import lombok.extern.slf4j.Slf4j;
+import groovy.util.logging.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.util.FileSystemUtils;
 import org.testcontainers.containers.GenericContainer;
@@ -201,7 +202,7 @@ public class PrivateArtifactRepositoryTest {
 
 		Path baseDir = Path.of(TESTCODE_DIR + "/dependent-project");
 		CountDownLatch latch = new CountDownLatch(1);
-		new org.springframework.rewrite.maveninvokerplayground.MavenExecutor(log, successEvent -> {
+		new MavenExecutor(log, successEvent -> {
 			latch.countDown();
 		})
 		.execute(List.of("clean", "install"), baseDir);
