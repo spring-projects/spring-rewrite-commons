@@ -15,8 +15,6 @@
  */
 package org.springframework.rewrite.gradle.plugin.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.FeaturePreviews;
 import org.gradle.initialization.DefaultSettings;
@@ -35,27 +33,102 @@ import java.util.*;
 
 public class GradleToolingApiSettingsBuilder {
 
-	@AllArgsConstructor
-	@Value
-	static class FeaturePreviewImpl implements FeaturePreview, Serializable {
+	static final class FeaturePreviewImpl implements FeaturePreview, Serializable {
 
-		String name;
+		private final String name;
 
-		boolean active;
+		private final boolean active;
 
-		boolean enabled;
+		private final boolean enabled;
+
+		public FeaturePreviewImpl(String name, boolean active, boolean enabled) {
+			this.name = name;
+			this.active = active;
+			this.enabled = enabled;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public boolean isActive() {
+			return this.active;
+		}
+
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			FeaturePreviewImpl that = (FeaturePreviewImpl) o;
+			return active == that.active && enabled == that.enabled && Objects.equals(name, that.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, active, enabled);
+		}
+
+		public String toString() {
+			return "GradleToolingApiSettingsBuilder.FeaturePreviewImpl(name=" + this.getName() + ", active="
+					+ this.isActive() + ", enabled=" + this.isEnabled() + ")";
+		}
 
 	}
 
-	@AllArgsConstructor
-	@Value
-	static class GradleSettingsImpl implements GradleSettings, Serializable {
+	static final class GradleSettingsImpl implements GradleSettings, Serializable {
 
-		List<MavenRepository> pluginRepositories;
+		private final List<MavenRepository> pluginRepositories;
 
-		List<GradlePluginDescriptor> plugins;
+		private final List<GradlePluginDescriptor> plugins;
 
-		Map<String, FeaturePreview> featurePreviews;
+		private final Map<String, FeaturePreview> featurePreviews;
+
+		public GradleSettingsImpl(List<MavenRepository> pluginRepositories, List<GradlePluginDescriptor> plugins,
+				Map<String, FeaturePreview> featurePreviews) {
+			this.pluginRepositories = pluginRepositories;
+			this.plugins = plugins;
+			this.featurePreviews = featurePreviews;
+		}
+
+		public List<MavenRepository> getPluginRepositories() {
+			return this.pluginRepositories;
+		}
+
+		public List<GradlePluginDescriptor> getPlugins() {
+			return this.plugins;
+		}
+
+		public Map<String, FeaturePreview> getFeaturePreviews() {
+			return this.featurePreviews;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			GradleSettingsImpl that = (GradleSettingsImpl) o;
+			return Objects.equals(pluginRepositories, that.pluginRepositories) && Objects.equals(plugins, that.plugins)
+					&& Objects.equals(featurePreviews, that.featurePreviews);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(pluginRepositories, plugins, featurePreviews);
+		}
+
+		public String toString() {
+			return "GradleToolingApiSettingsBuilder.GradleSettingsImpl(pluginRepositories="
+					+ this.getPluginRepositories() + ", plugins=" + this.getPlugins() + ", featurePreviews="
+					+ this.getFeaturePreviews() + ")";
+		}
 
 	}
 

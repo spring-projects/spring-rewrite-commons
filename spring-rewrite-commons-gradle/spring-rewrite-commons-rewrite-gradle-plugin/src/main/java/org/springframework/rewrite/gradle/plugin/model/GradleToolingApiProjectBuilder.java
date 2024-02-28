@@ -15,10 +15,6 @@
  */
 package org.springframework.rewrite.gradle.plugin.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -46,8 +42,6 @@ import static java.util.stream.Collectors.toList;
 
 public class GradleToolingApiProjectBuilder {
 
-	@Builder
-	@Getter
 	static class MavenRepositoryImpl implements MavenRepository, Serializable {
 
 		String id;
@@ -66,21 +60,152 @@ public class GradleToolingApiProjectBuilder {
 
 		Boolean DeriveMetadataIfMissing;
 
+		MavenRepositoryImpl(String id, String uri, String releases, String snapshots, boolean knownToExist,
+				String username, String password, Boolean DeriveMetadataIfMissing) {
+			this.id = id;
+			this.uri = uri;
+			this.releases = releases;
+			this.snapshots = snapshots;
+			this.knownToExist = knownToExist;
+			this.username = username;
+			this.password = password;
+			this.DeriveMetadataIfMissing = DeriveMetadataIfMissing;
+		}
+
+		public static MavenRepositoryImplBuilder builder() {
+			return new MavenRepositoryImplBuilder();
+		}
+
+		public String getId() {
+			return this.id;
+		}
+
+		public String getUri() {
+			return this.uri;
+		}
+
+		public String getReleases() {
+			return this.releases;
+		}
+
+		public String getSnapshots() {
+			return this.snapshots;
+		}
+
+		public boolean isKnownToExist() {
+			return this.knownToExist;
+		}
+
+		public String getUsername() {
+			return this.username;
+		}
+
+		public String getPassword() {
+			return this.password;
+		}
+
+		public Boolean getDeriveMetadataIfMissing() {
+			return this.DeriveMetadataIfMissing;
+		}
+
+		public static class MavenRepositoryImplBuilder {
+
+			private String id;
+
+			private String uri;
+
+			private String releases;
+
+			private String snapshots;
+
+			private boolean knownToExist;
+
+			private String username;
+
+			private String password;
+
+			private Boolean DeriveMetadataIfMissing;
+
+			MavenRepositoryImplBuilder() {
+			}
+
+			public MavenRepositoryImplBuilder id(String id) {
+				this.id = id;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder uri(String uri) {
+				this.uri = uri;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder releases(String releases) {
+				this.releases = releases;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder snapshots(String snapshots) {
+				this.snapshots = snapshots;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder knownToExist(boolean knownToExist) {
+				this.knownToExist = knownToExist;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder username(String username) {
+				this.username = username;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder password(String password) {
+				this.password = password;
+				return this;
+			}
+
+			public MavenRepositoryImplBuilder DeriveMetadataIfMissing(Boolean DeriveMetadataIfMissing) {
+				this.DeriveMetadataIfMissing = DeriveMetadataIfMissing;
+				return this;
+			}
+
+			public MavenRepositoryImpl build() {
+				return new MavenRepositoryImpl(this.id, this.uri, this.releases, this.snapshots, this.knownToExist,
+						this.username, this.password, this.DeriveMetadataIfMissing);
+			}
+
+			public String toString() {
+				return "GradleToolingApiProjectBuilder.MavenRepositoryImpl.MavenRepositoryImplBuilder(id=" + this.id
+						+ ", uri=" + this.uri + ", releases=" + this.releases + ", snapshots=" + this.snapshots
+						+ ", knownToExist=" + this.knownToExist + ", username=" + this.username + ", password="
+						+ this.password + ", DeriveMetadataIfMissing=" + this.DeriveMetadataIfMissing + ")";
+			}
+
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
 	static class GradlePluginDescriptorImpl implements GradlePluginDescriptor, Serializable {
 
 		String fullyQualifiedClassName;
 
 		String id;
 
+		public GradlePluginDescriptorImpl(String fullyQualifiedClassName, String id) {
+			this.fullyQualifiedClassName = fullyQualifiedClassName;
+			this.id = id;
+		}
+
+		public String getFullyQualifiedClassName() {
+			return this.fullyQualifiedClassName;
+		}
+
+		public String getId() {
+			return this.id;
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
-	@EqualsAndHashCode
 	static class GroupArtifactVersionImpl implements GroupArtifactVersion, Serializable {
 
 		String groupId;
@@ -89,23 +214,78 @@ public class GradleToolingApiProjectBuilder {
 
 		String version;
 
+		public GroupArtifactVersionImpl(String groupId, String artifactId, String version) {
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+			this.version = version;
+		}
+
+		public String getGroupId() {
+			return this.groupId;
+		}
+
+		public String getArtifactId() {
+			return this.artifactId;
+		}
+
+		public String getVersion() {
+			return this.version;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			GroupArtifactVersionImpl that = (GroupArtifactVersionImpl) o;
+			return Objects.equals(groupId, that.groupId) && Objects.equals(artifactId, that.artifactId)
+					&& Objects.equals(version, that.version);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(groupId, artifactId, version);
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
-	@EqualsAndHashCode
 	static class GroupArtifactImpl implements GroupArtifact, Serializable {
 
 		String groupId;
 
 		String artifactId;
 
+		public GroupArtifactImpl(String groupId, String artifactId) {
+			this.groupId = groupId;
+			this.artifactId = artifactId;
+		}
+
+		public String getGroupId() {
+			return this.groupId;
+		}
+
+		public String getArtifactId() {
+			return this.artifactId;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			GroupArtifactImpl that = (GroupArtifactImpl) o;
+			return Objects.equals(groupId, that.groupId) && Objects.equals(artifactId, that.artifactId);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(groupId, artifactId);
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
-	@Builder
-	@EqualsAndHashCode
 	static class DependencyImpl implements Dependency, Serializable {
 
 		GroupArtifactVersion gav;
@@ -120,11 +300,123 @@ public class GradleToolingApiProjectBuilder {
 
 		String optional;
 
+		public DependencyImpl(GroupArtifactVersion gav, String classifier, String type, String scope,
+				List<GroupArtifact> exclusions, String optional) {
+			this.gav = gav;
+			this.classifier = classifier;
+			this.type = type;
+			this.scope = scope;
+			this.exclusions = exclusions;
+			this.optional = optional;
+		}
+
+		public static DependencyImplBuilder builder() {
+			return new DependencyImplBuilder();
+		}
+
+		public GroupArtifactVersion getGav() {
+			return this.gav;
+		}
+
+		public String getClassifier() {
+			return this.classifier;
+		}
+
+		public String getType() {
+			return this.type;
+		}
+
+		public String getScope() {
+			return this.scope;
+		}
+
+		public List<GroupArtifact> getExclusions() {
+			return this.exclusions;
+		}
+
+		public String getOptional() {
+			return this.optional;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			DependencyImpl that = (DependencyImpl) o;
+			return Objects.equals(gav, that.gav) && Objects.equals(classifier, that.classifier)
+					&& Objects.equals(type, that.type) && Objects.equals(scope, that.scope)
+					&& Objects.equals(exclusions, that.exclusions) && Objects.equals(optional, that.optional);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(gav, classifier, type, scope, exclusions, optional);
+		}
+
+		public static class DependencyImplBuilder {
+
+			private GroupArtifactVersion gav;
+
+			private String classifier;
+
+			private String type;
+
+			private String scope;
+
+			private List<GroupArtifact> exclusions;
+
+			private String optional;
+
+			DependencyImplBuilder() {
+			}
+
+			public DependencyImplBuilder gav(GroupArtifactVersion gav) {
+				this.gav = gav;
+				return this;
+			}
+
+			public DependencyImplBuilder classifier(String classifier) {
+				this.classifier = classifier;
+				return this;
+			}
+
+			public DependencyImplBuilder type(String type) {
+				this.type = type;
+				return this;
+			}
+
+			public DependencyImplBuilder scope(String scope) {
+				this.scope = scope;
+				return this;
+			}
+
+			public DependencyImplBuilder exclusions(List<GroupArtifact> exclusions) {
+				this.exclusions = exclusions;
+				return this;
+			}
+
+			public DependencyImplBuilder optional(String optional) {
+				this.optional = optional;
+				return this;
+			}
+
+			public DependencyImpl build() {
+				return new DependencyImpl(this.gav, this.classifier, this.type, this.scope, this.exclusions,
+						this.optional);
+			}
+
+			public String toString() {
+				return "GradleToolingApiProjectBuilder.DependencyImpl.DependencyImplBuilder(gav=" + this.gav
+						+ ", classifier=" + this.classifier + ", type=" + this.type + ", scope=" + this.scope
+						+ ", exclusions=" + this.exclusions + ", optional=" + this.optional + ")";
+			}
+
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
-	@EqualsAndHashCode
 	static class ResolvedGroupArtifactVersionImpl implements ResolvedGroupArtifactVersion, Serializable {
 
 		String artifactId;
@@ -135,12 +427,49 @@ public class GradleToolingApiProjectBuilder {
 
 		String datedSnapshotVersion;
 
+		public ResolvedGroupArtifactVersionImpl(String artifactId, String groupId, String version,
+				String datedSnapshotVersion) {
+			this.artifactId = artifactId;
+			this.groupId = groupId;
+			this.version = version;
+			this.datedSnapshotVersion = datedSnapshotVersion;
+		}
+
+		public String getArtifactId() {
+			return this.artifactId;
+		}
+
+		public String getGroupId() {
+			return this.groupId;
+		}
+
+		public String getVersion() {
+			return this.version;
+		}
+
+		public String getDatedSnapshotVersion() {
+			return this.datedSnapshotVersion;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			ResolvedGroupArtifactVersionImpl that = (ResolvedGroupArtifactVersionImpl) o;
+			return Objects.equals(artifactId, that.artifactId) && Objects.equals(groupId, that.groupId)
+					&& Objects.equals(version, that.version)
+					&& Objects.equals(datedSnapshotVersion, that.datedSnapshotVersion);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(artifactId, groupId, version, datedSnapshotVersion);
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Builder
-	@Getter
-	@EqualsAndHashCode
 	static class ResolvedDependencyImpl implements ResolvedDependency, Serializable {
 
 		MavenRepositoryImpl repository;
@@ -153,10 +482,110 @@ public class GradleToolingApiProjectBuilder {
 
 		int depth;
 
+		public ResolvedDependencyImpl(MavenRepositoryImpl repository, ResolvedGroupArtifactVersionImpl gav,
+				DependencyImpl requested, List<ResolvedDependency> dependencies, int depth) {
+			this.repository = repository;
+			this.gav = gav;
+			this.requested = requested;
+			this.dependencies = dependencies;
+			this.depth = depth;
+		}
+
+		public static ResolvedDependencyImplBuilder builder() {
+			return new ResolvedDependencyImplBuilder();
+		}
+
+		public MavenRepositoryImpl getRepository() {
+			return this.repository;
+		}
+
+		public ResolvedGroupArtifactVersionImpl getGav() {
+			return this.gav;
+		}
+
+		public DependencyImpl getRequested() {
+			return this.requested;
+		}
+
+		public List<ResolvedDependency> getDependencies() {
+			return this.dependencies;
+		}
+
+		public int getDepth() {
+			return this.depth;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			ResolvedDependencyImpl that = (ResolvedDependencyImpl) o;
+			return depth == that.depth && Objects.equals(repository, that.repository) && Objects.equals(gav, that.gav)
+					&& Objects.equals(requested, that.requested) && Objects.equals(dependencies, that.dependencies);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(repository, gav, requested, dependencies, depth);
+		}
+
+		public static class ResolvedDependencyImplBuilder {
+
+			private MavenRepositoryImpl repository;
+
+			private ResolvedGroupArtifactVersionImpl gav;
+
+			private DependencyImpl requested;
+
+			private List<ResolvedDependency> dependencies;
+
+			private int depth;
+
+			ResolvedDependencyImplBuilder() {
+			}
+
+			public ResolvedDependencyImplBuilder repository(MavenRepositoryImpl repository) {
+				this.repository = repository;
+				return this;
+			}
+
+			public ResolvedDependencyImplBuilder gav(ResolvedGroupArtifactVersionImpl gav) {
+				this.gav = gav;
+				return this;
+			}
+
+			public ResolvedDependencyImplBuilder requested(DependencyImpl requested) {
+				this.requested = requested;
+				return this;
+			}
+
+			public ResolvedDependencyImplBuilder dependencies(List<ResolvedDependency> dependencies) {
+				this.dependencies = dependencies;
+				return this;
+			}
+
+			public ResolvedDependencyImplBuilder depth(int depth) {
+				this.depth = depth;
+				return this;
+			}
+
+			public ResolvedDependencyImpl build() {
+				return new ResolvedDependencyImpl(this.repository, this.gav, this.requested, this.dependencies,
+						this.depth);
+			}
+
+			public String toString() {
+				return "GradleToolingApiProjectBuilder.ResolvedDependencyImpl.ResolvedDependencyImplBuilder(repository="
+						+ this.repository + ", gav=" + this.gav + ", requested=" + this.requested + ", dependencies="
+						+ this.dependencies + ", depth=" + this.depth + ")";
+			}
+
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
 	static class GradleDependencyConfigurationImpl implements GradleDependencyConfiguration, Serializable {
 
 		String name;
@@ -175,10 +604,61 @@ public class GradleToolingApiProjectBuilder {
 
 		List<ResolvedDependency> resolved;
 
+		public GradleDependencyConfigurationImpl(String name, String description, boolean transitive,
+				boolean canBeConsumed, boolean canBeResolved, List<GradleDependencyConfiguration> extendsFrom,
+				List<Dependency> requested, List<ResolvedDependency> resolved) {
+			this.name = name;
+			this.description = description;
+			this.transitive = transitive;
+			this.canBeConsumed = canBeConsumed;
+			this.canBeResolved = canBeResolved;
+			this.extendsFrom = extendsFrom;
+			this.requested = requested;
+			this.resolved = resolved;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String getDescription() {
+			return description;
+		}
+
+		@Override
+		public boolean isTransitive() {
+			return transitive;
+		}
+
+		@Override
+		public boolean isCanBeConsumed() {
+			return canBeConsumed;
+		}
+
+		@Override
+		public boolean isCanBeResolved() {
+			return canBeResolved;
+		}
+
+		@Override
+		public List<GradleDependencyConfiguration> getExtendsFrom() {
+			return extendsFrom;
+		}
+
+		@Override
+		public List<Dependency> getRequested() {
+			return requested;
+		}
+
+		@Override
+		public List<ResolvedDependency> getResolved() {
+			return resolved;
+		}
+
 	}
 
-	@AllArgsConstructor
-	@Getter
 	static class GradleProjectImpl implements GradleProject, Serializable {
 
 		String name;
@@ -192,6 +672,41 @@ public class GradleToolingApiProjectBuilder {
 		List<MavenRepository> mavenPluginRepositories;
 
 		Map<String, GradleDependencyConfiguration> nameToConfiguration;
+
+		public GradleProjectImpl(String name, String path, List<GradlePluginDescriptor> plugins,
+				List<MavenRepository> mavenRepositories, List<MavenRepository> mavenPluginRepositories,
+				Map<String, GradleDependencyConfiguration> nameToConfiguration) {
+			this.name = name;
+			this.path = path;
+			this.plugins = plugins;
+			this.mavenRepositories = mavenRepositories;
+			this.mavenPluginRepositories = mavenPluginRepositories;
+			this.nameToConfiguration = nameToConfiguration;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public String getPath() {
+			return this.path;
+		}
+
+		public List<GradlePluginDescriptor> getPlugins() {
+			return this.plugins;
+		}
+
+		public List<MavenRepository> getMavenRepositories() {
+			return this.mavenRepositories;
+		}
+
+		public List<MavenRepository> getMavenPluginRepositories() {
+			return this.mavenPluginRepositories;
+		}
+
+		public Map<String, GradleDependencyConfiguration> getNameToConfiguration() {
+			return this.nameToConfiguration;
+		}
 
 	}
 

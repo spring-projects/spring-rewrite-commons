@@ -15,24 +15,67 @@
  */
 package org.springframework.rewrite.gradle.plugin.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.springframework.rewrite.gradle.model.KotlinSourceSetData;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Objects;
 
-@AllArgsConstructor
-@Value
-class KotlinSourceSetDataImpl implements KotlinSourceSetData, Serializable {
+final class KotlinSourceSetDataImpl implements KotlinSourceSetData, Serializable {
 
-	String name;
+	private final String name;
 
-	Collection<File> kotlin;
+	private final Collection<File> kotlin;
 
-	Collection<File> compileClasspath;
+	private final Collection<File> compileClasspath;
 
-	Collection<File> implementationClasspath;
+	private final Collection<File> implementationClasspath;
+
+	public KotlinSourceSetDataImpl(String name, Collection<File> kotlin, Collection<File> compileClasspath,
+			Collection<File> implementationClasspath) {
+		this.name = name;
+		this.kotlin = kotlin;
+		this.compileClasspath = compileClasspath;
+		this.implementationClasspath = implementationClasspath;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public Collection<File> getKotlin() {
+		return this.kotlin;
+	}
+
+	public Collection<File> getCompileClasspath() {
+		return this.compileClasspath;
+	}
+
+	public Collection<File> getImplementationClasspath() {
+		return this.implementationClasspath;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		KotlinSourceSetDataImpl that = (KotlinSourceSetDataImpl) o;
+		return Objects.equals(name, that.name) && Objects.equals(kotlin, that.kotlin)
+				&& Objects.equals(compileClasspath, that.compileClasspath)
+				&& Objects.equals(implementationClasspath, that.implementationClasspath);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, kotlin, compileClasspath, implementationClasspath);
+	}
+
+	public String toString() {
+		return "KotlinSourceSetDataImpl(name=" + this.getName() + ", kotlin=" + this.getKotlin() + ", compileClasspath="
+				+ this.getCompileClasspath() + ", implementationClasspath=" + this.getImplementationClasspath() + ")";
+	}
 
 }

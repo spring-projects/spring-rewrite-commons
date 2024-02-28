@@ -15,22 +15,66 @@
  */
 package org.springframework.rewrite.gradle.plugin.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.springframework.rewrite.gradle.model.JavaVersionData;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-@AllArgsConstructor
-@Value
-class JavaVersionDataImpl implements JavaVersionData, Serializable {
+final class JavaVersionDataImpl implements JavaVersionData, Serializable {
 
-	String createdBy;
+	private final String createdBy;
 
-	String vmVendor;
+	private final String vmVendor;
 
-	String sourceCompatibility;
+	private final String sourceCompatibility;
 
-	String targetCompatibility;
+	private final String targetCompatibility;
+
+	public JavaVersionDataImpl(String createdBy, String vmVendor, String sourceCompatibility,
+			String targetCompatibility) {
+		this.createdBy = createdBy;
+		this.vmVendor = vmVendor;
+		this.sourceCompatibility = sourceCompatibility;
+		this.targetCompatibility = targetCompatibility;
+	}
+
+	public String getCreatedBy() {
+		return this.createdBy;
+	}
+
+	public String getVmVendor() {
+		return this.vmVendor;
+	}
+
+	public String getSourceCompatibility() {
+		return this.sourceCompatibility;
+	}
+
+	public String getTargetCompatibility() {
+		return this.targetCompatibility;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		JavaVersionDataImpl that = (JavaVersionDataImpl) o;
+		return Objects.equals(createdBy, that.createdBy) && Objects.equals(vmVendor, that.vmVendor)
+				&& Objects.equals(sourceCompatibility, that.sourceCompatibility)
+				&& Objects.equals(targetCompatibility, that.targetCompatibility);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(createdBy, vmVendor, sourceCompatibility, targetCompatibility);
+	}
+
+	public String toString() {
+		return "JavaVersionDataImpl(createdBy=" + this.getCreatedBy() + ", vmVendor=" + this.getVmVendor()
+				+ ", sourceCompatibility=" + this.getSourceCompatibility() + ", targetCompatibility="
+				+ this.getTargetCompatibility() + ")";
+	}
 
 }
