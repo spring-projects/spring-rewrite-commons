@@ -47,11 +47,39 @@ Use MavenCli to parse Maven projects and instantiate OpenRewrite's `MAvenMojoPro
 The parser provides access to OpenRewrite's LST.
 This implementation uses as much code as possible from OpenRewrite and Maven being the closest to the execution of OpenRewrite recipes inside OR's Maven plugin.
 
-
-
 ==== `OpenRewriteRecipeLauncher`
 Use Maven Invoker to run OpenRewrite recipes in a separate process like from command line but started from inside a Java application.
 It
+
+
+[plantuml,"models",svg]
+.....
+
+class OpenRewritePluginLauncher
+
+class RewriteProjectParser
+
+class FlexRewriteProjectParser
+
+class ProjectResourceSet
+
+component srcMaven as "src-maven" {
+    component srcMavenInvoker as "src-maven-invoker" {
+    }
+    component srcMavenEmbedder as "src-maven-embedder" {
+    }
+}
+
+component srcGradle as "src-gradle" {
+    component srcGradleModel as "src-gradle-model" {
+    }
+    component srcGradleParser as "src-gradle-parser" {
+    }
+    component srcGradlePlugin as "src-gradle-plugin" {
+    }
+}
+}
+.....
 
 === Implement a Recipe Launcher
 
