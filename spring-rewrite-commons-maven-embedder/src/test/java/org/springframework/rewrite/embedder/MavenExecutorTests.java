@@ -73,7 +73,8 @@ class MavenExecutorTests {
 
 		MavenCli cli = new MavenCli();
 		System.setProperty("maven.multiModuleProjectDirectory", baseDir.toString());
-		int i = cli.doMain(List.of("org.springframework.cloud:spring-cloud-dataflow-apps-metadata-plugin:aggregate-metadata",
+		int i = cli
+			.doMain(List.of("org.springframework.cloud:spring-cloud-dataflow-apps-metadata-plugin:aggregate-metadata",
 					"-DskipTests", "-e")
 				.toArray(new String[] {}), baseDir.toString(), System.out, System.err);
 		System.out.println(i);
@@ -203,8 +204,7 @@ class MavenExecutorTests {
 		// -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-migrate-java:LATEST,org.openrewrite.recipe:rewrite-hibernate:LATEST,org.openrewrite.recipe:rewrite-java-dependencies:LATEST,org.openrewrite.recipe:rewrite-testing-frameworks:LATEST,org.openrewrite.recipe:rewrite-static-analysis:LATEST,org.openrewrite.recipe:rewrite-spring:LATEST
 		// -Drewrite.activeRecipes=org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_7
 		request.setGoals(List.of("clean", "package", "-U", "-B", "--fail-at-end",
-				"org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.openrewrite.java.RemoveUnusedImports"
-		));
+				"org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.openrewrite.java.RemoveUnusedImports"));
 
 		Invoker invoker = new DefaultInvoker();
 		InvocationResult result = invoker.execute(request);

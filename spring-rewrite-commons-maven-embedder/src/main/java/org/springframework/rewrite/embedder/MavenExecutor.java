@@ -117,6 +117,7 @@ import static org.apache.maven.shared.utils.logging.MessageUtils.buffer;
  * to the {@link MavenSession}.
  *
  * Author: Jason van Zyl
+ *
  * @author Fabian Krüger
  */
 public class MavenExecutor {
