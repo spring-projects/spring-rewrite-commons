@@ -12,28 +12,6 @@ ____
 
 == Get started
 
-=== Modules
-
-[plantuml,"models",svg]
-.....
-component srcMaven as "src-maven" {
-    component srcMavenInvoker as "src-maven-invoker" {
-    }
-    component srcMavenEmbedder as "src-maven-embedder" {
-    }
-}
-
-component srcGradle as "src-gradle" {
-    component srcGradleModel as "src-gradle-model" {
-    }
-    component srcGradleParser as "src-gradle-parser" {
-    }
-    component srcGradlePlugin as "src-gradle-plugin" {
-    }
-}
-}
-.....
-
 === Add Dependency
 
 **Maven**
