@@ -15,8 +15,6 @@
  */
 package org.springframework.rewrite.gradle.plugin.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -41,58 +39,89 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
-@Value
-@AllArgsConstructor
-class GradleProjectDataImpl implements GradleProjectData, Serializable {
+final class GradleProjectDataImpl implements GradleProjectData, Serializable {
 
 	private static final Logger logger = Logging.getLogger(GradleProjectDataImpl.class);
 
-	private static Class<?>[] SUPPORTED_GRADLE_PROPERTY_VALUE_TYPES = new Class<?>[] { Number.class, Boolean.class,
-			String.class, Character.class };
+	private static final Class<?>[] SUPPORTED_GRADLE_PROPERTY_VALUE_TYPES = new Class<?>[] { Number.class,
+			Boolean.class, String.class, Character.class };
 
-	String name;
+	private final String name;
 
-	String path;
+	private final String path;
 
-	String group;
+	private final String group;
 
-	String version;
+	private final String version;
 
-	List<GradlePluginDescriptor> plugins;
+	private final List<GradlePluginDescriptor> plugins;
 
-	List<MavenRepository> mavenRepositories;
+	private final List<MavenRepository> mavenRepositories;
 
-	List<MavenRepository> mavenPluginRepositories;
+	private final List<MavenRepository> mavenPluginRepositories;
 
-	Map<String, GradleDependencyConfiguration> nameToConfiguration;
+	private final Map<String, GradleDependencyConfiguration> nameToConfiguration;
 
-	GradleSettings gradleSettings;
+	private final GradleSettings gradleSettings;
 
-	String gradleVersion;
+	private final String gradleVersion;
 
-	boolean rootProject;
+	private final boolean rootProject;
 
-	File rootProjectDir;
+	private final File rootProjectDir;
 
-	Collection<GradleProjectData> subprojects;
+	private final Collection<GradleProjectData> subprojects;
 
-	File projectDir;
+	private final File projectDir;
 
-	File buildDir;
+	private final File buildDir;
 
-	File buildscriptFile;
+	private final File buildscriptFile;
 
-	Map<String, ?> properties;
+	private final Map<String, ?> properties;
 
-	List<JavaSourceSetData> javaSourceSets;
+	private final List<JavaSourceSetData> javaSourceSets;
 
-	boolean multiPlatformKotlinProject;
+	private final boolean multiPlatformKotlinProject;
 
-	List<KotlinSourceSetData> kotlinSourceSets;
+	private final List<KotlinSourceSetData> kotlinSourceSets;
 
-	Collection<File> buildscriptClasspath;
+	private final Collection<File> buildscriptClasspath;
 
-	Collection<File> settingsClasspath;
+	private final Collection<File> settingsClasspath;
+
+	public GradleProjectDataImpl(String name, String path, String group, String version,
+			List<GradlePluginDescriptor> plugins, List<MavenRepository> mavenRepositories,
+			List<MavenRepository> mavenPluginRepositories,
+			Map<String, GradleDependencyConfiguration> nameToConfiguration, GradleSettings gradleSettings,
+			String gradleVersion, boolean rootProject, File rootProjectDir, Collection<GradleProjectData> subprojects,
+			File projectDir, File buildDir, File buildscriptFile, Map<String, ?> properties,
+			List<JavaSourceSetData> javaSourceSets, boolean multiPlatformKotlinProject,
+			List<KotlinSourceSetData> kotlinSourceSets, Collection<File> buildscriptClasspath,
+			Collection<File> settingsClasspath) {
+		this.name = name;
+		this.path = path;
+		this.group = group;
+		this.version = version;
+		this.plugins = plugins;
+		this.mavenRepositories = mavenRepositories;
+		this.mavenPluginRepositories = mavenPluginRepositories;
+		this.nameToConfiguration = nameToConfiguration;
+		this.gradleSettings = gradleSettings;
+		this.gradleVersion = gradleVersion;
+		this.rootProject = rootProject;
+		this.rootProjectDir = rootProjectDir;
+		this.subprojects = subprojects;
+		this.projectDir = projectDir;
+		this.buildDir = buildDir;
+		this.buildscriptFile = buildscriptFile;
+		this.properties = properties;
+		this.javaSourceSets = javaSourceSets;
+		this.multiPlatformKotlinProject = multiPlatformKotlinProject;
+		this.kotlinSourceSets = kotlinSourceSets;
+		this.buildscriptClasspath = buildscriptClasspath;
+		this.settingsClasspath = settingsClasspath;
+	}
 
 	static GradleProjectDataImpl from(Project project) {
 		GradleProject toolingRewriiteGradleProject = GradleToolingApiProjectBuilder.gradleProject(project);
@@ -114,7 +143,7 @@ class GradleProjectDataImpl implements GradleProjectData, Serializable {
 	}
 
 	private static Collection<GradleProjectData> subprojects(Collection<Project> subprojects) {
-		List<GradleProjectData> sub = new ArrayList(subprojects.size());
+		List<GradleProjectData> sub = new ArrayList<>(subprojects.size());
 		for (Project s : subprojects) {
 			sub.add(from(s));
 		}
@@ -135,7 +164,7 @@ class GradleProjectDataImpl implements GradleProjectData, Serializable {
 			return Collections.emptyList();
 		}
 		else {
-			List<JavaSourceSetData> sourceSetData = new ArrayList(javaConvention.getSourceSets().size());
+			List<JavaSourceSetData> sourceSetData = new ArrayList<>(javaConvention.getSourceSets().size());
 			for (SourceSet sourceSet : javaConvention.getSourceSets()) {
 				sourceSetData.add(new JavaSourceSetDataImpl(sourceSet.getName(), sourceSet.getAllSource().getFiles(),
 						sourceSet.getResources().getSourceDirectories().getFiles(), sourceSet.getAllJava().getFiles(),
@@ -210,7 +239,7 @@ class GradleProjectDataImpl implements GradleProjectData, Serializable {
 			return Collections.emptyList();
 		}
 
-		List<KotlinSourceSetData> kotlinSourceSetData = new ArrayList(sourceSetNames.size());
+		List<KotlinSourceSetData> kotlinSourceSetData = new ArrayList<>(sourceSetNames.size());
 
 		for (String sourceSetName : sourceSetNames) {
 			try {
@@ -267,6 +296,141 @@ class GradleProjectDataImpl implements GradleProjectData, Serializable {
 			}
 		}
 		return emptyList();
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public String getPath() {
+		return this.path;
+	}
+
+	public String getGroup() {
+		return this.group;
+	}
+
+	public String getVersion() {
+		return this.version;
+	}
+
+	public List<GradlePluginDescriptor> getPlugins() {
+		return this.plugins;
+	}
+
+	public List<MavenRepository> getMavenRepositories() {
+		return this.mavenRepositories;
+	}
+
+	public List<MavenRepository> getMavenPluginRepositories() {
+		return this.mavenPluginRepositories;
+	}
+
+	public Map<String, GradleDependencyConfiguration> getNameToConfiguration() {
+		return this.nameToConfiguration;
+	}
+
+	public GradleSettings getGradleSettings() {
+		return this.gradleSettings;
+	}
+
+	public String getGradleVersion() {
+		return this.gradleVersion;
+	}
+
+	public boolean isRootProject() {
+		return this.rootProject;
+	}
+
+	public File getRootProjectDir() {
+		return this.rootProjectDir;
+	}
+
+	public Collection<GradleProjectData> getSubprojects() {
+		return this.subprojects;
+	}
+
+	public File getProjectDir() {
+		return this.projectDir;
+	}
+
+	public File getBuildDir() {
+		return this.buildDir;
+	}
+
+	public File getBuildscriptFile() {
+		return this.buildscriptFile;
+	}
+
+	public Map<String, ?> getProperties() {
+		return this.properties;
+	}
+
+	public List<JavaSourceSetData> getJavaSourceSets() {
+		return this.javaSourceSets;
+	}
+
+	public boolean isMultiPlatformKotlinProject() {
+		return this.multiPlatformKotlinProject;
+	}
+
+	public List<KotlinSourceSetData> getKotlinSourceSets() {
+		return this.kotlinSourceSets;
+	}
+
+	public Collection<File> getBuildscriptClasspath() {
+		return this.buildscriptClasspath;
+	}
+
+	public Collection<File> getSettingsClasspath() {
+		return this.settingsClasspath;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		GradleProjectDataImpl that = (GradleProjectDataImpl) o;
+		return rootProject == that.rootProject && multiPlatformKotlinProject == that.multiPlatformKotlinProject
+				&& Objects.equals(name, that.name) && Objects.equals(path, that.path)
+				&& Objects.equals(group, that.group) && Objects.equals(version, that.version)
+				&& Objects.equals(plugins, that.plugins) && Objects.equals(mavenRepositories, that.mavenRepositories)
+				&& Objects.equals(mavenPluginRepositories, that.mavenPluginRepositories)
+				&& Objects.equals(nameToConfiguration, that.nameToConfiguration)
+				&& Objects.equals(gradleSettings, that.gradleSettings)
+				&& Objects.equals(gradleVersion, that.gradleVersion)
+				&& Objects.equals(rootProjectDir, that.rootProjectDir) && Objects.equals(subprojects, that.subprojects)
+				&& Objects.equals(projectDir, that.projectDir) && Objects.equals(buildDir, that.buildDir)
+				&& Objects.equals(buildscriptFile, that.buildscriptFile) && Objects.equals(properties, that.properties)
+				&& Objects.equals(javaSourceSets, that.javaSourceSets)
+				&& Objects.equals(kotlinSourceSets, that.kotlinSourceSets)
+				&& Objects.equals(buildscriptClasspath, that.buildscriptClasspath)
+				&& Objects.equals(settingsClasspath, that.settingsClasspath);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, path, group, version, plugins, mavenRepositories, mavenPluginRepositories,
+				nameToConfiguration, gradleSettings, gradleVersion, rootProject, rootProjectDir, subprojects,
+				projectDir, buildDir, buildscriptFile, properties, javaSourceSets, multiPlatformKotlinProject,
+				kotlinSourceSets, buildscriptClasspath, settingsClasspath);
+	}
+
+	public String toString() {
+		return "GradleProjectDataImpl(name=" + this.getName() + ", path=" + this.getPath() + ", group="
+				+ this.getGroup() + ", version=" + this.getVersion() + ", plugins=" + this.getPlugins()
+				+ ", mavenRepositories=" + this.getMavenRepositories() + ", mavenPluginRepositories="
+				+ this.getMavenPluginRepositories() + ", nameToConfiguration=" + this.getNameToConfiguration()
+				+ ", gradleSettings=" + this.getGradleSettings() + ", gradleVersion=" + this.getGradleVersion()
+				+ ", rootProject=" + this.isRootProject() + ", rootProjectDir=" + this.getRootProjectDir()
+				+ ", subprojects=" + this.getSubprojects() + ", projectDir=" + this.getProjectDir() + ", buildDir="
+				+ this.getBuildDir() + ", buildscriptFile=" + this.getBuildscriptFile() + ", properties="
+				+ this.getProperties() + ", javaSourceSets=" + this.getJavaSourceSets()
+				+ ", multiPlatformKotlinProject=" + this.isMultiPlatformKotlinProject() + ", kotlinSourceSets="
+				+ this.getKotlinSourceSets() + ", buildscriptClasspath=" + this.getBuildscriptClasspath()
+				+ ", settingsClasspath=" + this.getSettingsClasspath() + ")";
 	}
 
 }
