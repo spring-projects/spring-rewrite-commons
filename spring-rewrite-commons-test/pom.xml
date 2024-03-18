@@ -3,14 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.springframework.rewrite</groupId>
-        <artifactId>spring-rewrite-commons-functional-tests</artifactId>
+        <artifactId>spring-rewrite-commons</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dependency-resolution-tests</artifactId>
+    <artifactId>spring-rewrite-commons-test</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -21,13 +22,29 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.rewrite</groupId>
-            <artifactId>spring-rewrite-commons-launcher</artifactId>
-            <version>${project.version}</version>
+            <artifactId>spring-rewrite-commons-utils</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <!-- Using shaded JGit from OR  -->
+        <dependency>
             <groupId>org.openrewrite</groupId>
-            <artifactId>rewrite-java</artifactId>
+            <artifactId>rewrite-core</artifactId>
+            <version>${rewrite.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit-pioneer</groupId>
+            <artifactId>junit-pioneer</artifactId>
+            <version>${junit-pioneer.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
-
 </project>
