@@ -17,7 +17,7 @@
         <module>spring-rewrite-commons-examples</module>
         <module>spring-rewrite-commons-starters</module>
         <module>spring-rewrite-commons-gradle</module>
-        <module>spring-rewrite-commons-maven-invoker</module>
+        <module>spring-rewrite-commons-plugin-invoker</module>
     </modules>
 
     <organization>
@@ -37,13 +37,15 @@
         <rewrite-polyglot.version>1.8.11</rewrite-polyglot.version>
         <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
+        <gradle-tooling-api.version>8.4</gradle-tooling-api.version>
+        <maven.version>3.9.1</maven.version>
+        <maven-invoker.version>3.2.0</maven-invoker.version>
+        <maven-shared-utils.version>3.4.2</maven-shared-utils.version>
 
         <!-- testing dependencies -->
-        <maven.version>3.9.1</maven.version>
         <maven-resolver.version>1.9.13</maven-resolver.version>
         <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
         <plexus-cypher.version>1.8</plexus-cypher.version>
-        <maven-invoker.version>3.2.0</maven-invoker.version>
         <junit-pioneer.version>2.1.0</junit-pioneer.version>
 
         <!-- documentation dependencies -->
@@ -116,6 +118,16 @@
                 <artifactId>junit-pioneer</artifactId>
                 <version>${junit-pioneer.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.gradle</groupId>
+                <artifactId>gradle-tooling-api</artifactId>
+                <version>${gradle-tooling-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite</groupId>
+                <artifactId>rewrite-core</artifactId>
+                <version>${rewrite.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

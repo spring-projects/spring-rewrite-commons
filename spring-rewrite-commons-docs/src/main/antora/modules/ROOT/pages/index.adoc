@@ -9,16 +9,15 @@ Fabian Krüger
 
 == Overview
 Spring Rewrite Commons provides abstractions and parsers for https://github.com/openrewrite/[OpenRewrite].
-The project can parse Java projects using Maven and apply OpenRewrite recipes without the need of a build tool plugin.
-It aims to become the foundation for Spring Boot applications using OpenRewrite.
 
-https://github.com/openrewrite/[OpenRewrite] is a code refactoring, remediation, and modernization automation tool providing a rich https://docs.openrewrite.org/recipes[catalog of recipes] for tasks like automated code transformations.
+https://github.com/openrewrite/[OpenRewrite] is a code refactoring, remediation, and modernization automation tool providing a rich https://docs.openrewrite.org/recipes[catalog of recipes] for task like automated code transformations.
 
 These are the main components offered by Spring Rewrite Commons:
 
-* `xref:concepts.adoc#_rewriteprojectparser[RewriteProjectParser]` - Parse a project to an OpenRewrite https://docs.openrewrite.org/concepts-explanations/lossless-semantic-trees[Lossless Semantic Tree] (LST).
-* `xref:concepts.adoc#_recipediscovery[RewriteRecipeDiscovery]` - Discover recipes on the classpath.
+* `xref:concepts.adoc#:_plugininvoker[RewritePlugin]` - Helper to execute OpenRewrite's Gradle or Maven plugin through Java
+* `xref:concepts.adoc#_rewriteprojectparser[RewriteProjectParser]` - Parse a project to an OpenRewrite https://docs.openrewrite.org/concepts-explanations/lossless-semantic-trees[LST] outside a build tool plugin.
 * `xref:concepts.adoc#_projectresourceset[ProjectResourceSet]` - Encapsulates the LST to run https://github.com/openrewrite/[OpenRewrite] recipes sequentially.
+* `xref:concepts.adoc#_recipediscovery[RewriteRecipeDiscovery]` - Discover recipes on the classpath.
 * `xref:concepts.adoc#_projectresourcesetserializer[ProjectResourceSetSerializer]` - Serialize the current state of the `ProjectResourceSet` to the filesystem.
 * Some helpers for xref:testing.adoc[testíng] also exist
 
