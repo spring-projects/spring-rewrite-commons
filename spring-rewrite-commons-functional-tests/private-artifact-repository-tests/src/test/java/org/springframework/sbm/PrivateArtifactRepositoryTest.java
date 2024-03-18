@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.rewrite.RewriteProjectParser;
 import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
-import org.springframework.rewrite.parser.maven.SbmTestConfiguration;
 import org.springframework.util.FileSystemUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -87,8 +86,7 @@ import static org.assertj.core.api.Fail.fail;
  *
  * @author Fabian Krüger
  */
-@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, RewriteLauncherConfiguration.class,
-		SbmTestConfiguration.class })
+@SpringBootTest(classes = { MavenArtifactCacheTestConfig.class, RewriteLauncherConfiguration.class })
 @Testcontainers
 public class PrivateArtifactRepositoryTest {
 

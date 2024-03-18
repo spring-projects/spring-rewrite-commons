@@ -45,6 +45,8 @@ public class TestProjectHelper {
 
 	private boolean deleteDirIfExists = false;
 
+	private String gitHash = null;
+
 	public TestProjectHelper(Path targetDir) {
 		this.targetDir = targetDir;
 	}
@@ -73,6 +75,11 @@ public class TestProjectHelper {
 
 	public TestProjectHelper cloneGitProject(String url) {
 		this.gitUrl = url;
+		return this;
+	}
+
+	public TestProjectHelper checkoutHash(String gitHash) {
+		this.gitHash = gitHash;
 		return this;
 	}
 
@@ -110,8 +117,12 @@ public class TestProjectHelper {
 				Git git = Git.cloneRepository().setDirectory(directory).setURI(this.gitUrl).call();
 
 				if (gitTag != null) {
-					git.checkout().setName("refs/tags/" + gitTag).call();
-				}
+					git.checkout().setName("refs/tags/" + gitTag).setCreateBranch(false).call();
+				} /*
+					 * else if(gitHash != null) { //
+					 * git.checkout().setAllPaths(true).setStartPoint(gitHash).call();
+					 * git.checkout().setOrphan(true).setStartPoint(gitHash).call(); }
+					 */
 			}
 			catch (GitAPIException e) {
 				throw new RuntimeException(e);
