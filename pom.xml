@@ -169,6 +169,27 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-core</artifactId>
+                <version>${maven.version}</version>
+                <exclusions>
+<!--
+[ERROR] Dependency convergence error for org.apache.maven.shared:maven-shared-utils:jar:3.4.2 paths to dependency are:
+[ERROR] +-org.springframework.rewrite:spring-rewrite-commons-plugin-invoker-maven:jar:0.1.0-SNAPSHOT
+[ERROR]   +-org.apache.maven.shared:maven-shared-utils:jar:3.4.2:compile
+[ERROR] and
+[ERROR] +-org.springframework.rewrite:spring-rewrite-commons-plugin-invoker-maven:jar:0.1.0-SNAPSHOT
+[ERROR]   +-org.apache.maven:maven-compat:jar:3.9.6:compile
+[ERROR]     +-org.apache.maven:maven-core:jar:3.9.6:compile
+[ERROR]       +-org.apache.maven.shared:maven-shared-utils:jar:3.3.4:compile
+-->
+                    <exclusion>
+                        <groupId>org.apache.maven.shared</groupId>
+                        <artifactId>maven-shared-utils</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
