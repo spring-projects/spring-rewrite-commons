@@ -98,7 +98,7 @@ public class ParserExecutionHelper {
 			.createComparingParser(springRewriteProperties);
 		try {
 			if (executionContext != null) {
-				RewriteProjectParsingResult parseResult = comparingParser.parse(baseDir, executionContext);
+				RewriteProjectParsingResult parseResult = comparingParser.parse(baseDir);
 				return parseResult;
 			}
 			else {
