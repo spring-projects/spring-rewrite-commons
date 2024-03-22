@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>application</module>
-<!--        <module>component</module>-->
+        <module>component</module>
     </modules>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
