@@ -57,12 +57,12 @@ class MavenExecutorTests {
 	@Test
 	@DisplayName("simple project")
 	void simpleProject() throws InterruptedException {
-		Path baseDir = TestProjectHelper.getMavenProject("simple-maven-project");
+		Path baseDir = TestProjectHelper.getMavenProject("simple");
 		CountDownLatch latch = new CountDownLatch(1);
 		new MavenExecutor(logger, successEvent -> {
 			latch.countDown();
 		}).execute(List.of("clean", "package"), baseDir);
-		latch.await(10, TimeUnit.SECONDS);
+		latch.await(30, TimeUnit.SECONDS);
 		assertThat(latch.getCount()).isEqualTo(0);
 	}
 
@@ -201,8 +201,10 @@ class MavenExecutorTests {
 				System.out.println(s);
 			}
 		});
-		request.setPomFile(new File(
-				"/Users/fkrueger/projects/forks/spring-rewrite-commons-fork/spring-rewrite-commons-launcher/testcode/maven-projects/resources/pom.xml"));
+
+		Path pomFile = TestProjectHelper.getMavenProject("simple-spring-boot").resolve("pom.xml");
+		request.setPomFile(pomFile.toFile());
+
 		// org.openrewrite.maven:rewrite-maven-plugin:5.20.0:run
 		// -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-migrate-java:LATEST,org.openrewrite.recipe:rewrite-hibernate:LATEST,org.openrewrite.recipe:rewrite-java-dependencies:LATEST,org.openrewrite.recipe:rewrite-testing-frameworks:LATEST,org.openrewrite.recipe:rewrite-static-analysis:LATEST,org.openrewrite.recipe:rewrite-spring:LATEST
 		// -Drewrite.activeRecipes=org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_7

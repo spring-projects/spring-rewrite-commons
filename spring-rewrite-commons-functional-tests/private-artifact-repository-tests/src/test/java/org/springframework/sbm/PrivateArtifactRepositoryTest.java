@@ -27,6 +27,8 @@ import org.openrewrite.maven.cache.LocalMavenArtifactCache;
 import org.openrewrite.maven.cache.MavenArtifactCache;
 import org.openrewrite.maven.tree.MavenRepository;
 import org.powermock.reflect.Whitebox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -202,6 +204,7 @@ public class PrivateArtifactRepositoryTest {
 
 		Path baseDir = Path.of(TESTCODE_DIR + "/dependent-project");
 		CountDownLatch latch = new CountDownLatch(1);
+		Logger log = LoggerFactory.getLogger(PrivateArtifactRepositoryTest.class);
 		new MavenExecutor(log, successEvent -> {
 			latch.countDown();
 		})
