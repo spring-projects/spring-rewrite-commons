@@ -102,24 +102,15 @@ public class RewriteParserConfiguration {
 	}
 
 	@Bean
-	MavenProjectAnalyzer mavenProjectAnalyzer(MavenArtifactDownloader artifactDownloader) {
-		MavenProjectGraph mavenProjectGraph = new MavenProjectGraph();
-		MavenProjectSorter mavenProjectSorter = new MavenProjectSorter(mavenProjectGraph);
-		MavenProjectFactory mavenProjectFactory = new MavenProjectFactory(artifactDownloader);
-		return new MavenProjectAnalyzer(mavenProjectSorter, mavenProjectFactory);
-	}
-
-	@Bean
 	RewriteProjectParser rewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory,
 			MavenBuildFileParser buildFileParser, SourceFileParser sourceFileParser, StyleDetector styleDetector,
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, org.springframework.rewrite.scopes.ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ProjectScanner projectScanner,
-			ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer,
-			MavenArtifactDownloader artifactDownloader) {
+			ExecutionContext executionContext, MavenArtifactDownloader artifactDownloader) {
 		return new RewriteProjectParser(provenanceMarkerFactory, buildFileParser, sourceFileParser, styleDetector,
 				springRewriteProperties, parsingEventListener, eventPublisher, scanScope, beanFactory, projectScanner,
-				executionContext, mavenProjectAnalyzer, artifactDownloader);
+				executionContext, artifactDownloader);
 	}
 
 	@Bean

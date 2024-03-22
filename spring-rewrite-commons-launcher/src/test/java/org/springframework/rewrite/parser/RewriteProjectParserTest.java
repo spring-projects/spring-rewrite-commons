@@ -108,7 +108,6 @@ class RewriteProjectParserTest {
 				new StyleDetector(), springRewriteProperties, mock(ParsingEventListener.class),
 				mock(ApplicationEventPublisher.class), new ScanScope(), mock(ConfigurableListableBeanFactory.class),
 				new ProjectScanner(new DefaultResourceLoader(), springRewriteProperties), executionContext,
-				new MavenProjectAnalyzer(new MavenProjectSorter(projectCollector), mavenProjectFactory),
 				artifactDownloader);
 
 		List<String> parsedFiles = new ArrayList<>();
