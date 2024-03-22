@@ -34,6 +34,7 @@ import org.openrewrite.maven.MavenMojoProjectParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.rewrite.test.util.TestProjectHelper;
+import org.springframework.test.util.TestSocketUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -185,9 +186,11 @@ class MavenExecutorTests {
 
 		System.out.println("mvn " + defaultGoalsPart + " " + orCommandPart);
 
+		int port = TestSocketUtils.findAvailableTcpPort();
+
 		InvocationRequest request = new DefaultInvocationRequest();
 		request.addShellEnvironment("MAVEN_OPTS",
-				"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
+				"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + port);
 		request.setMavenHome(new File(System.getenv("MAVEN_HOME")));
 		request.setShowErrors(true);
 		request.setBatchMode(true);
