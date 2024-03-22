@@ -16,6 +16,8 @@
 package org.springframework.rewrite;
 
 import org.apache.maven.execution.ExecutionEvent;
+import org.apache.maven.rtinfo.RuntimeInformation;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.SourceFile;
@@ -37,7 +39,7 @@ import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
 import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
 import org.springframework.rewrite.parser.maven.MavenProject;
-import org.springframework.rewrite.parser.maven.MavenProjectAnalyzer;
+import org.springframework.rewrite.parser.maven.MavenRuntimeInformation;
 import org.springframework.rewrite.parser.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.scopes.ScanScope;
 import org.springframework.util.StringUtils;
@@ -98,16 +100,13 @@ public class RewriteProjectParser {
 
 	private final ExecutionContext executionContext;
 
-	private final MavenProjectAnalyzer mavenProjectAnalyzer;
-
 	private final MavenArtifactDownloader artifactDownloader;
 
 	public RewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory, MavenBuildFileParser buildFileParser,
 			SourceFileParser sourceFileParser, StyleDetector styleDetector,
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, ScanScope scanScope, ConfigurableListableBeanFactory beanFactory,
-			ProjectScanner scanner, ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer,
-			MavenArtifactDownloader artifactDownloader) {
+			ProjectScanner scanner, ExecutionContext executionContext, MavenArtifactDownloader artifactDownloader) {
 		this.provenanceMarkerFactory = provenanceMarkerFactory;
 		this.buildFileParser = buildFileParser;
 		this.sourceFileParser = sourceFileParser;
@@ -119,7 +118,6 @@ public class RewriteProjectParser {
 		this.beanFactory = beanFactory;
 		this.scanner = scanner;
 		this.executionContext = executionContext;
-		this.mavenProjectAnalyzer = mavenProjectAnalyzer;
 		this.artifactDownloader = artifactDownloader;
 	}
 
@@ -157,13 +155,16 @@ public class RewriteProjectParser {
 		return new RewriteProjectParsingResult(sourceFilesRef.get(), executionContext);
 	}
 
-	private List<SourceFile> runInMavenSession(ExecutionEvent onSuccess, Path baseDir, List<Resource> resources) {
+	private List<SourceFile> runInMavenSession(ExecutionEvent executionEvent, Path baseDir, List<Resource> resources) {
 		List<NamedStyles> styles = List.of();
-		List<MavenProject> sortedProjects = onSuccess.getSession()
+
+		final RuntimeInformation runtimeInformation = getRuntimeInformation(executionEvent);
+
+		List<MavenProject> sortedProjects = executionEvent.getSession()
 			.getProjectDependencyGraph()
 			.getSortedProjects()
 			.stream()
-			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources, runtimeInformation))
 			.toList();
 
 		ParserContext parserContext = new ParserContext(baseDir, resources, sortedProjects);
@@ -197,15 +198,29 @@ public class RewriteProjectParser {
 		return sourceFiles;
 	}
 
+	private static RuntimeInformation getRuntimeInformation(ExecutionEvent onSuccess) {
+		RuntimeInformation runtimeInformation;
+		try {
+			runtimeInformation = onSuccess.getSession().getContainer().lookup(RuntimeInformation.class);
+		}
+		catch (ComponentLookupException e) {
+			throw new RuntimeException(e);
+		}
+		return runtimeInformation;
+	}
+
 	private MavenProject mavenProjectToMavenProject(org.apache.maven.project.MavenProject mavenProject,
-			MavenArtifactDownloader artifactDownloader, List<Resource> resources) {
+			MavenArtifactDownloader artifactDownloader, List<Resource> resources,
+			RuntimeInformation runtimeInformation) {
 		Path baseDir = mavenProject.getBasedir().toPath();
 		File file = mavenProject.getExecutionProject().getFile();
 		Resource rootPom = new FileSystemResource(file);
-		MavenProject newMavenProject = new MavenProject(baseDir, rootPom, artifactDownloader, resources);
+
+		MavenProject newMavenProject = new MavenProject(baseDir, rootPom, artifactDownloader, resources,
+				new MavenRuntimeInformation(runtimeInformation.getMavenVersion()));
 		List<MavenProject> mavenProjects = mavenProject.getCollectedProjects()
 			.stream()
-			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources))
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources, runtimeInformation))
 			.toList();
 		newMavenProject.setReactorProjects(mavenProjects);
 		return newMavenProject;

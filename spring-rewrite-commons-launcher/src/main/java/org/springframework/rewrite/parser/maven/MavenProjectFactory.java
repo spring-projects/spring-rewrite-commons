@@ -15,6 +15,7 @@
  */
 package org.springframework.rewrite.parser.maven;
 
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.springframework.core.io.Resource;
@@ -33,17 +34,19 @@ public class MavenProjectFactory {
 		this.artifactDownloader = artifactDownloader;
 	}
 
-	public List<MavenProject> create(Path baseDir, List<Resource> projectResources) {
+	public List<MavenProject> create(Path baseDir, List<Resource> projectResources,
+			MavenRuntimeInformation runtimeInformation) {
 		List<Resource> allPomFiles = MavenBuildFileFilter.filterBuildFiles(projectResources);
 		if (allPomFiles.isEmpty()) {
 			throw new IllegalArgumentException("The provided resources did not contain any 'pom.xml' file.");
 		}
-		return allPomFiles.stream().map(pf -> create(baseDir, pf, projectResources)).toList();
+		return allPomFiles.stream().map(pf -> create(baseDir, pf, projectResources, runtimeInformation)).toList();
 	}
 
 	@NotNull
-	public MavenProject create(Path baseDir, Resource pomFile, List<Resource> projectResources) {
-		return new MavenProject(baseDir, pomFile, artifactDownloader, projectResources);
+	public MavenProject create(Path baseDir, Resource pomFile, List<Resource> projectResources,
+			MavenRuntimeInformation runtimeInformation) {
+		return new MavenProject(baseDir, pomFile, artifactDownloader, projectResources, runtimeInformation);
 	}
 
 }

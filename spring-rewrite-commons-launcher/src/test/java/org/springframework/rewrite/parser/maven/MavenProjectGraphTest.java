@@ -64,7 +64,9 @@ class MavenProjectGraphTest {
 				""";
 		Path baseDir = Path.of("./target").toAbsolutePath().normalize();
 		Resource pomResource = new DummyResource(baseDir.resolve("pom.xml"), pomCode);
-		MavenProject mavenProject = projectFactory.create(baseDir, pomResource, List.of(pomResource));
+		MavenRuntimeInformation runtimeInformation = new MavenRuntimeInformation("3.9.1");
+		MavenProject mavenProject = projectFactory.create(baseDir, pomResource, List.of(pomResource),
+				runtimeInformation);
 		List<MavenProject> allMavenProjects = List.of(mavenProject);
 
 		Map<MavenProject, Set<MavenProject>> mavenProjectSetMap = sut.from(baseDir, allMavenProjects);
@@ -291,7 +293,8 @@ class MavenProjectGraphTest {
 		}
 
 		public MavenProjectBuilder afterSort() {
-			mavenProjects = MavenProjectGraphTest.projectFactory.create(baseDir, resources);
+			mavenProjects = MavenProjectGraphTest.projectFactory.create(baseDir, resources,
+					new MavenRuntimeInformation("3.9.1"));
 			dependencyGraph = sut.from(baseDir, mavenProjects);
 			return this;
 		}

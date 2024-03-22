@@ -47,6 +47,8 @@ public class MavenProject {
 
 	private final MavenBuildFile buildFile;
 
+	private final MavenRuntimeInformation runtimeInformation;
+
 	/**
 	 * All {@link MavenProject}s of this build.
 	 */
@@ -71,13 +73,15 @@ public class MavenProject {
 	private ProjectId projectId;
 
 	public MavenProject(Path baseDir, Resource rootPom, MavenArtifactDownloader rewriteMavenArtifactDownloader,
-			List<Resource> resources) {
-		this(baseDir, rootPom, List.of(), rewriteMavenArtifactDownloader, resources);
+			List<Resource> resources, MavenRuntimeInformation runtimeInformation) {
+		this(baseDir, rootPom, List.of(), rewriteMavenArtifactDownloader, resources, runtimeInformation);
 	}
 
 	public MavenProject(Path baseDir, Resource pomFile, List<MavenProject> dependsOnModels,
-			MavenArtifactDownloader rewriteMavenArtifactDownloader, List<Resource> resources) {
+			MavenArtifactDownloader rewriteMavenArtifactDownloader, List<Resource> resources,
+			MavenRuntimeInformation runtimeInformation) {
 		this.projectRoot = baseDir;
+		this.runtimeInformation = runtimeInformation;
 		this.buildFile = new MavenBuildFile(pomFile);
 		if (dependsOnModels != null) {
 			this.dependentProjects.addAll(dependsOnModels);
@@ -164,7 +168,7 @@ public class MavenProject {
 
 	public MavenRuntimeInformation getMavenRuntimeInformation() {
 		// FIXME: 945 implement this
-		return new MavenRuntimeInformation();
+		return new MavenRuntimeInformation(runtimeInformation.getMavenVersion());
 	}
 
 	public String getName() {

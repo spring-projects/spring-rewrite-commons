@@ -73,7 +73,8 @@ class MavenProjectSorterTest {
 
 		List<Resource> resources = List.of(new DummyResource(Path.of("pom.xml"), singlePom));
 		Path baseDir = Path.of(".").toAbsolutePath().normalize();
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 		assertThat(sortedProjects).hasSize(1);
 	}
@@ -124,7 +125,8 @@ class MavenProjectSorterTest {
 				new DummyResource(exampleModuleDir.resolve("pom.xml"), modulePom)
 		);
 		// @formatter:on
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 
 		assertThat(sortedProjects).hasSize(2);
@@ -199,7 +201,8 @@ class MavenProjectSorterTest {
 				new DummyResource(Path.of("example/pom.xml"), modulePom),
 				new DummyResource(Path.of("dangling/pom.xml"), danglingPom));
 
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 
 		assertThat(sortedProjects).hasSize(2);
@@ -273,7 +276,8 @@ class MavenProjectSorterTest {
 				new DummyResource(Path.of("dangling/pom.xml"), danglingPom));
 
 		Path baseDir = Path.of(".").toAbsolutePath();
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 
 		assertThat(sortedProjects).hasSize(2);
@@ -363,7 +367,8 @@ class MavenProjectSorterTest {
 				new DummyResource(Path.of("pom.xml"), parentPom));
 
 		Path baseDir = Path.of(".").toAbsolutePath();
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 
 		// Returned ordered
@@ -470,7 +475,8 @@ class MavenProjectSorterTest {
 				new DummyResource(baseDir.resolve("pom.xml"), parentPom));
 
 		// Provided unordered
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sortedProjects = sut.sort(baseDir, mavenProjects);
 
 		// Expected order is parent, module-b, module-c, module-a
@@ -574,7 +580,8 @@ class MavenProjectSorterTest {
 				new DummyResource(Path.of("pom.xml"), parentPom));
 
 		Path baseDir = Path.of(".").toAbsolutePath();
-		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+		List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+				new MavenRuntimeInformation("3.9.1"));
 		List<MavenProject> sorted = sut.sort(baseDir, mavenProjects);
 
 		// Expected order is parent, module-b, module-c, module-a
@@ -695,7 +702,8 @@ class MavenProjectSorterTest {
 			List<org.apache.maven.project.MavenProject> mavenSorted = mavenSession.getProjectDependencyGraph()
 				.getSortedProjects();
 
-			List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources);
+			List<MavenProject> mavenProjects = mavenProjectFactory.create(baseDir, resources,
+					new MavenRuntimeInformation("3.9.1"));
 			List<MavenProject> sbmSorted = sut.sort(baseDir, mavenProjects);
 
 			assertThat(mavenSorted).hasSize(5);
