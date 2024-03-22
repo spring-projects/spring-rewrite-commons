@@ -300,7 +300,6 @@ public class MavenExecutor {
 
 			CliRequest cliRequest = createCliRequest(args, classWorld);
 			setField(cliRequest, "workingDirectory", workingDirectory);
-			cliRequest.getRequest().setExecutionListener(listener);
 			return doMain(cliRequest);
 		}
 		finally {
@@ -350,6 +349,9 @@ public class MavenExecutor {
 			toolchains(cliRequest);
 			populateRequest(cliRequest);
 			encryption(cliRequest);
+
+			cliRequest.getRequest().setExecutionListener(listener);
+
 			return execute(cliRequest);
 		}
 		catch (ExitException e) {
