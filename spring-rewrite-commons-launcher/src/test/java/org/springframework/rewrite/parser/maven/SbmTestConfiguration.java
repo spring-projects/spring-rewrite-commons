@@ -42,23 +42,8 @@ public class SbmTestConfiguration {
 	}
 
 	@Bean
-	MavenExecutionRequestFactory requestFactory(MavenConfigFileParser configFileParser) {
-		return new MavenExecutionRequestFactory(configFileParser);
-	}
-
-	@Bean
-	MavenExecutor mavenExecutor(MavenExecutionRequestFactory requestFactory, MavenPlexusContainer plexusContainer) {
-		return new MavenExecutor(requestFactory, plexusContainer);
-	}
-
-	@Bean
 	MavenMojoProjectParserFactory projectParserFactory() {
 		return new MavenMojoProjectParserFactory(springRewriteProperties);
-	}
-
-	@Bean
-	MavenPlexusContainer plexusContainer() {
-		return new MavenPlexusContainer();
 	}
 
 	@Bean
@@ -67,12 +52,11 @@ public class SbmTestConfiguration {
 	}
 
 	@Bean
-	RewriteMavenProjectParser rewriteMavenProjectParser(MavenPlexusContainer plexusContainer,
-			ParsingEventListener parsingEventListenerAdapter, MavenExecutor mavenExecutor,
+	RewriteMavenProjectParser rewriteMavenProjectParser(ParsingEventListener parsingEventListenerAdapter,
 			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
-		return new RewriteMavenProjectParser(plexusContainer, parsingEventListenerAdapter, mavenExecutor,
-				mavenMojoProjectParserFactory, scanScope, beanFactory, executionContext);
+		return new RewriteMavenProjectParser(parsingEventListenerAdapter, mavenMojoProjectParserFactory, scanScope,
+				beanFactory, executionContext);
 	}
 
 }

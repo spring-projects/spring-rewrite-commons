@@ -15,10 +15,14 @@
  */
 package org.springframework.rewrite;
 
+import org.apache.maven.execution.ExecutionEvent;
+import org.apache.maven.rtinfo.RuntimeInformation;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.SourceFile;
 import org.openrewrite.marker.Marker;
+import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import org.openrewrite.style.NamedStyles;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
@@ -27,21 +31,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.*;
 import org.springframework.rewrite.parser.events.StartedParsingProjectEvent;
 import org.springframework.rewrite.parser.events.SuccessfullyParsedProjectEvent;
 import org.springframework.rewrite.parser.maven.MavenBuildFileParser;
 import org.springframework.rewrite.parser.maven.MavenProject;
-import org.springframework.rewrite.parser.maven.MavenProjectAnalyzer;
+import org.springframework.rewrite.parser.maven.MavenRuntimeInformation;
 import org.springframework.rewrite.parser.maven.ProvenanceMarkerFactory;
 import org.springframework.rewrite.scopes.ScanScope;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Project parser parsing resources under a given {@link Path} to OpenRewrite Lossless
@@ -92,13 +100,13 @@ public class RewriteProjectParser {
 
 	private final ExecutionContext executionContext;
 
-	private final MavenProjectAnalyzer mavenProjectAnalyzer;
+	private final MavenArtifactDownloader artifactDownloader;
 
 	public RewriteProjectParser(ProvenanceMarkerFactory provenanceMarkerFactory, MavenBuildFileParser buildFileParser,
 			SourceFileParser sourceFileParser, StyleDetector styleDetector,
 			SpringRewriteProperties springRewriteProperties, ParsingEventListener parsingEventListener,
 			ApplicationEventPublisher eventPublisher, ScanScope scanScope, ConfigurableListableBeanFactory beanFactory,
-			ProjectScanner scanner, ExecutionContext executionContext, MavenProjectAnalyzer mavenProjectAnalyzer) {
+			ProjectScanner scanner, ExecutionContext executionContext, MavenArtifactDownloader artifactDownloader) {
 		this.provenanceMarkerFactory = provenanceMarkerFactory;
 		this.buildFileParser = buildFileParser;
 		this.sourceFileParser = sourceFileParser;
@@ -110,7 +118,7 @@ public class RewriteProjectParser {
 		this.beanFactory = beanFactory;
 		this.scanner = scanner;
 		this.executionContext = executionContext;
-		this.mavenProjectAnalyzer = mavenProjectAnalyzer;
+		this.artifactDownloader = artifactDownloader;
 	}
 
 	/**
@@ -137,10 +145,28 @@ public class RewriteProjectParser {
 		// TODO: See ConfigurableRewriteMojo#getPlainTextMasks()
 		// TODO: where to retrieve styles from? --> see
 		// AbstractRewriteMojo#getActiveStyles() & AbstractRewriteMojo#loadStyles()
+
+		AtomicReference<List<SourceFile>> sourceFilesRef = new AtomicReference<>();
+		new MavenExecutor(onSuccess -> {
+			List<SourceFile> sourceFiles = runInMavenSession(onSuccess, baseDir, resources);
+			sourceFilesRef.set(sourceFiles);
+		}).execute(List.of("clean", "package", "--fail-at-end"), baseDir);
+
+		return new RewriteProjectParsingResult(sourceFilesRef.get(), executionContext);
+	}
+
+	private List<SourceFile> runInMavenSession(ExecutionEvent executionEvent, Path baseDir, List<Resource> resources) {
 		List<NamedStyles> styles = List.of();
 
-		// Get the ordered otherSourceFiles of projects
-		List<MavenProject> sortedProjects = mavenProjectAnalyzer.getBuildProjects(baseDir, resources);
+		final RuntimeInformation runtimeInformation = getRuntimeInformation(executionEvent);
+
+		List<MavenProject> sortedProjects = executionEvent.getSession()
+			.getProjectDependencyGraph()
+			.getSortedProjects()
+			.stream()
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources, runtimeInformation))
+			.toList();
+
 		ParserContext parserContext = new ParserContext(baseDir, resources, sortedProjects);
 
 		// generate provenance
@@ -169,8 +195,35 @@ public class RewriteProjectParser {
 		List<SourceFile> sourceFiles = styleDetector.sourcesWithAutoDetectedStyles(resultingList.stream());
 
 		eventPublisher.publishEvent(new SuccessfullyParsedProjectEvent(sourceFiles));
+		return sourceFiles;
+	}
 
-		return new RewriteProjectParsingResult(sourceFiles, executionContext);
+	private static RuntimeInformation getRuntimeInformation(ExecutionEvent onSuccess) {
+		RuntimeInformation runtimeInformation;
+		try {
+			runtimeInformation = onSuccess.getSession().getContainer().lookup(RuntimeInformation.class);
+		}
+		catch (ComponentLookupException e) {
+			throw new RuntimeException(e);
+		}
+		return runtimeInformation;
+	}
+
+	private MavenProject mavenProjectToMavenProject(org.apache.maven.project.MavenProject mavenProject,
+			MavenArtifactDownloader artifactDownloader, List<Resource> resources,
+			RuntimeInformation runtimeInformation) {
+		Path baseDir = mavenProject.getBasedir().toPath();
+		File file = mavenProject.getExecutionProject().getFile();
+		Resource rootPom = new FileSystemResource(file);
+
+		MavenProject newMavenProject = new MavenProject(baseDir, rootPom, artifactDownloader, resources,
+				new MavenRuntimeInformation(runtimeInformation.getMavenVersion()));
+		List<MavenProject> mavenProjects = mavenProject.getCollectedProjects()
+			.stream()
+			.map(p -> this.mavenProjectToMavenProject(p, artifactDownloader, resources, runtimeInformation))
+			.toList();
+		newMavenProject.setReactorProjects(mavenProjects);
+		return newMavenProject;
 	}
 
 	@NotNull

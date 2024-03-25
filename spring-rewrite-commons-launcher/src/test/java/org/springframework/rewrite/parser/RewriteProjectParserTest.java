@@ -23,6 +23,7 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
+import org.openrewrite.maven.cache.LocalMavenArtifactCache;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -107,7 +108,7 @@ class RewriteProjectParserTest {
 				new StyleDetector(), springRewriteProperties, mock(ParsingEventListener.class),
 				mock(ApplicationEventPublisher.class), new ScanScope(), mock(ConfigurableListableBeanFactory.class),
 				new ProjectScanner(new DefaultResourceLoader(), springRewriteProperties), executionContext,
-				new MavenProjectAnalyzer(new MavenProjectSorter(projectCollector), mavenProjectFactory));
+				artifactDownloader);
 
 		List<String> parsedFiles = new ArrayList<>();
 		ParsingExecutionContextView.view(executionContext).setParsingListener(new ParsingEventListener() {

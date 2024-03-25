@@ -20,17 +20,16 @@ import org.openrewrite.InMemoryExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.rewrite.boot.autoconfigure.SpringRewriteCommonsConfiguration;
+import org.springframework.rewrite.OpenRewriteProjectParser;
 import org.springframework.rewrite.RewriteProjectParser;
+import org.springframework.rewrite.boot.autoconfigure.RewriteLauncherConfiguration;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.maven.ComparingParserFactory;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 
 import java.nio.file.Path;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -58,46 +57,53 @@ public class ParserExecutionHelper {
 
 	public ParallelParsingResult parseParallel(Path baseDir, SpringRewriteProperties springRewriteProperties,
 			ExecutionContext executionContext) {
+		CountDownLatch latch = new CountDownLatch(2);
+
+		ExecutorService threadPool = Executors.newFixedThreadPool(2);
+
+		AtomicReference<RewriteProjectParsingResult> actualParsingResultRef = new AtomicReference<>();
+		AtomicReference<RewriteProjectParsingResult> expectedParsingResultRef = new AtomicReference<>();
+
+		Future<?> customParserResult = threadPool.submit(() -> {
+			RewriteProjectParsingResult parsingResult = parseWithRewriteProjectParser(baseDir, springRewriteProperties);
+			actualParsingResultRef.set(parsingResult);
+			latch.countDown();
+		});
+
+		Future<?> submit = threadPool.submit(() -> {
+			RewriteProjectParsingResult parsingResult = parseWithComparingParser(baseDir, springRewriteProperties,
+					executionContext);
+			expectedParsingResultRef.set(parsingResult);
+			latch.countDown();
+		});
+
 		try {
-			CountDownLatch latch = new CountDownLatch(2);
-
-			ExecutorService threadPool = Executors.newFixedThreadPool(2);
-
-			AtomicReference<RewriteProjectParsingResult> actualParsingResultRef = new AtomicReference<>();
-			AtomicReference<RewriteProjectParsingResult> expectedParsingResultRef = new AtomicReference<>();
-
-			threadPool.submit(() -> {
-				RewriteProjectParsingResult parsingResult = parseWithRewriteProjectParser(baseDir,
-						springRewriteProperties);
-				;
-				actualParsingResultRef.set(parsingResult);
-				latch.countDown();
-			});
-
-			threadPool.submit(() -> {
-				RewriteProjectParsingResult parsingResult = parseWithComparingParser(baseDir, springRewriteProperties,
-						executionContext);
-				expectedParsingResultRef.set(parsingResult);
-				latch.countDown();
-			});
-			latch.await();
-			return new ParallelParsingResult(expectedParsingResultRef.get(), actualParsingResultRef.get());
+			submit.get();
+			customParserResult.get();
 		}
-		catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		catch (InterruptedException ie) {
+			Thread.currentThread().interrupt();
 		}
+		catch (ExecutionException e) {
+			Throwable taskException = e.getCause();
+			throw new RuntimeException(taskException);
+		}
+
+		return new ParallelParsingResult(expectedParsingResultRef.get(), actualParsingResultRef.get());
 	}
 
 	public RewriteProjectParsingResult parseWithComparingParser(Path baseDir,
 			SpringRewriteProperties springRewriteProperties, ExecutionContext executionContext) {
-		RewriteMavenProjectParser comparingParser = new ComparingParserFactory()
+		OpenRewriteProjectParser comparingParser = new ComparingParserFactory()
 			.createComparingParser(springRewriteProperties);
 		try {
 			if (executionContext != null) {
-				return comparingParser.parse(baseDir, executionContext);
+				RewriteProjectParsingResult parseResult = comparingParser.parse(baseDir);
+				return parseResult;
 			}
 			else {
-				return comparingParser.parse(baseDir);
+				RewriteProjectParsingResult parseResult = comparingParser.parse(baseDir);
+				return parseResult;
 			}
 		}
 		catch (Exception e) {
@@ -109,7 +115,7 @@ public class ParserExecutionHelper {
 	public RewriteProjectParsingResult parseWithRewriteProjectParser(Path baseDir,
 			SpringRewriteProperties springRewriteProperties) {
 		AtomicReference<RewriteProjectParsingResult> atomicRef = new AtomicReference<>();
-		new ApplicationContextRunner().withUserConfiguration(SpringRewriteCommonsConfiguration.class)
+		new ApplicationContextRunner().withUserConfiguration(RewriteLauncherConfiguration.class)
 			.withBean("spring.rewrite-" + SpringRewriteProperties.class.getName(), SpringRewriteProperties.class,
 					() -> springRewriteProperties)
 			.run(appCtx -> {

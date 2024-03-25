@@ -21,5 +21,4 @@
     <modules>
         <module>spring-rewrite-commons-starter-boot-upgrade</module>
     </modules>
-
 </project>

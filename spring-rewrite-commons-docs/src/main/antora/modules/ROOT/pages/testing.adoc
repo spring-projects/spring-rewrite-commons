@@ -5,6 +5,32 @@ The `RewriteProjectParser`
 == Test Helper
 
 === TestProjectHelper
+
+The `TestProjectHelper` allows reading test projects from disk or to create them in memory.
+
+==== Clone a Git Repository
+[source,java]
+....
+
+.toAbsolutePath().normalize();
+TestProjectHelper.createTestProject(projectRoot)
+    .deleteDirIfExists()
+    .cloneGitProject("https://github.com/corona-warn-app/cwa-server.git")
+    .checkoutTag("v3.2.0")
+    .writeToFilesystem();
+....
+
+==== Read a project from testcode dir
+
+Projects used for testing can be provided in a `testcode` directory.
+Maven projects are read from `testcode/maven-projects`.
+
+Example: Get Path to `./testcode/maven-projects/my-test-project`:
+[source, java]
+....
+Path baseDir = TestProjectHelper.TestProjectHelper.getMavenProject("my-test-project");
+....
+
 === ParserParityTestHelper
 === ParserExecutionHelper
 === RewriteMavenProjectParser

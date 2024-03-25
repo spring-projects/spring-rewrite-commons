@@ -59,9 +59,8 @@ public class MavenSettingsInitializer {
 		Path mavenSecuritySettingsFile = userHome.resolve(".m2/settings-security.xml");
 
 		MavenRepository mavenRepository = new MavenRepository("local", repo, null, null, true, null, null, null);
-		MavenSettings.Profile defaultProfile = new MavenSettings.Profile("default", null, new RawRepositories());
-		MavenSettings.@Nullable Profiles profiles = new MavenSettings.Profiles(List.of(defaultProfile));
-		MavenSettings.@Nullable ActiveProfiles activeProfiles = new MavenSettings.ActiveProfiles(List.of("default"));
+		MavenSettings.@Nullable Profiles profiles = new MavenSettings.Profiles(List.of());
+		MavenSettings.@Nullable ActiveProfiles activeProfiles = new MavenSettings.ActiveProfiles(List.of());
 		MavenSettings.@Nullable Mirrors mirrors = new MavenSettings.Mirrors();
 		MavenSettings.Servers servers = new MavenSettings.Servers();
 		MavenSettings mavenSettings = new MavenSettings(repo, mavenRepository, profiles, activeProfiles, mirrors,

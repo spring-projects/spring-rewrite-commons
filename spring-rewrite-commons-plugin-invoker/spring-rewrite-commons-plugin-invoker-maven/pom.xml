@@ -41,6 +41,26 @@
             <groupId>org.openrewrite.maven</groupId>
             <artifactId>rewrite-maven-plugin</artifactId>
             <version>${rewrite-maven-plugin.version}</version>
+            <exclusions>
+<!--
+[ERROR] Dependency convergence error for com.google.errorprone:error_prone_annotations:jar:2.21.1 paths to dependency are:
+[ERROR] +-org.springframework.rewrite:spring-rewrite-commons-plugin-invoker-maven:jar:0.1.0-SNAPSHOT
+[ERROR]   +-org.openrewrite.maven:rewrite-maven-plugin:jar:5.20.0:compile
+[ERROR]     +-org.openrewrite:rewrite-maven:jar:8.13.4:compile
+[ERROR]       +-com.github.ben-manes.caffeine:caffeine:jar:3.1.8:runtime
+[ERROR]         +-com.google.errorprone:error_prone_annotations:jar:2.21.1:compile
+[ERROR] and
+[ERROR] +-org.springframework.rewrite:spring-rewrite-commons-plugin-invoker-maven:jar:0.1.0-SNAPSHOT
+[ERROR]   +-org.openrewrite.maven:rewrite-maven-plugin:jar:5.20.0:compile
+[ERROR]     +-com.puppycrawl.tools:checkstyle:jar:9.3:compile
+[ERROR]       +-com.google.guava:guava:jar:31.0.1-jre:compile
+[ERROR]         +-com.google.errorprone:error_prone_annotations:jar:2.7.1:compile
+-->
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

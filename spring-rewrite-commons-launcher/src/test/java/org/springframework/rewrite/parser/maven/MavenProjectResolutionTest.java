@@ -21,6 +21,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.rewrite.embedder.MavenExecutor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,10 +102,7 @@ class MavenProjectResolutionTest {
 		Path pomFile = tempDir.resolve("pom.xml");
 		Files.writeString(pomFile, pomXml);
 
-		MavenPlexusContainer plexusContainerFactory = new MavenPlexusContainer();
-		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
-		MavenExecutor mavenExecutor = new MavenExecutor(requestFactory, plexusContainerFactory);
-		mavenExecutor.onProjectSucceededEvent(tempDir, List.of("dependency:resolve"), event -> {
+		new MavenExecutor(event -> {
 			MavenProject mavenProject = event.getSession().getCurrentProject();
 			assertThat(mavenProject.getName()).isEqualTo("the-name");
 			assertThat(mavenProject.getArtifactId()).isEqualTo("the-example");
@@ -142,7 +140,7 @@ class MavenProjectResolutionTest {
 			catch (DependencyResolutionRequiredException e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}).execute(List.of("dependency:resolve"), tempDir);
 	}
 
 	private String dep(String s) {

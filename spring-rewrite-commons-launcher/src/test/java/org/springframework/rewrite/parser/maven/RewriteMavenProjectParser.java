@@ -31,8 +31,10 @@ import org.openrewrite.style.NamedStyles;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
 import org.openrewrite.xml.tree.Xml;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.rewrite.embedder.MavenExecutor;
 import org.springframework.rewrite.parser.RewriteProjectParsingResult;
 import org.springframework.rewrite.scopes.ScanScope;
 
@@ -54,11 +56,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class RewriteMavenProjectParser {
 
-	private final MavenPlexusContainer mavenPlexusContainer;
-
 	private final ParsingEventListener parsingListener;
-
-	private final MavenExecutor mavenRunner;
 
 	private final MavenMojoProjectParserFactory mavenMojoProjectParserFactory;
 
@@ -68,12 +66,10 @@ public class RewriteMavenProjectParser {
 
 	private final ExecutionContext executionContext;
 
-	public RewriteMavenProjectParser(MavenPlexusContainer mavenPlexusContainer, ParsingEventListener parsingListener,
-			MavenExecutor mavenRunner, MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
+	public RewriteMavenProjectParser(ParsingEventListener parsingListener,
+			MavenMojoProjectParserFactory mavenMojoProjectParserFactory, ScanScope scanScope,
 			ConfigurableListableBeanFactory beanFactory, ExecutionContext executionContext) {
-		this.mavenPlexusContainer = mavenPlexusContainer;
 		this.parsingListener = parsingListener;
-		this.mavenRunner = mavenRunner;
 		this.mavenMojoProjectParserFactory = mavenMojoProjectParserFactory;
 		this.scanScope = scanScope;
 		this.beanFactory = beanFactory;
@@ -92,31 +88,28 @@ public class RewriteMavenProjectParser {
 	@NotNull
 	public RewriteProjectParsingResult parse(Path baseDir, ExecutionContext executionContext) {
 		final Path absoluteBaseDir = getAbsolutePath(baseDir);
-		PlexusContainer plexusContainer = mavenPlexusContainer.get();
-		RewriteProjectParsingResult parsingResult = parseInternal(absoluteBaseDir, executionContext, plexusContainer);
+
+		RewriteProjectParsingResult parsingResult = parseInternal(absoluteBaseDir, executionContext);
 		return parsingResult;
 	}
 
-	private RewriteProjectParsingResult parseInternal(Path baseDir, ExecutionContext executionContext,
-			PlexusContainer plexusContainer) {
+	private RewriteProjectParsingResult parseInternal(Path baseDir, ExecutionContext executionContext) {
 		clearScanScopedBeans();
 
 		AtomicReference<RewriteProjectParsingResult> parsingResult = new AtomicReference<>();
-		mavenRunner.onProjectSucceededEvent(baseDir, List.of("clean", "package"), event -> {
-			try {
-				MavenSession session = event.getSession();
-				List<MavenProject> mavenProjects = session.getAllProjects();
-				MavenMojoProjectParser rewriteProjectParser = mavenMojoProjectParserFactory.create(baseDir,
-						mavenProjects, plexusContainer, session);
-				List<NamedStyles> styles = List.of();
-				List<SourceFile> sourceFiles = parseSourceFiles(rewriteProjectParser, mavenProjects, styles,
-						executionContext);
-				parsingResult.set(new RewriteProjectParsingResult(sourceFiles, executionContext));
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
+
+		new MavenExecutor(LoggerFactory.getLogger(RewriteMavenProjectParser.class), event -> {
+			MavenSession session = event.getSession();
+			List<MavenProject> mavenProjects = session.getAllProjects();
+			PlexusContainer plexusContainer = session.getContainer();
+			MavenMojoProjectParser rewriteProjectParser = mavenMojoProjectParserFactory.create(baseDir, mavenProjects,
+					plexusContainer, session);
+			List<NamedStyles> styles = List.of();
+			List<SourceFile> sourceFiles = parseSourceFiles(session.getTopLevelProject(), rewriteProjectParser,
+					mavenProjects, styles, executionContext);
+			parsingResult.set(new RewriteProjectParsingResult(sourceFiles, executionContext));
+		}).execute(List.of("clean", "package", "--fail-at-end"), baseDir);
+
 		return parsingResult.get();
 	}
 
@@ -124,13 +117,13 @@ public class RewriteMavenProjectParser {
 		scanScope.clear(beanFactory);
 	}
 
-	private List<SourceFile> parseSourceFiles(MavenMojoProjectParser rewriteProjectParser,
-			List<MavenProject> mavenProjects, List<NamedStyles> styles, ExecutionContext executionContext) {
+	private List<SourceFile> parseSourceFiles(MavenProject rootMavenProject,
+			MavenMojoProjectParser rewriteProjectParser, List<MavenProject> mavenProjects, List<NamedStyles> styles,
+			ExecutionContext executionContext) {
 		try {
-			Stream<SourceFile> sourceFileStream = rewriteProjectParser.listSourceFiles(
-					mavenProjects.get(mavenProjects.size() - 1), // FIXME: Order and
-																	// access to root
-																	// module
+			Stream<SourceFile> sourceFileStream = rewriteProjectParser.listSourceFiles(rootMavenProject,
+					// access to root
+					// module
 					styles, executionContext);
 			return sourcesWithAutoDetectedStyles(sourceFileStream);
 		}

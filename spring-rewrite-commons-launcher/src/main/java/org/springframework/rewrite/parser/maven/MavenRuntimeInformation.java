@@ -15,14 +15,22 @@
  */
 package org.springframework.rewrite.parser.maven;
 
+import org.apache.maven.rtinfo.RuntimeInformation;
+
 /**
  * @author Fabian Krüger
  */
 public class MavenRuntimeInformation {
 
+	private final String mavenVersion;
+
+	public MavenRuntimeInformation(String mavenVersion) {
+
+		this.mavenVersion = mavenVersion;
+	}
+
 	public String getMavenVersion() {
-		// FIXME: 945 implement this
-		return "3.9.1";
+		return this.mavenVersion;
 	}
 
 }

@@ -15,11 +15,14 @@
  */
 package org.springframework.rewrite.boot.autoconfigure;
 
+import org.openrewrite.ExecutionContext;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.rewrite.OpenRewriteProjectParser;
 import org.springframework.rewrite.RewriteRecipeLauncher;
 import org.springframework.rewrite.RewriteProjectParser;
+import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.resource.ProjectResourceSetFactory;
 import org.springframework.rewrite.resource.ProjectResourceSetSerializer;
 import org.springframework.rewrite.RewriteRecipeDiscovery;
@@ -35,6 +38,12 @@ public class RewriteLauncherConfiguration {
 	RewriteRecipeLauncher rewriteRecipeLauncher(RewriteProjectParser parser, RewriteRecipeDiscovery dicovery,
 			ProjectResourceSetFactory resourceSetFactory, ProjectResourceSetSerializer deserializer) {
 		return new RewriteRecipeLauncher(parser, dicovery, resourceSetFactory, deserializer);
+	}
+
+	@Bean
+	OpenRewriteProjectParser openRewriteProjectParser(SpringRewriteProperties properties,
+			ExecutionContext executionContext) {
+		return new OpenRewriteProjectParser(properties, executionContext);
 	}
 
 }

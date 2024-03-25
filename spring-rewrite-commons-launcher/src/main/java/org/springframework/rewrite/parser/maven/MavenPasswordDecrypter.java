@@ -39,12 +39,7 @@ class MavenPasswordDecrypter {
 	private final SecDispatcher secDispatcher;
 
 	public MavenPasswordDecrypter() {
-		try {
-			this.secDispatcher = new DefaultSecDispatcher(new DefaultPlexusCipher());
-		}
-		catch (PlexusCipherException e) {
-			throw new RuntimeException(e);
-		}
+		this.secDispatcher = new DefaultSecDispatcher(new DefaultPlexusCipher());
 	}
 
 	public void decryptMavenServerPasswords(MavenSettings mavenSettings, Path mavenSecuritySettingsFile) {

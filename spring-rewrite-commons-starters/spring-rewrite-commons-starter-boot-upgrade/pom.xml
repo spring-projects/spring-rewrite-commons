@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>spring-rewrite-commons-starter-boot-upgrade</artifactId>
+    <name>Spring Rewrite Boot Upgrade Starter</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -44,6 +45,28 @@
         <dependency>
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-migrate-java</artifactId>
+            <!--
+            [ERROR] Dependency convergence error for org.openrewrite.recipe:rewrite-static-analysis:jar:1.2.0 paths to dependency are:
+            [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-examples:pom:0.1.0-SNAPSHOT
+            [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT:compile
+            [ERROR]     +-org.openrewrite.recipe:rewrite-migrate-java:jar:2.7.0:compile
+            [ERROR]       +-org.openrewrite.recipe:rewrite-static-analysis:jar:1.2.0:runtime
+            [ERROR] and
+            [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-examples:pom:0.1.0-SNAPSHOT
+            [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT:compile
+            [ERROR]     +-org.openrewrite.recipe:rewrite-testing-frameworks:jar:2.3.0:compile
+            [ERROR]       +-org.openrewrite.recipe:rewrite-static-analysis:jar:1.2.1:runtime
+            [ERROR] and
+            [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-examples:pom:0.1.0-SNAPSHOT
+            [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT:compile
+            [ERROR]     +-org.openrewrite.recipe:rewrite-static-analysis:jar:1.2.1:compile
+            -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openrewrite.recipe</groupId>
+                    <artifactId>rewrite-static-analysis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.openrewrite.recipe</groupId>
@@ -56,6 +79,44 @@
         <dependency>
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-testing-frameworks</artifactId>
+            <exclusions>
+                <!--
+                [ERROR] Dependency convergence error for org.apache.commons:commons-compress:jar:1.25.0 paths to dependency are:
+                [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-launcher:jar:0.1.0-SNAPSHOT:compile
+                [ERROR]     +-org.springframework.rewrite:spring-rewrite-commons-test:jar:0.1.0-SNAPSHOT:compile
+                [ERROR]       +-org.openrewrite:rewrite-core:jar:8.14.0:compile
+                [ERROR]         +-org.apache.commons:commons-compress:jar:1.25.0:runtime
+                [ERROR] and
+                [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                [ERROR]   +-org.openrewrite.recipe:rewrite-testing-frameworks:jar:2.3.1:compile
+                [ERROR]     +-org.testcontainers:testcontainers:jar:1.19.3:runtime
+                [ERROR]       +-org.apache.commons:commons-compress:jar:1.24.0:runtime
+                -->
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+                <!--
+                [ERROR] Dependency convergence error for net.java.dev.jna:jna:jar:5.14.0 paths to dependency are:
+                [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                [ERROR]   +-org.springframework.rewrite:spring-rewrite-commons-launcher:jar:0.1.0-SNAPSHOT:compile
+                [ERROR]     +-org.springframework.rewrite:spring-rewrite-commons-test:jar:0.1.0-SNAPSHOT:compile
+                [ERROR]       +-org.openrewrite:rewrite-core:jar:8.14.0:compile
+                [ERROR]         +-net.java.dev.jna:jna-platform:jar:5.14.0:runtime
+                [ERROR]           +-net.java.dev.jna:jna:jar:5.14.0:runtime
+                [ERROR] and
+                [ERROR] +-org.springframework.rewrite:spring-rewrite-commons-starter-boot-upgrade:jar:0.1.0-SNAPSHOT
+                [ERROR]   +-org.openrewrite.recipe:rewrite-testing-frameworks:jar:2.3.1:compile
+                [ERROR]     +-org.testcontainers:testcontainers:jar:1.19.3:runtime
+                [ERROR]       +-com.github.docker-java:docker-java-transport-zerodep:jar:3.3.4:runtime
+                [ERROR]         +-net.java.dev.jna:jna:jar:5.13.0:runtime
+                -->
+                <exclusion>
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>jna</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.openrewrite.recipe</groupId>

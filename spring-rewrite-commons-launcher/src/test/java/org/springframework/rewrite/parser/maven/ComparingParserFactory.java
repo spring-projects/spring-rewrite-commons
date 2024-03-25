@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.openrewrite.InMemoryExecutionContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.rewrite.OpenRewriteProjectParser;
+import org.springframework.rewrite.parser.RewriteExecutionContext;
 import org.springframework.rewrite.parser.SpringRewriteProperties;
 import org.springframework.rewrite.parser.events.RewriteParsingEventListenerAdapter;
 import org.springframework.rewrite.scopes.ScanScope;
@@ -31,23 +33,13 @@ import static org.mockito.Mockito.mock;
 public class ComparingParserFactory {
 
 	@NotNull
-	public RewriteMavenProjectParser createComparingParser() {
+	public OpenRewriteProjectParser createComparingParser() {
 		return createComparingParser(new SpringRewriteProperties());
 	}
 
-	public RewriteMavenProjectParser createComparingParser(SpringRewriteProperties springRewriteProperties) {
-		MavenPlexusContainer plexusContainer = new MavenPlexusContainer();
-		ConfigurableListableBeanFactory beanFactory = mock(ConfigurableListableBeanFactory.class);
-		ScanScope scanScope = mock(ScanScope.class);
-		ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
-		RewriteParsingEventListenerAdapter parsingListener = new RewriteParsingEventListenerAdapter(eventPublisher);
-		MavenExecutionRequestFactory requestFactory = new MavenExecutionRequestFactory(new MavenConfigFileParser());
-		RewriteMavenProjectParser mavenProjectParser1 = new RewriteMavenProjectParser(plexusContainer, parsingListener,
-				new MavenExecutor(requestFactory, plexusContainer),
-				new MavenMojoProjectParserFactory(springRewriteProperties), scanScope, beanFactory,
-				new InMemoryExecutionContext(t -> {
-					throw new RuntimeException(t);
-				}));
+	public OpenRewriteProjectParser createComparingParser(SpringRewriteProperties springRewriteProperties) {
+		OpenRewriteProjectParser mavenProjectParser1 = new OpenRewriteProjectParser(springRewriteProperties,
+				new RewriteExecutionContext());
 		return mavenProjectParser1;
 	}
 
