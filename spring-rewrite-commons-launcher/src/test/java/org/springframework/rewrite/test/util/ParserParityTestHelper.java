@@ -463,6 +463,7 @@ public class ParserParityTestHelper {
 					List<String> differences = new ArrayList<>(c1Sorted);
 					differences.removeAll(c2Sorted);
 					String diff = differences.stream().collect(Collectors.joining("\n"));
+					System.out.println("The diff between lists:");
 					System.out.println(diff);
 				}
 				return equals;
