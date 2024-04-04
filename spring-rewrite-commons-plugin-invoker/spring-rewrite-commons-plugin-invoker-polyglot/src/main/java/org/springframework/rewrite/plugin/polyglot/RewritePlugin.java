@@ -158,7 +158,7 @@ public class RewritePlugin implements OpenRewritePluginBuilder.GradlePluginVersi
 		if (debug) {
 			finalizingBuilder = finalizingBuilder.withDebug();
 		}
-		if (debugConfig != null) {
+		if (debugConfig != null && debugConfig.isDebugEnabled()) {
 			finalizingBuilder = finalizingBuilder.withDebugger(debugConfig.getPort(), debugConfig.isSuspend());
 		}
 		result = finalizingBuilder.onDir(baseDir);
