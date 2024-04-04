@@ -20,6 +20,7 @@
         <module>boot-3-upgrade-atomic-example</module>
         <module>boot-3-upgrade-iterative-example</module>
         <module>list-applicable-recipes-example</module>
+        <module>plugin-invoker-boot-upgrade-examples</module>
     </modules>
 
     <properties>
