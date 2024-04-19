@@ -28,6 +28,7 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
+import org.openrewrite.java.tree.J;
 import org.openrewrite.shaded.jgit.api.errors.GitAPIException;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
@@ -59,7 +60,50 @@ import static org.assertj.core.api.AssertionsForClassTypes.fail;
  */
 @DisabledOnOs(value = OS.WINDOWS, disabledReason = "The repository URIs of dependencies differ.")
 @Issue("https://github.com/spring-projects/spring-rewrite-commons/issues/12")
+@Disabled("https://github.com/spring-projects/spring-rewrite-commons/issues/81")
 class RewriteProjectParserParityTest {
+
+	@Test
+	@DisplayName("parseResources")
+	void parseResources() {
+		Path baseDir = TestProjectHelper.getMavenProject("resources");
+		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
+			assertThat(comparingParsingResult.sourceFiles()).hasSize(5);
+		});
+	}
+
+	@Test
+	@DisplayName("testFailingProject")
+	void testFailingProject() {
+		Path baseDir = Path.of("./testcode/maven-projects/failing");
+		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
+			assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+			J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
+			assertThat(cu.getTypesInUse()
+				.getTypesInUse()
+				.stream()
+				.map(t -> t.toString())
+				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+
+			assertThat(testedParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+			J.CompilationUnit cu2 = (J.CompilationUnit) testedParsingResult.sourceFiles().get(1);
+			assertThat(cu2.getTypesInUse()
+				.getTypesInUse()
+				.stream()
+				.map(t -> t.toString())
+				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+		});
+	}
+
+	@Test
+	@DisplayName("parse4Modules")
+	void parse4Modules() {
+		Path baseDir = TestProjectHelper.getMavenProject("4-modules");
+		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
+			assertThat(comparingParsingResult.sourceFiles()).hasSize(4);
+			assertThat(testedParsingResult.sourceFiles()).hasSize(4);
+		});
+	}
 
 	@Test
 	@DisplayName("Parsing Simplistic Maven Project ")
