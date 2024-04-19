@@ -30,34 +30,24 @@ import java.nio.file.Path;
  */
 public class GradleInvoker {
 
-	private static BuildLauncher getBuildLauncher(Path baseDir, OutputStream os, String[] tasks) {
-		ProjectConnection connection = getProjectConnection(baseDir);
-		BuildLauncher buildLauncher = connection.newBuild().setStandardOutput(os).forTasks(tasks);
-		return buildLauncher;
-	}
-
 	public static GradleInvocationResult runTasks(Path baseDir, String[] args, String... tasks) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		ByteArrayOutputStream es = new ByteArrayOutputStream();
-		BuildLauncher buildLauncher = getBuildLauncher(baseDir, os, tasks);
-		buildLauncher.addArguments(args);
-		buildLauncher.setStandardError(es);
-		buildLauncher.run();
-		return new GradleInvocationResult(new String(os.toByteArray()), new String(es.toByteArray()));
-	}
-
-	protected static ProjectConnection getProjectConnection(Path projectDir) {
-		ProjectConnection connection;
-		var connector = (DefaultGradleConnector) GradleConnector.newConnector();
-		if (Files.exists(projectDir.resolve("gradle/wrapper/gradle-wrapper.properties"))) {
+		DefaultGradleConnector connector = (DefaultGradleConnector) GradleConnector.newConnector();
+		if (Files.exists(baseDir.resolve("gradle/wrapper/gradle-wrapper.properties"))) {
 			connector.useBuildDistribution();
 		}
 		else {
 			connector.useGradleVersion("8.4");
 		}
-
-		connection = connector.forProjectDirectory(projectDir.toFile()).connect();
-		return connection;
+		try (ProjectConnection connection = connector.forProjectDirectory(baseDir.toFile()).connect()) {
+			BuildLauncher buildLauncher = connection.newBuild().setStandardOutput(os).forTasks(tasks);
+			buildLauncher.addArguments(args);
+			buildLauncher.setStandardError(es);
+			buildLauncher.run();
+			connection.close();
+			return new GradleInvocationResult(new String(os.toByteArray()), new String(es.toByteArray()));
+		}
 	}
 
 }

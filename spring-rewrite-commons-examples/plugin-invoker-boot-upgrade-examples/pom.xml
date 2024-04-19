@@ -8,7 +8,6 @@
 		<version>0.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>org.springframework.rewrite.example</groupId>
 	<artifactId>plugin-invoker-boot-upgrade-examples</artifactId>
 	<name>plugin-invoker-boot-upgrade-examples</name>
 	<description>plugin-invoker-boot-upgrade-examples</description>
