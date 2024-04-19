@@ -18,6 +18,8 @@
         <module>spring-rewrite-commons-starters</module>
         <module>spring-rewrite-commons-gradle</module>
         <module>spring-rewrite-commons-plugin-invoker</module>
+        <module>spring-rewrite-commons-utils</module>
+        <module>spring-rewrite-commons-test</module>
     </modules>
 
     <organization>
@@ -128,6 +130,11 @@
                 <groupId>org.openrewrite</groupId>
                 <artifactId>rewrite-core</artifactId>
                 <version>${rewrite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.rewrite</groupId>
+                <artifactId>spring-rewrite-commons-test</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
