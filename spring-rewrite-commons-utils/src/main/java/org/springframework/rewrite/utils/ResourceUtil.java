@@ -52,7 +52,13 @@ public class ResourceUtil {
 	}
 
 	public static void write(Path basePath, List<Resource> resources) {
-		resources.stream().forEach(r -> ResourceUtil.persistResource(basePath, r));
+		try {
+			Files.createDirectories(basePath);
+			resources.stream().forEach(r -> ResourceUtil.persistResource(basePath, r));
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static void persistResource(Path basePath, Resource r) {
