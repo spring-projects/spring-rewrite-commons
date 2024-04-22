@@ -21,6 +21,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
@@ -95,6 +97,7 @@ class TestProjectHelperTest {
 	}
 
 	@Nested
+	@DisabledOnOs(value = OS.WINDOWS, disabledReason = "https://github.com/junit-team/junit5/issues/2811")
 	class TextProjectHelper_ExistingGitRepoSupport {
 
 		@TempDir
