@@ -40,6 +40,7 @@ public class ProjectResourceSetFactory {
 	}
 
 	public ProjectResourceSet create(Path baseDir, List<SourceFile> sourceFiles) {
+		baseDir = baseDir.toAbsolutePath().normalize();
 		List<RewriteSourceFileHolder<? extends SourceFile>> rewriteSourceFileHolders = sourceFileWrapper
 			.wrapRewriteSourceFiles(baseDir, sourceFiles);
 		return createFromSourceFileHolders(rewriteSourceFileHolders);
