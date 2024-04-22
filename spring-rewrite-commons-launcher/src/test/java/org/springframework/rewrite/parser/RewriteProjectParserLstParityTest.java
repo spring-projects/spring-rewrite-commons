@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junitpioneer.jupiter.ExpectedToFail;
 import org.junitpioneer.jupiter.Issue;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
@@ -35,7 +36,7 @@ import org.openrewrite.tree.ParsingExecutionContextView;
 import org.springframework.rewrite.parser.maven.ComparingParserFactory;
 import org.springframework.rewrite.parser.maven.RewriteMavenProjectParser;
 import org.springframework.rewrite.test.util.DummyResource;
-import org.springframework.rewrite.test.util.ParserParityTestHelper;
+import org.springframework.rewrite.test.util.ParserLstParityTestHelper;
 import org.springframework.rewrite.test.util.TestProjectHelper;
 
 import java.nio.file.Path;
@@ -52,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 /**
- * Test parity between OpenRewrite parser logic and RewriteProjectParser.
+ * Test parity of generated LST between OpenRewrite parser logic and RewriteProjectParser.
  *
  * RewriteMavenProjectParser resembles the parser logic from OpenRewrite's Maven plugin
  *
@@ -67,42 +68,45 @@ class RewriteProjectParserParityTest {
 	@DisplayName("parseResources")
 	void parseResources() {
 		Path baseDir = TestProjectHelper.getMavenProject("resources");
-		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
-			assertThat(comparingParsingResult.sourceFiles()).hasSize(5);
-		});
+		ParserLstParityTestHelper.scanProjectDir(baseDir)
+			.verifyParity((comparingParsingResult, testedParsingResult) -> {
+				assertThat(comparingParsingResult.sourceFiles()).hasSize(5);
+			});
 	}
 
 	@Test
 	@DisplayName("testFailingProject")
 	void testFailingProject() {
 		Path baseDir = Path.of("./testcode/maven-projects/failing");
-		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
-			assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
-			J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
-			assertThat(cu.getTypesInUse()
-				.getTypesInUse()
-				.stream()
-				.map(t -> t.toString())
-				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+		ParserLstParityTestHelper.scanProjectDir(baseDir)
+			.verifyParity((comparingParsingResult, testedParsingResult) -> {
+				assertThat(comparingParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+				J.CompilationUnit cu = (J.CompilationUnit) comparingParsingResult.sourceFiles().get(1);
+				assertThat(cu.getTypesInUse()
+					.getTypesInUse()
+					.stream()
+					.map(t -> t.toString())
+					.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
 
-			assertThat(testedParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
-			J.CompilationUnit cu2 = (J.CompilationUnit) testedParsingResult.sourceFiles().get(1);
-			assertThat(cu2.getTypesInUse()
-				.getTypesInUse()
-				.stream()
-				.map(t -> t.toString())
-				.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
-		});
+				assertThat(testedParsingResult.sourceFiles().get(1)).isInstanceOf(J.CompilationUnit.class);
+				J.CompilationUnit cu2 = (J.CompilationUnit) testedParsingResult.sourceFiles().get(1);
+				assertThat(cu2.getTypesInUse()
+					.getTypesInUse()
+					.stream()
+					.map(t -> t.toString())
+					.anyMatch(t -> t.equals("javax.validation.constraints.Min"))).isTrue();
+			});
 	}
 
 	@Test
 	@DisplayName("parse4Modules")
 	void parse4Modules() {
 		Path baseDir = TestProjectHelper.getMavenProject("4-modules");
-		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity((comparingParsingResult, testedParsingResult) -> {
-			assertThat(comparingParsingResult.sourceFiles()).hasSize(4);
-			assertThat(testedParsingResult.sourceFiles()).hasSize(4);
-		});
+		ParserLstParityTestHelper.scanProjectDir(baseDir)
+			.verifyParity((comparingParsingResult, testedParsingResult) -> {
+				assertThat(comparingParsingResult.sourceFiles()).hasSize(4);
+				assertThat(testedParsingResult.sourceFiles()).hasSize(4);
+			});
 	}
 
 	@Test
@@ -170,7 +174,7 @@ class RewriteProjectParserParityTest {
 		comparingSpringRewriteProperties.setPomCacheEnabled(true);
 		comparingSpringRewriteProperties.setPomCacheEnabled(true);
 
-		ParserParityTestHelper.scanProjectDir(tempDir)
+		ParserLstParityTestHelper.scanProjectDir(tempDir)
 			.withParserProperties(comparingSpringRewriteProperties)
 			.verifyParity();
 	}
@@ -185,7 +189,7 @@ class RewriteProjectParserParityTest {
 	void parseMultiModule1() {
 		Path baseDir = getMavenProject("multi-module-1");
 
-		ParserParityTestHelper.scanProjectDir(baseDir).verifyParity();
+		ParserLstParityTestHelper.scanProjectDir(baseDir).verifyParity();
 	}
 
 	@Test
@@ -206,7 +210,7 @@ class RewriteProjectParserParityTest {
 	@Issue("https://github.com/spring-projects-experimental/spring-boot-migrator/issues/875")
 	void parseCheckstyle() {
 		Path baseDir = getMavenProject("checkstyle");
-		ParserParityTestHelper.scanProjectDir(baseDir)
+		ParserLstParityTestHelper.scanProjectDir(baseDir)
 			.parseSequentially()
 			.verifyParity((comparingParsingResult, testedParsingResult) -> {
 				assertThat(
@@ -224,7 +228,7 @@ class RewriteProjectParserParityTest {
 
 	@Test
 	@DisplayName("Parse complex Maven reactor project")
-	@Disabled("https://github.com/openrewrite/rewrite/issues/3409")
+	@ExpectedToFail("https://github.com/openrewrite/rewrite/issues/3409")
 	void parseComplexMavenReactorProject() {
 		Path projectRoot = Path.of("./testcode/maven-projects/cwa-server").toAbsolutePath().normalize();
 		TestProjectHelper.createTestProject(projectRoot)
@@ -250,7 +254,7 @@ class RewriteProjectParserParityTest {
 			}
 		});
 
-		ParserParityTestHelper.scanProjectDir(projectRoot)
+		ParserLstParityTestHelper.scanProjectDir(projectRoot)
 			.parseSequentially()
 			.withExecutionContextForComparingParser(executionContext)
 			.withParserProperties(springRewriteProperties)
