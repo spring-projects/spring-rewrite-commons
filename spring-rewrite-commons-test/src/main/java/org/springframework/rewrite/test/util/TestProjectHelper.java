@@ -16,8 +16,10 @@
 package org.springframework.rewrite.test.util;
 
 import org.apache.commons.io.FileUtils;
-import org.openrewrite.shaded.jgit.api.Git;
-import org.openrewrite.shaded.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.springframework.core.io.Resource;
 import org.springframework.rewrite.utils.ResourceUtil;
 
@@ -27,11 +29,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
+ * Helper to set up test projects for OpenRewrite migrations.
+ *
  * @author Fabian Krüger
  */
 public class TestProjectHelper {
+
+	public static final String TESTCODE_MAVEN_PROJECTS = "./testcode/maven-projects/";
+
+	private static final String TESTCODE_GRADLE_PROJECTS = "./testcode/gradle-projects/";
 
 	private final Path targetDir;
 
@@ -45,12 +54,26 @@ public class TestProjectHelper {
 
 	private boolean deleteDirIfExists = false;
 
+	private String gitHash = null;
+
 	public TestProjectHelper(Path targetDir) {
 		this.targetDir = targetDir;
 	}
 
-	public static Path getMavenProject(String s) {
-		return Path.of("./testcode/maven-projects/").resolve(s).toAbsolutePath().normalize();
+	/**
+	 * Returns the absolute path to {@code ./testcode/maven-projects/<givenProjectDir>}
+	 * @param givenProjectDir
+	 */
+	public static Path getMavenProject(String givenProjectDir) {
+		return Path.of(TESTCODE_MAVEN_PROJECTS).resolve(givenProjectDir).toAbsolutePath().normalize();
+	}
+
+	/**
+	 * Returns the absolute path to {@code ./testcode/gradle-projects/<givenProjectDir>}
+	 * @param givenProjectDir
+	 */
+	public static Path getGradleProject(String givenProjectDir) {
+		return Path.of(TESTCODE_GRADLE_PROJECTS).resolve(givenProjectDir).toAbsolutePath().normalize();
 	}
 
 	public static TestProjectHelper createTestProject(Path targetDir) {
@@ -73,6 +96,11 @@ public class TestProjectHelper {
 
 	public TestProjectHelper cloneGitProject(String url) {
 		this.gitUrl = url;
+		return this;
+	}
+
+	public TestProjectHelper checkoutCommit(String gitHash) {
+		this.gitHash = gitHash;
 		return this;
 	}
 
@@ -110,7 +138,10 @@ public class TestProjectHelper {
 				Git git = Git.cloneRepository().setDirectory(directory).setURI(this.gitUrl).call();
 
 				if (gitTag != null) {
-					git.checkout().setName("refs/tags/" + gitTag).call();
+					git.checkout().setName("refs/tags/" + gitTag).setCreateBranch(false).call();
+				}
+				else if (gitHash != null) {
+					checkoutCommit(git, gitHash);
 				}
 			}
 			catch (GitAPIException e) {
@@ -118,6 +149,24 @@ public class TestProjectHelper {
 			}
 		}
 		ResourceUtil.write(targetDir, resources);
+	}
+
+	private void checkoutCommit(Git git, String startingGitHash) {
+		try {
+			Ref ref = git.checkout().setName(startingGitHash).call();
+		}
+		catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void resetRepo(Git git, String startingGitHash) {
+		try {
+			git.reset().setRef(startingGitHash).setMode(ResetCommand.ResetType.HARD).call();
+		}
+		catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public TestProjectHelper addResource(String relativePath, String content) {

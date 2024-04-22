@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Fabian Krüger
  */
-public class ParserParityTestHelper {
+public class ParserLstParityTestHelper {
 
 	private final Path baseDir;
 
@@ -58,12 +58,12 @@ public class ParserParityTestHelper {
 
 	private ExecutionContext executionContext;
 
-	private ParserParityTestHelper(Path baseDir) {
+	private ParserLstParityTestHelper(Path baseDir) {
 		this.baseDir = baseDir;
 	}
 
-	public static ParserParityTestHelper scanProjectDir(Path baseDir) {
-		ParserParityTestHelper helper = new ParserParityTestHelper(baseDir);
+	public static ParserLstParityTestHelper scanProjectDir(Path baseDir) {
+		ParserLstParityTestHelper helper = new ParserLstParityTestHelper(baseDir);
 		return helper;
 	}
 
@@ -71,17 +71,17 @@ public class ParserParityTestHelper {
 	 * Sequentially parse given project using tested parser and then comparing parser. The
 	 * parser are executed in parallel by default.
 	 */
-	public ParserParityTestHelper parseSequentially() {
+	public ParserLstParityTestHelper parseSequentially() {
 		this.isParallelParse = false;
 		return this;
 	}
 
-	public ParserParityTestHelper withParserProperties(SpringRewriteProperties springRewriteProperties) {
+	public ParserLstParityTestHelper withParserProperties(SpringRewriteProperties springRewriteProperties) {
 		this.springRewriteProperties = springRewriteProperties;
 		return this;
 	}
 
-	public ParserParityTestHelper withExecutionContextForComparingParser(ExecutionContext executionContext) {
+	public ParserLstParityTestHelper withExecutionContextForComparingParser(ExecutionContext executionContext) {
 		this.executionContext = executionContext;
 		return this;
 	}
