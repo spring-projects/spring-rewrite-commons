@@ -42,6 +42,8 @@ public class RewritePlugin implements OpenRewritePluginBuilder.GradlePluginVersi
 
 	private String gradlePluginVersion;
 
+	private String mavenPluginVersion;
+
 	private List<String> recipes = new ArrayList<>();
 
 	private boolean debug;
@@ -77,6 +79,12 @@ public class RewritePlugin implements OpenRewritePluginBuilder.GradlePluginVersi
 	@Override
 	public OpenRewritePluginBuilder.Recipes gradlePluginVersion(String pluginVersion) {
 		this.gradlePluginVersion = pluginVersion;
+		return this;
+	}
+
+	@Override
+	public OpenRewritePluginBuilder.GradlePluginVersion mavenPluginVersion(String mavenPluginVersion) {
+		this.mavenPluginVersion = mavenPluginVersion;
 		return this;
 	}
 
@@ -151,7 +159,8 @@ public class RewritePlugin implements OpenRewritePluginBuilder.GradlePluginVersi
 			default -> builder = RewriteMavenPlugin.run();
 		}
 		RewriteMavenPluginBuilder.FinalizingBuilder finalizingBuilder = builder
-			.recipes(this.recipes.toArray(String[]::new));
+			.recipes(this.recipes.toArray(String[]::new))
+			.withMavenPluginVersion("5.32.1");
 		if (minMemory != null) {
 			finalizingBuilder = finalizingBuilder.withMemory(minMemory, maxMemory);
 		}
@@ -225,6 +234,8 @@ class OpenRewritePluginBuilder {
 	public interface GradlePluginVersion {
 
 		Recipes gradlePluginVersion(String pluginVersion);
+
+		GradlePluginVersion mavenPluginVersion(String s);
 
 	}
 

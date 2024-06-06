@@ -26,11 +26,17 @@ public interface RewriteMavenPluginBuilder {
 
 	public interface Recipes {
 
-		FinalizingBuilder recipes(String... recipeNames);
+		MavenPLuginVersionBuilder recipes(String... recipeNames);
 
 	}
 
-	interface FinalizingBuilder {
+	interface MavenPLuginVersionBuilder {
+
+		FinalizingBuilder withMavenPluginVersion(String mavenPluginVersion);
+
+	}
+
+	interface FinalizingBuilder extends MavenPLuginVersionBuilder {
 
 		FinalizingBuilder withDependencies(String... dependencies);
 
