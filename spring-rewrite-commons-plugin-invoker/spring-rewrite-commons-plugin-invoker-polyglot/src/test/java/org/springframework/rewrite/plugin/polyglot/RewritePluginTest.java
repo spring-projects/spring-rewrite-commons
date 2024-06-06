@@ -118,6 +118,7 @@ public class RewritePluginTest {
 			int port = TestSocketUtils.findAvailableTcpPort();
 			Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
 			PluginInvocationResult result = RewritePlugin.run()
+				.mavenPluginVersion("5.32.1")
 				.gradlePluginVersion("6.10.0")
 				.recipes(EXTENDED_RECIPES)
 				.dependencies(EXTENDED_RECIPES_DEPS)

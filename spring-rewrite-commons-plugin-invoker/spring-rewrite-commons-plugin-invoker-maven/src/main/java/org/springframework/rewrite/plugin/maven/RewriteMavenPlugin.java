@@ -46,6 +46,8 @@ public class RewriteMavenPlugin
 
 	private boolean debug;
 
+	private String rewriteMavenPluginVersion;
+
 	@Override
 	public RewriteMavenPluginBuilder.FinalizingBuilder withDependencies(String... dependencies) {
 		this.dependencies = Arrays.asList(dependencies);
@@ -113,35 +115,48 @@ public class RewriteMavenPlugin
 			builder.withMemory(minMemory, maxMemory);
 		}
 		MavenInvocationResult result = execute(baseDir, debug, debugConfig, builder.build(), goal, recipes,
-				dependencies);
+				dependencies, rewriteMavenPluginVersion);
 
 		return new PluginInvocationResult(result.getExitCode() != 0 ? false : true, result.getCapturedLines());
 	}
 
 	static MavenInvocationResult execute(Path baseDir, boolean debug, DebugConfig debugConfig, BuildConfig buildConfig,
-			Goal openRewriteGoal, List<String> recipes1, List<String> dependencies1) {
-		String openRewriteCommand = renderOpenRewriteCommand(recipes1, dependencies1, openRewriteGoal);
+			Goal openRewriteGoal, List<String> recipes1, List<String> dependencies1, String rewriteMavenPluginVersion) {
+		String openRewriteCommand = renderOpenRewriteCommand(recipes1, dependencies1, openRewriteGoal,
+				rewriteMavenPluginVersion);
 		List<String> goals = List.of("--fail-at-end", openRewriteCommand);
 		return MavenInvoker.runGoals(baseDir, debugConfig, debug, buildConfig, goals);
 	}
 
 	private static String renderOpenRewriteCommand(List<String> recipeNames, List<String> dependencies,
-			Goal rewritePluginGoal) {
+			Goal rewritePluginGoal, String rewriteMavenPluginVersion) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("org.openrewrite.maven:rewrite-maven-plugin:").append(rewritePluginGoal.getMaven()).append(" ");
+		sb.append("org.openrewrite.maven:rewrite-maven-plugin:")
+			.append(rewriteMavenPluginVersion)
+			.append(":")
+			.append(rewritePluginGoal.getMaven())
+			.append(" ");
 		String recipesList = recipeNames.stream().collect(Collectors.joining(","));
 		sb.append("-Drewrite.activeRecipes=").append(recipesList);
 		if (!dependencies.isEmpty()) {
 			String dependenciesList = dependencies.stream().collect(Collectors.joining(","));
 			sb.append(" ").append("-Drewrite.recipeArtifactCoordinates=").append(dependenciesList);
 		}
-		return sb.toString();
+
+		String cmd = sb.toString();
+		return cmd;
 	}
 
 	@Override
 	public RewriteMavenPluginBuilder.FinalizingBuilder withMemory(String minMemory, String maxMemory) {
 		this.minMemory = minMemory;
 		this.maxMemory = maxMemory;
+		return this;
+	}
+
+	@Override
+	public RewriteMavenPluginBuilder.FinalizingBuilder withMavenPluginVersion(String mavenPluginVersion) {
+		this.rewriteMavenPluginVersion = mavenPluginVersion;
 		return this;
 	}
 

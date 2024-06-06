@@ -54,7 +54,10 @@ class RewriteMavenPluginTest {
 	void simpleProjectSimpleConfig() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
 
-		PluginInvocationResult result = RewriteMavenPlugin.run().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.run()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 
 		String out = result.capturedOutput();
 		assertThat(result.success()).isTrue();
@@ -66,7 +69,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("builder runNoFork")
 	void simpleProjectSimpleConfigRunNoFork() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
-		PluginInvocationResult result = RewriteMavenPlugin.runNoFork().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.runNoFork()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 		String out = result.capturedOutput();
 		assertThat(result.success()).isTrue();
 		assertTasksExecuted(out, "runNoFork");
@@ -77,7 +83,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("builder dryRun")
 	void simpleProjectSimpleConfigDryRun() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
-		PluginInvocationResult result = RewriteMavenPlugin.dryRun().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.dryRun()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 		String out = result.capturedOutput();
 		assertThat(result.success()).isTrue();
 		assertTasksExecuted(out, tasksOf(DEFAULT_GOALS, "dryRun"));
@@ -88,7 +97,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("builder dryRunNoFork")
 	void simpleProjectSimpleConfigDryRunNoFork() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
-		PluginInvocationResult result = RewriteMavenPlugin.dryRunNoFork().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.dryRunNoFork()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 		String out = result.capturedOutput();
 		assertThat(result.success()).isTrue();
 		assertTasksExecuted(out, "dryRunNoFork");
@@ -99,7 +111,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("builder discover")
 	void simpleProjectSimpleConfigDiscover() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
-		PluginInvocationResult result = RewriteMavenPlugin.discover().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.discover()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 		String out = result.capturedOutput();
 		assertThat(result.success()).isTrue();
 		assertTasksExecuted(out, "discover");
@@ -110,7 +125,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("builder cyclonedx")
 	void simpleProjectSimpleConfigCyclonedx() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
-		PluginInvocationResult result = RewriteMavenPlugin.cyclonedx().recipes(RECIPES).onDir(baseDir);
+		PluginInvocationResult result = RewriteMavenPlugin.cyclonedx()
+			.recipes(RECIPES)
+			.withMavenPluginVersion("5.32.1")
+			.onDir(baseDir);
 		String out = result.capturedOutput();
 		System.out.println(out);
 		assertThat(result.success()).isTrue();
@@ -125,6 +143,7 @@ class RewriteMavenPluginTest {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
 		PluginInvocationResult result = RewriteMavenPlugin.run()
 			.recipes(EXTENDED_RECIPES)
+			.withMavenPluginVersion("5.32.1")
 			.withDependencies(EXTENDED_REFCIPES_DEPS)
 			.withDebugger(port, false)
 			.withDebug()
@@ -145,9 +164,10 @@ class RewriteMavenPluginTest {
 
 		int port = TestSocketUtils.findAvailableTcpPort();
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
+		String rewriteMavenPluginVersion = "5.32.1";
 		MavenInvocationResult result = RewriteMavenPlugin.execute(baseDir, true, DebugConfig.from(port, false),
 				BuildConfig.builder().withMemory("1G", "4G").build(), RewriteMavenPlugin.Goal.DRY_RUN,
-				Arrays.asList(RECIPES), List.of());
+				Arrays.asList(RECIPES), List.of(), rewriteMavenPluginVersion);
 		String out = result.getCapturedLines();
 		assertDebugConfig(out, port, false);
 		assertMemory(out, "1G", "4G");
@@ -179,9 +199,10 @@ class RewriteMavenPluginTest {
 	@DisplayName("execute discover")
 	void executeDiscover() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
+		String rewriteMavenPluginVersion = "5.32.1";
 		MavenInvocationResult result = RewriteMavenPlugin.execute(baseDir, false, DebugConfig.disabled(),
 				BuildConfig.fromDefault(), RewriteMavenPlugin.Goal.DISCOVER, Arrays.asList(EXTENDED_RECIPES),
-				List.of(EXTENDED_REFCIPES_DEPS));
+				List.of(EXTENDED_REFCIPES_DEPS), rewriteMavenPluginVersion);
 		String out = result.getCapturedLines();
 		assertThat(result.getExitCode()).isEqualTo(0);
 		assertTasksExecuted(out, "discover");
@@ -192,17 +213,20 @@ class RewriteMavenPluginTest {
 	@DisplayName("execute cylonedx")
 	void executeCyclonedx() {
 		Path baseDir = Path.of("./testcode/maven-projects/simple").toAbsolutePath().normalize();
+		String rewriteMavenPluginVersion = "5.32.1";
 		MavenInvocationResult result = RewriteMavenPlugin.execute(baseDir, false, DebugConfig.disabled(),
 				BuildConfig.fromDefault(), RewriteMavenPlugin.Goal.CYCLONEDX, Arrays.asList(EXTENDED_RECIPES),
-				List.of(EXTENDED_REFCIPES_DEPS));
+				List.of(EXTENDED_REFCIPES_DEPS), rewriteMavenPluginVersion);
 		String out = result.getCapturedLines();
 		assertThat(result.getExitCode()).isEqualTo(0);
 		assertTasksExecuted(out, "cyclonedx");
 	}
 
 	private void verify(Path baseDir, RewriteMavenPlugin.Goal runNoFork, String expectedGoal) {
+		String rewriteMavenPluginVersion = "5.32.1";
 		MavenInvocationResult result = RewriteMavenPlugin.execute(baseDir, false, DebugConfig.disabled(),
-				BuildConfig.fromDefault(), runNoFork, Arrays.asList(EXTENDED_RECIPES), List.of(EXTENDED_REFCIPES_DEPS));
+				BuildConfig.fromDefault(), runNoFork, Arrays.asList(EXTENDED_RECIPES), List.of(EXTENDED_REFCIPES_DEPS),
+				rewriteMavenPluginVersion);
 		String out = result.getCapturedLines();
 		assertThat(result.getExitCode()).isEqualTo(0);
 		assertRecipesExecuted(out, EXTENDED_RECIPES);
