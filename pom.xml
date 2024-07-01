@@ -34,10 +34,13 @@
 
         <!-- prod dependencies -->
         <spring-boot.version>3.2.1</spring-boot.version>
-        <rewrite.version>8.13.4</rewrite.version>
-        <rewrite-kotlin.version>1.8.4</rewrite-kotlin.version>
-        <rewrite-polyglot.version>1.8.11</rewrite-polyglot.version>
+
+        <!-- rewrite -->
+        <rewrite-bom.version>8.13.4</rewrite-bom.version>
         <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
+        <rewrite-kotlin.version>1.10.0</rewrite-kotlin.version>
+        <rewrite-polyglot.version>1.9.2</rewrite-polyglot.version>
+
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <gradle-tooling-api.version>8.4</gradle-tooling-api.version>
         <maven.version>3.9.1</maven.version>
@@ -128,8 +131,20 @@
             </dependency>
             <dependency>
                 <groupId>org.openrewrite</groupId>
-                <artifactId>rewrite-core</artifactId>
-                <version>${rewrite.version}</version>
+                <artifactId>rewrite-bom</artifactId>
+                <version>${rewrite-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite</groupId>
+                <artifactId>rewrite-kotlin</artifactId>
+                <version>${rewrite-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite</groupId>
+                <artifactId>rewrite-polyglot</artifactId>
+                <version>${rewrite-polyglot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.rewrite</groupId>

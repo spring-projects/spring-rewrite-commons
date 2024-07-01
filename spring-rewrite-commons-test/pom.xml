@@ -34,7 +34,6 @@
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-core</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
