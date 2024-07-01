@@ -37,6 +37,7 @@
 
         <!-- rewrite -->
         <rewrite-bom.version>8.13.4</rewrite-bom.version>
+        <rewrite-recipe-bom.version>2.6.2</rewrite-recipe-bom.version> <!-- brings rewrite-bom -->
         <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
         <rewrite-kotlin.version>1.10.0</rewrite-kotlin.version>
         <rewrite-polyglot.version>1.9.2</rewrite-polyglot.version>
@@ -135,6 +136,13 @@
                 <version>${rewrite-bom.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite.recipe</groupId>
+                <artifactId>rewrite-recipe-bom</artifactId>
+                <version>${rewrite-recipe-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.openrewrite</groupId>
