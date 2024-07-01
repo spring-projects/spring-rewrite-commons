@@ -33,13 +33,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- prod dependencies -->
-        <spring-boot.version>3.2.1</spring-boot.version>
-        <rewrite.version>8.13.4</rewrite.version>
-        <rewrite-kotlin.version>1.8.4</rewrite-kotlin.version>
-        <rewrite-polyglot.version>1.8.11</rewrite-polyglot.version>
-        <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
+        <spring-boot.version>3.3.1</spring-boot.version>
+
+        <!-- rewrite -->
+        <rewrite-bom.version>8.28.1</rewrite-bom.version>
+        <rewrite-recipe-bom.version>2.13.2</rewrite-recipe-bom.version> <!-- brings rewrite-bom -->
+        <rewrite-maven-plugin.version>5.34.1</rewrite-maven-plugin.version>
+        <rewrite-kotlin.version>1.18.1</rewrite-kotlin.version>
+        <rewrite-polyglot.version>1.12.2</rewrite-polyglot.version>
+
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <gradle-tooling-api.version>8.4</gradle-tooling-api.version>
+        <gradle-tooling-model.version>1.1.2</gradle-tooling-model.version>
         <maven.version>3.9.1</maven.version>
         <maven-invoker.version>3.2.0</maven-invoker.version>
         <maven-shared-utils.version>3.4.2</maven-shared-utils.version>
@@ -48,7 +53,7 @@
         <maven-resolver.version>1.9.13</maven-resolver.version>
         <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
         <plexus-cypher.version>1.8</plexus-cypher.version>
-        <junit-pioneer.version>2.1.0</junit-pioneer.version>
+        <junit-pioneer.version>2.2.0</junit-pioneer.version>
 
         <!-- documentation dependencies -->
         <io.spring.maven.antora-version>0.0.4</io.spring.maven.antora-version>
@@ -128,8 +133,27 @@
             </dependency>
             <dependency>
                 <groupId>org.openrewrite</groupId>
-                <artifactId>rewrite-core</artifactId>
-                <version>${rewrite.version}</version>
+                <artifactId>rewrite-bom</artifactId>
+                <version>${rewrite-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite.recipe</groupId>
+                <artifactId>rewrite-recipe-bom</artifactId>
+                <version>${rewrite-recipe-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite</groupId>
+                <artifactId>rewrite-kotlin</artifactId>
+                <version>${rewrite-kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openrewrite</groupId>
+                <artifactId>rewrite-polyglot</artifactId>
+                <version>${rewrite-polyglot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.rewrite</groupId>

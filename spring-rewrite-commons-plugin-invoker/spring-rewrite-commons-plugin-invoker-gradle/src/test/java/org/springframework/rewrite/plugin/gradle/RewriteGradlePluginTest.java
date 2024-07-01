@@ -53,6 +53,7 @@ public class RewriteGradlePluginTest {
 		PluginInvocationResult result = RewriteGradlePlugin.dryRun()
 			.recipes(RECIPES)
 			.usingPluginVersion("6.10.0")
+			.withMemory("128M", "512M")
 			.onDir(baseDir);
 
 		String out = result.capturedOutput();

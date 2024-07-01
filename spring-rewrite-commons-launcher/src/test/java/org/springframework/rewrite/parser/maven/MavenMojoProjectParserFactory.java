@@ -73,12 +73,13 @@ public class MavenMojoProjectParserFactory {
 
 	public MavenMojoProjectParser create(Path baseDir, RuntimeInformation runtimeInformation,
 			SettingsDecrypter settingsDecrypter) {
+		boolean parseAdditionalResources = true;
 		return new MavenMojoProjectParser(new Slf4jToMavenLoggerAdapter(LOGGER), baseDir,
 				springRewriteProperties.isPomCacheEnabled(), springRewriteProperties.getPomCacheDirectory(),
 				runtimeInformation, springRewriteProperties.isSkipMavenParsing(),
 				springRewriteProperties.getIgnoredPathPatterns(), springRewriteProperties.getPlainTextMasks(),
 				springRewriteProperties.getSizeThresholdMb(), null, settingsDecrypter,
-				springRewriteProperties.isRunPerSubmodule());
+				springRewriteProperties.isRunPerSubmodule(), parseAdditionalResources);
 	}
 
 }

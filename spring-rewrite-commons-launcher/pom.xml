@@ -34,47 +34,38 @@
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-maven</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-java</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-java-17</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-json</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-yaml</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-hcl</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-protobuf</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-xml</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-properties</artifactId>
-            <version>${rewrite.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>

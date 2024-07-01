@@ -30,7 +30,6 @@ import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.Parser;
 import org.openrewrite.SourceFile;
 import org.openrewrite.java.tree.J;
-import org.openrewrite.shaded.jgit.api.errors.GitAPIException;
 import org.openrewrite.tree.ParsingEventListener;
 import org.openrewrite.tree.ParsingExecutionContextView;
 import org.springframework.rewrite.parser.maven.ComparingParserFactory;
@@ -111,7 +110,7 @@ class RewriteProjectParserParityTest {
 
 	@Test
 	@DisplayName("Parsing Simplistic Maven Project ")
-	void parsingSimplisticMavenProject(@TempDir Path tempDir) throws GitAPIException {
+	void parsingSimplisticMavenProject(@TempDir Path tempDir) {
 		@Language("xml")
 		String pomXml = """
 				<?xml version="1.0" encoding="UTF-8"?>
