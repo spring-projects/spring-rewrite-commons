@@ -36,11 +36,11 @@
         <spring-boot.version>3.2.1</spring-boot.version>
 
         <!-- rewrite -->
-        <rewrite-bom.version>8.13.4</rewrite-bom.version>
-        <rewrite-recipe-bom.version>2.6.2</rewrite-recipe-bom.version> <!-- brings rewrite-bom -->
-        <rewrite-maven-plugin.version>5.20.0</rewrite-maven-plugin.version>
-        <rewrite-kotlin.version>1.10.0</rewrite-kotlin.version>
-        <rewrite-polyglot.version>1.9.2</rewrite-polyglot.version>
+        <rewrite-bom.version>8.28.1</rewrite-bom.version>
+        <rewrite-recipe-bom.version>2.13.2</rewrite-recipe-bom.version> <!-- brings rewrite-bom -->
+        <rewrite-maven-plugin.version>5.34.1</rewrite-maven-plugin.version>
+        <rewrite-kotlin.version>1.18.1</rewrite-kotlin.version>
+        <rewrite-polyglot.version>1.12.2</rewrite-polyglot.version>
 
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <gradle-tooling-api.version>8.4</gradle-tooling-api.version>
