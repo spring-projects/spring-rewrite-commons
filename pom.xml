@@ -67,7 +67,7 @@
         <spring-javaformat-maven-plugin.version>0.0.41</spring-javaformat-maven-plugin.version>
         <license-maven-plugin.version>4.3</license-maven-plugin.version>
         <artifactory-maven-plugin.version>3.6.1</artifactory-maven-plugin.version>
-        <asciidoctor-maven-plugin.version>2.2.3</asciidoctor-maven-plugin.version>
+        <asciidoctor-maven-plugin.version>3.0.0</asciidoctor-maven-plugin.version>
         <project.inceptionYear>2021</project.inceptionYear>
     </properties>
 
