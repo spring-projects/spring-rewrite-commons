@@ -340,7 +340,6 @@ public class PrivateArtifactRepositoryTest {
 
 		static void unzip(Path repoDir) {
 			try {
-				;
 				ZipFile zipFile = new ZipFile(REPOSITORIES_ZIP);
 				zipFile.extractAll(repoDir.toString());
 			}
