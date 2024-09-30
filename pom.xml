@@ -47,7 +47,7 @@
         <!-- testing dependencies -->
         <maven-resolver.version>1.9.13</maven-resolver.version>
         <maven-wagon-http.version>3.5.3</maven-wagon-http.version>
-        <plexus-cypher.version>1.8</plexus-cypher.version>
+        <plexus-cypher.version>3.0.0</plexus-cypher.version>
         <junit-pioneer.version>2.1.0</junit-pioneer.version>
 
         <!-- documentation dependencies -->
